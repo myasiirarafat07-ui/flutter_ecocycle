@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../models/user_model.dart';
 import '../../providers/user_provider.dart';
+import '../notifications/notification_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -28,7 +29,7 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(user),
+              _buildHeader(context, user),
               const SizedBox(height: 20),
               _buildTotalWasteCard(user),
               const SizedBox(height: 28),
@@ -45,7 +46,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(UserProvider user) {
+  Widget _buildHeader(BuildContext context, UserProvider user) {
     final greeting = _getGreeting();
     final displayName = user.name.isEmpty ? 'Pengguna' : user.name.split(' ').first;
 
@@ -75,7 +76,13 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        const Icon(Icons.notifications_outlined, color: Colors.white70, size: 26),
+        GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NotificationScreen()),
+          ),
+          child: const Icon(Icons.notifications_outlined, color: Colors.white70, size: 26),
+        ),
       ],
     );
   }

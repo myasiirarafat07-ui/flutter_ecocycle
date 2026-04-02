@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../auth/login_screen.dart';
+import '../notifications/notification_screen.dart';
 import 'personal_info_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -44,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
           const Icon(Icons.settings_outlined, color: Colors.white70, size: 26),
           const Text('Profil Saya', style: TextStyle(
               color: AppColors.textWhite, fontSize: 17, fontWeight: FontWeight.bold)),
-          const Icon(Icons.notifications_outlined, color: Colors.white70, size: 26),
+          const SizedBox(width: 26),
         ],
       ),
     );
@@ -159,7 +160,9 @@ class ProfileScreen extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const PersonalInfoScreen())),
       ),
       _MenuItem(icon: Icons.credit_card_outlined, label: 'Metode Pembayaran', onTap: () {}),
-      _MenuItem(icon: Icons.notifications_outlined, label: 'Notifikasi', onTap: () {}),
+      _MenuItem(icon: Icons.notifications_outlined, label: 'Notifikasi', onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
+      }),
       _MenuItem(icon: Icons.help_outline, label: 'Pusat Bantuan', onTap: () {}),
     ];
 

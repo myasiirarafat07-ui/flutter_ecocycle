@@ -170,18 +170,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     const SizedBox(height: 6),
                     _buildBadge(),
                     const SizedBox(height: 32),
-                    _buildSectionLabel('ACCOUNT DETAILS'),
+                    _buildSectionLabel('INFORMASI AKUN'),
                     const SizedBox(height: 12),
                     _buildInfoCard(
                       icon: Icons.person_outline,
-                      label: 'FULL NAME',
+                      label: 'NAMA LENGKAP',
                       value: _nameController.text.isEmpty ? '-' : _nameController.text,
                       onEdit: () => _showEditDialog(title: 'Nama', controller: _nameController),
                     ),
                     const SizedBox(height: 10),
                     _buildInfoCard(
                       icon: Icons.mail_outline,
-                      label: 'EMAIL ADDRESS',
+                      label: 'EMAIL',
                       value: _emailController.text.isEmpty ? '-' : _emailController.text,
                       onEdit: () => _showEditDialog(
                         title: 'Email',
@@ -192,7 +192,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     const SizedBox(height: 10),
                     _buildInfoCard(
                       icon: Icons.phone_outlined,
-                      label: 'PHONE NUMBER',
+                      label: 'NOMOR TELEPON',
                       value: _phoneController.text.isEmpty ? 'Belum diisi' : _phoneController.text,
                       onEdit: () => _showEditDialog(
                         title: 'Nomor Telepon',
@@ -203,7 +203,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     const SizedBox(height: 10),
                     _buildInfoCard(
                       icon: Icons.location_on_outlined,
-                      label: 'SHIPPING ADDRESS',
+                      label: 'ALAMAT PENGIRIMAN',
                       value: _addressController.text.isEmpty ? 'Belum diisi' : _addressController.text,
                       onEdit: () => _showEditDialog(
                         title: 'Alamat',
@@ -234,7 +234,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
           const Expanded(
             child: Text(
-              'Personal Information',
+              'Informasi Pribadi',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textWhite,
