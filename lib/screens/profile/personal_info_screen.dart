@@ -426,7 +426,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
           icon: const Icon(Icons.save_outlined, size: 20),
           label: Text(
-            _hasChanges ? 'Save Changes' : 'No Changes',
+            _hasChanges ? 'Simpan Perubahan' : 'Tidak Ada Perubahan',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
