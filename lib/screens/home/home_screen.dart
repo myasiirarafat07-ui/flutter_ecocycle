@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../models/user_model.dart';
+import '../../providers/user_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  static const _user = UserModel(
-    name: 'Budi',
-    memberSince: '2023',
-    isPremium: true,
-    totalWasteKg: 15,
-    weeklyChangePercent: 2.5,
-    treesPlanted: 2,
-    co2OffsetKg: 12,
-  );
 
   static const _activities = [
     ActivityItem(
@@ -26,6 +18,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<UserProvider>();
+
     return Scaffold(
       backgroundColor: AppColors.bgDark,
       body: SafeArea(
@@ -34,15 +28,15 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
+              _buildHeader(user),
               const SizedBox(height: 20),
-              _buildTotalWasteCard(),
+              _buildTotalWasteCard(user),
               const SizedBox(height: 28),
-              _buildServicesSection(context),
+              _buildServicesSection(),
               const SizedBox(height: 28),
               _buildRecommendationSection(),
               const SizedBox(height: 28),
-              _buildRecentActivities(context),
+              _buildRecentActivities(),
               const SizedBox(height: 20),
             ],
           ),
@@ -51,50 +45,50 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(UserProvider user) {
+    final greeting = _getGreeting();
+    final displayName = user.name.isEmpty ? 'Pengguna' : user.name.split(' ').first;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        GestureDetector(
-          onTap: () {},
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: AppColors.bgCard,
-                child: const Icon(Icons.person, color: Colors.white70, size: 26),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Selamat pagi,',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                  ),
-                  Text(
-                    'Halo, ${_user.name}!',
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.bgCard,
+              child: user.name.isNotEmpty
+                  ? Text(user.name[0].toUpperCase(),
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))
+                  : const Icon(Icons.person, color: Colors.white70, size: 26),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(greeting, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                Text('Halo, $displayName!',
                     style: const TextStyle(
-                      color: AppColors.textWhite,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                        color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ],
         ),
-        GestureDetector(
-          onTap: () {},
-          child: const Icon(Icons.notifications_outlined,
-              color: Colors.white70, size: 26),
-        ),
+        const Icon(Icons.notifications_outlined, color: Colors.white70, size: 26),
       ],
     );
   }
 
-  Widget _buildTotalWasteCard() {
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Selamat pagi,';
+    if (hour < 15) return 'Selamat siang,';
+    if (hour < 19) return 'Selamat sore,';
+    return 'Selamat malam,';
+  }
+
+  Widget _buildTotalWasteCard(UserProvider user) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(22),
@@ -115,22 +109,16 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    _user.totalWasteKg.toStringAsFixed(0),
+                    user.totalWasteKg.toStringAsFixed(0),
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      height: 1,
-                    ),
+                        color: Colors.white, fontSize: 48,
+                        fontWeight: FontWeight.bold, height: 1),
                   ),
                   const SizedBox(width: 6),
                   const Padding(
                     padding: EdgeInsets.only(bottom: 8),
-                    child: Text('kg',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w500)),
+                    child: Text('kg', style: TextStyle(
+                        color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500)),
                   ),
                 ],
               ),
@@ -138,17 +126,16 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+                    color: Colors.black26, borderRadius: BorderRadius.circular(20)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.trending_up,
-                        color: Colors.greenAccent, size: 16),
+                    const Icon(Icons.trending_up, color: Colors.greenAccent, size: 16),
                     const SizedBox(width: 4),
                     Text(
-                      '+${_user.weeklyChangePercent}% dari minggu lalu',
+                      user.weeklyChangePercent == 0
+                          ? 'Mulai catat limbahmu!'
+                          : '+${user.weeklyChangePercent}% dari minggu lalu',
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ],
@@ -157,8 +144,7 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           Positioned(
-            right: -10,
-            bottom: -10,
+            right: -10, bottom: -10,
             child: Opacity(
               opacity: 0.15,
               child: const Icon(Icons.recycling, color: Colors.white, size: 100),
@@ -169,78 +155,46 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesSection(BuildContext context) {
+  Widget _buildServicesSection() {
     final services = [
-      _ServiceItem(
-        label: 'Konsultasi\nAhli',
-        icon: Icons.psychology_outlined,
-        onTap: () {},
-      ),
-      _ServiceItem(
-        label: 'Limbah',
-        icon: Icons.label_outline,
-        onTap: () {},
-      ),
-      _ServiceItem(
-        label: 'Marketplace',
-        icon: Icons.shopping_bag_outlined,
-        onTap: () {},
-      ),
-      _ServiceItem(
-        label: 'Edukasi',
-        icon: Icons.school_outlined,
-        onTap: () {},
-      ),
+      _ServiceItem(label: 'Konsultasi\nAhli', icon: Icons.psychology_outlined, onTap: () {}),
+      _ServiceItem(label: 'Limbah', icon: Icons.label_outline, onTap: () {}),
+      _ServiceItem(label: 'Marketplace', icon: Icons.shopping_bag_outlined, onTap: () {}),
+      _ServiceItem(label: 'Edukasi', icon: Icons.school_outlined, onTap: () {}),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Layanan Kami',
-            style: TextStyle(
-                color: AppColors.textWhite,
-                fontSize: 18,
-                fontWeight: FontWeight.bold)),
+        const Text('Layanan Kami', style: TextStyle(
+            color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: services
-              .map((s) => _buildServiceIcon(
-                  label: s.label, icon: s.icon, onTap: s.onTap))
-              .toList(),
+          children: services.map((s) => _buildServiceIcon(
+              label: s.label, icon: s.icon, onTap: s.onTap)).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildServiceIcon({
-  required String label,
-  required IconData icon,
-  required VoidCallback onTap,
-  }) {
+  Widget _buildServiceIcon({required String label, required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,  // ← tambah ini
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: 64, height: 64,
             decoration: BoxDecoration(
-              color: AppColors.bgCard,
-              borderRadius: BorderRadius.circular(14),
-            ),
+                color: AppColors.bgCard, borderRadius: BorderRadius.circular(14)),
             child: Icon(icon, color: Colors.white70, size: 28),
           ),
           const SizedBox(height: 8),
-          SizedBox(                                  // ← bungkus Text dengan SizedBox
-            height: 32,                              //   tinggi tetap untuk 2 baris
-            child: Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 11),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-            ),
+          SizedBox(
+            height: 32,
+            child: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 11),
+                textAlign: TextAlign.center, maxLines: 2),
           ),
         ],
       ),
@@ -251,14 +205,11 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text('Rekomendasi Pintar',
-                style: TextStyle(
-                    color: AppColors.textWhite,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
+          children: [
+            Text('Rekomendasi Pintar', style: TextStyle(
+                color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
             Icon(Icons.auto_awesome, color: AppColors.primaryLight, size: 22),
           ],
         ),
@@ -266,55 +217,36 @@ class HomeScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.bgCard,
-            borderRadius: BorderRadius.circular(14),
-          ),
+              color: AppColors.bgCard, borderRadius: BorderRadius.circular(14)),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 52, height: 52,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Image.asset('assets/icons/tips_home.png'),
-                ),
+                    color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.lightbulb_outline, color: Colors.white, size: 26),
               ),
               const SizedBox(width: 14),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Tips Hari Ini',
-                        style: TextStyle(
-                            color: AppColors.primaryLight,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    const Text(
+                    Text('Tips Hari Ini', style: TextStyle(
+                        color: AppColors.primaryLight, fontSize: 13, fontWeight: FontWeight.w600)),
+                    SizedBox(height: 4),
+                    Text(
                       'Anda punya limbah organik? Ubah jadi pupuk cair hari ini! Klik untuk panduan lengkapnya.',
-                      style: TextStyle(
-                          color: Colors.white, fontSize: 13, height: 1.4),
+                      style: TextStyle(color: Colors.white, fontSize: 13, height: 1.4),
                     ),
-                    const SizedBox(height: 10),
-                    GestureDetector(
-                      onTap: () {},
-                      child: const Row(
-                        children: [
-                          Text('Pelajari Sekarang',
-                              style: TextStyle(
-                                  color: AppColors.primaryLight,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600)),
-                          SizedBox(width: 4),
-                          Icon(Icons.chevron_right,
-                              color: AppColors.primaryLight, size: 18),
-                        ],
-                      ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Text('Pelajari Sekarang', style: TextStyle(
+                            color: AppColors.primaryLight, fontSize: 13, fontWeight: FontWeight.w600)),
+                        SizedBox(width: 4),
+                        Icon(Icons.chevron_right, color: AppColors.primaryLight, size: 18),
+                      ],
                     ),
                   ],
                 ),
@@ -326,24 +258,16 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivities(BuildContext context) {
+  Widget _buildRecentActivities() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Aktivitas Terakhir',
-                style: TextStyle(
-                    color: AppColors.textWhite,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            GestureDetector(
-              onTap: () {},
-              child: const Text('Lihat Semua',
-                  style: TextStyle(
-                      color: AppColors.primaryLight, fontSize: 13)),
-            ),
+            Text('Aktivitas Terakhir', style: TextStyle(
+                color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Lihat Semua', style: TextStyle(color: AppColors.primaryLight, fontSize: 13)),
           ],
         ),
         const SizedBox(height: 14),
@@ -356,49 +280,30 @@ class HomeScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(14),
-      ),
+      decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(14)),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
-            decoration: const BoxDecoration(
-              color: Color(0xFF2E2B00),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.recycling,
-                color: AppColors.warning, size: 22),
+            width: 44, height: 44,
+            decoration: const BoxDecoration(color: Color(0xFF2E2B00), shape: BoxShape.circle),
+            child: const Icon(Icons.recycling, color: AppColors.warning, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.title,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600)),
+                Text(item.title, style: const TextStyle(
+                    color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(item.subtitle,
-                    style: const TextStyle(
-                        color: Colors.white54, fontSize: 12)),
+                Text(item.subtitle, style: const TextStyle(color: Colors.white54, fontSize: 12)),
               ],
             ),
           ),
-          Text(
-            item.amount,
-            style: TextStyle(
-              color: item.isPositive
-                  ? AppColors.primaryLight
-                  : AppColors.danger,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(item.amount, style: TextStyle(
+            color: item.isPositive ? AppColors.primaryLight : AppColors.danger,
+            fontSize: 14, fontWeight: FontWeight.bold,
+          )),
         ],
       ),
     );
@@ -409,10 +314,5 @@ class _ServiceItem {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-
-  _ServiceItem({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
+  _ServiceItem({required this.label, required this.icon, required this.onTap});
 }
