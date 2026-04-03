@@ -27,9 +27,9 @@ class _MainWrapperState extends State<MainWrapper> {
   // 0 = Home, 1 = Search, 2 = placeholder (FAB), 3 = Activity, 4 = Profile
   final List<Widget> _pages = [
     const HomeScreen(),
-    const _PlaceholderScreen(label: 'Search'),   // TODO: Ganti dengan SearchScreen()
+    const _PlaceholderScreen(label: 'Pencarian'),   // TODO: Ganti dengan SearchScreen()
     const SizedBox(),                             // slot FAB (tidak dipakai)
-    const _PlaceholderScreen(label: 'Activity'), // TODO: Ganti dengan ActivityScreen()
+    const _PlaceholderScreen(label: 'Aktivitas'), // TODO: Ganti dengan ActivityScreen()
     const ProfileScreen(),
   ];
 
@@ -79,7 +79,7 @@ class _PlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Halaman $label\n(Coming Soon)',
+        'Halaman $label\n(Segera Hadir)',
         textAlign: TextAlign.center,
         style: const TextStyle(color: Colors.white54, fontSize: 16),
       ),

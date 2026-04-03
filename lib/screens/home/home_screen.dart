@@ -166,7 +166,7 @@ class HomeScreen extends StatelessWidget {
     final services = [
       _ServiceItem(label: 'Konsultasi\nAhli', icon: Icons.psychology_outlined, onTap: () {}),
       _ServiceItem(label: 'Limbah', icon: Icons.label_outline, onTap: () {}),
-      _ServiceItem(label: 'Marketplace', icon: Icons.shopping_bag_outlined, onTap: () {}),
+      _ServiceItem(label: 'Pasar', icon: Icons.shopping_bag_outlined, onTap: () {}),
       _ServiceItem(label: 'Edukasi', icon: Icons.school_outlined, onTap: () {}),
     ];
 

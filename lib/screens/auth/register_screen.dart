@@ -21,12 +21,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _agreeToTerms    = false;
   bool _isLoading       = false;
 
-  String _selectedUserType = 'Individual / Household';
+  String _selectedUserType = 'Individual';
   final List<String> _userTypes = [
-    'Individual / Household',
-    'Petani / Farmer',
-    'Bisnis / Business',
-    'Organisasi / Organization',
+    'Individual',
+    'Petani',
+    'Bisnis',
+    'Organisasi',
   ];
 
   @override
@@ -41,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Harap setujui Terms of Service terlebih dahulu'),
+        content: Text('Harap setujui Syarat Layanan terlebih dahulu'),
         backgroundColor: Colors.redAccent,
       ));
       return;
@@ -50,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Harap lengkapi semua field yang wajib diisi'),
+        content: Text('Harap lengkapi semua kolom yang wajib diisi'),
         backgroundColor: Colors.redAccent,
       ));
       return;
@@ -102,27 +102,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 28),
                         _buildHeading(),
                         const SizedBox(height: 24),
-                        LabeledField(label: 'Full Name',
+                        LabeledField(label: 'Nama Lengkap',
                           child: AppTextField(controller: _nameController,
-                              hint: 'John Doe', suffixIcon: Icons.person_outline)),
+                              hint: 'Masukkan nama lengkap Anda',
+                              suffixIcon: Icons.person_outline)),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'Email Address',
+                        LabeledField(label: 'Email',
                           child: AppTextField(controller: _emailController,
-                              hint: 'hello@example.com',
+                              hint: 'Masukkan email Anda',
                               keyboardType: TextInputType.emailAddress,
                               suffixIcon: Icons.mail_outline)),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'Phone Number',
+                        LabeledField(label: 'Nomor Telepon',
                           child: AppTextField(controller: _phoneController,
-                              hint: '+62 8xx xxxx xxxx',
+                              hint: 'Masukkan nomor telepon Anda',
                               keyboardType: TextInputType.phone,
                               suffixIcon: Icons.phone_outlined)),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'User Type', child: _buildUserTypeDropdown()),
+                        LabeledField(label: 'Jenis Pengguna', child: _buildUserTypeDropdown()),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'Password',
+                        LabeledField(label: 'Kata Sandi',
                           child: AppTextField(controller: _passwordController,
-                              hint: '••••••••', obscureText: _obscurePassword,
+                              hint: 'Masukkan kata sandi Anda',
+                              obscureText: _obscurePassword,
                               suffixIcon: _obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
@@ -136,11 +138,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('Already have an account? ',
+                              const Text('Sudah memiliki akun? ',
                                   style: TextStyle(color: Colors.white54, fontSize: 14)),
                               GestureDetector(
                                 onTap: _goToLogin,
-                                child: const Text('Login',
+                                child: const Text('Masuk',
                                     style: TextStyle(color: AppColors.primaryLight,
                                         fontSize: 14, fontWeight: FontWeight.bold)),
                               ),
@@ -191,10 +193,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildHeading() => const Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text('Create Account', style: TextStyle(color: AppColors.textWhite,
+      Text('Buat Akun Baru', style: TextStyle(color: AppColors.textWhite,
           fontSize: 26, fontWeight: FontWeight.bold)),
       SizedBox(height: 4),
-      Text('Join our community of eco-conscious heroes.',
+      Text('Bergabunglah dengan kami di komunitas peduli lingkungan.',
           style: TextStyle(color: Colors.white54, fontSize: 14)),
     ],
   );
@@ -234,13 +236,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           text: TextSpan(
             style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.4),
             children: [
-              const TextSpan(text: 'I agree to the '),
+              const TextSpan(text: 'Saya setuju dengan '),
               WidgetSpan(child: GestureDetector(onTap: () {},
-                  child: const Text('Terms of Service',
+                  child: const Text('Syarat Layanan',
                       style: TextStyle(color: AppColors.primaryLight, fontSize: 13)))),
-              const TextSpan(text: ' and '),
+              const TextSpan(text: ' dan '),
               WidgetSpan(child: GestureDetector(onTap: () {},
-                  child: const Text('Privacy Policy',
+                  child: const Text('Kebijakan Privasi',
                       style: TextStyle(color: AppColors.primaryLight, fontSize: 13)))),
               const TextSpan(text: '.'),
             ],
@@ -265,7 +267,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           : const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Create Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Buat Akun Baru', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 SizedBox(width: 8),
                 Icon(Icons.arrow_forward, size: 18),
               ],

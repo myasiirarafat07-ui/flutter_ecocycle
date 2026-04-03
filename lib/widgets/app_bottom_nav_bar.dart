@@ -44,14 +44,14 @@ class AppBottomNavBar extends StatelessWidget {
               _NavItem(
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home,
-                label: 'Home',
+                label: 'Beranda',
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
                 icon: Icons.search_outlined,
                 activeIcon: Icons.search,
-                label: 'Search',
+                label: 'Pencarian',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
@@ -59,14 +59,14 @@ class AppBottomNavBar extends StatelessWidget {
               _NavItem(
                 icon: Icons.history_outlined,
                 activeIcon: Icons.history,
-                label: 'Activity',
+                label: 'Aktivitas',
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),
               _NavItem(
                 icon: Icons.person_outline,
                 activeIcon: Icons.person,
-                label: 'Profile',
+                label: 'Profil',
                 isActive: currentIndex == 4,
                 onTap: () => onTap(4),
               ),

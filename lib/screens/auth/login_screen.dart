@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: 'Email',
                       child: AppTextField(
                         controller: _emailController,
-                        hint: 'Enter your email',
+                        hint: 'Masukkan email Anda',
                         keyboardType: TextInputType.emailAddress,
                         suffixIcon: Icons.mail_outline,
                       ),
@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Expanded(child: Divider(color: Colors.white24)),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 14),
-                        child: Text('Or continue with',
+                        child: Text('Atau masuk dengan',
                             style: TextStyle(color: Colors.white38, fontSize: 13)),
                       ),
                       Expanded(child: Divider(color: Colors.white24)),
@@ -132,11 +132,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Don't have an account? ",
+                          const Text("Tidak memiliki akun? ",
                               style: TextStyle(color: Colors.white54, fontSize: 14)),
                           GestureDetector(
                             onTap: _goToRegister,
-                            child: const Text('Sign Up',
+                            child: const Text('Daftar',
                                 style: TextStyle(color: AppColors.primaryLight,
                                     fontSize: 14, fontWeight: FontWeight.bold)),
                           ),
@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Center(child: Text('© 2024 EcoCycle. All rights reserved.',
+                    const Center(child: Text('© 2026 EcoCycle. All rights reserved.',
                         style: TextStyle(color: Colors.white24, fontSize: 12))),
                     const SizedBox(height: 24),
                   ],
@@ -184,11 +184,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeading() => const Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text('Welcome back',
+      Text('Selamat Datang Kembali!',
           style: TextStyle(color: AppColors.textWhite, fontSize: 28,
               fontWeight: FontWeight.bold)),
       SizedBox(height: 6),
-      Text("Let's continue your journey to a greener world",
+      Text("Mari lanjutkan perjalananmu menuju dunia yang lebih hijau",
           style: TextStyle(color: Colors.white54, fontSize: 14, height: 1.4)),
     ],
   );
@@ -199,11 +199,11 @@ class _LoginScreenState extends State<LoginScreen> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Password',
+          const Text('Kata Sandi',
               style: TextStyle(color: AppColors.textWhite, fontSize: 14)),
           GestureDetector(
             onTap: _handleForgotPassword,
-            child: const Text('Forgot Password?',
+            child: const Text('Lupa Kata Sandi?',
                 style: TextStyle(color: AppColors.primaryLight, fontSize: 13,
                     fontWeight: FontWeight.w600)),
           ),
@@ -212,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
       const SizedBox(height: 8),
       AppTextField(
         controller: _passwordController,
-        hint: 'Enter your password',
+        hint: 'Masukkan kata sandi Anda',
         obscureText: _obscurePassword,
         suffixIcon: _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
         onSuffixTap: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -233,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: _isLoading
           ? const SizedBox(width: 22, height: 22,
               child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-          : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          : const Text('Masuk', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     ),
   );
 }

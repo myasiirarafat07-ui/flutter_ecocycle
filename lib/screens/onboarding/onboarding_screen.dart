@@ -28,21 +28,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _pages = [
     _OnboardingData(
       imageAsset: 'assets/images/onboarding1.png',
-      title: 'Expert Agricultural\nConsultation',
+      title: 'Konsultasi\nPertanian Ahli',
       description:
-          'Get direct advice from experts to optimize your farming and waste management practices.',
+          'Dapatkan saran langsung dari para ahli untuk mengoptimalkan praktik pertanian dan pengelolaan limbah Anda.',
     ),
     _OnboardingData(
       imageAsset: 'assets/images/onboarding2.png',
-      title: 'Turn Waste into\nWealth',
+      title: 'Ubah Sampah\nMenjadi Kekayaan',
       description:
-          'Manage your organic waste and transform it into valuable compost, animal feed, or biogas.',
+          'Kelola limbah organik Anda dan ubah menjadi kompos berharga, pakan hewan, atau biogas.',
     ),
     _OnboardingData(
       imageAsset: 'assets/images/onboarding3.png',
-      title: 'Sustainable\nMarketplace',
+      title: 'Pasar\nBerkelanjutan',
       description:
-          'Shop for eco-friendly products and trade recycled materials within our circular community.',
+          'Berbelanja produk ramah lingkungan dan menukar bahan daur ulang dalam komunitas sirkular kami.',
     ),
   ];
 
@@ -100,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: GestureDetector(
                   onTap: _goToLogin,
                   child: const Text(
-                    'Skip',
+                    'Lewati',
                     style: TextStyle(
                       color: AppColors.primaryLight,
                       fontSize: 15,
@@ -201,7 +201,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _isLastPage ? 'Get Started' : 'Next',
+                    _isLastPage ? 'Mulai' : 'Lanjut',
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.bold),
                   ),
@@ -226,7 +226,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 child: const Text(
-                  'Back',
+                  'Kembali',
                   style: TextStyle(
                       color: AppColors.primaryLight,
                       fontSize: 15,

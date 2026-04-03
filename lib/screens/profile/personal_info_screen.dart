@@ -321,7 +321,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         Icon(Icons.shield_outlined, color: AppColors.primaryLight, size: 15),
         const SizedBox(width: 5),
         Text(
-          'Eco-conscious Member',
+          'Member EcoCycle',
           style: TextStyle(
             color: AppColors.primaryLight,
             fontSize: 13,
