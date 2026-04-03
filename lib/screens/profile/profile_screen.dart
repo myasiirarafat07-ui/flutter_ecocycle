@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../auth/login_screen.dart';
-import '../notifications/notification_screen.dart';
+import '../notification/notification_screen.dart';
+import '../payment/payment_method_screen.dart';
 import 'personal_info_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -159,7 +160,9 @@ class ProfileScreen extends StatelessWidget {
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const PersonalInfoScreen())),
       ),
-      _MenuItem(icon: Icons.credit_card_outlined, label: 'Metode Pembayaran', onTap: () {}),
+      _MenuItem(icon: Icons.credit_card_outlined, label: 'Metode Pembayaran', onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentMethodScreen()));
+      }),
       _MenuItem(icon: Icons.notifications_outlined, label: 'Notifikasi', onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
       }),

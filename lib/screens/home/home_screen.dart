@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../models/user_model.dart';
 import '../../providers/user_provider.dart';
-import '../notifications/notification_screen.dart';
+import '../notification/notification_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
