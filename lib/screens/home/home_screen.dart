@@ -6,7 +6,11 @@ import '../../providers/user_provider.dart';
 import '../notification/notification_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  // Callback ini dipanggil saat user tap ikon hamburger (≡)
+  // MainWrapper yang akan membuka drawer-nya
+  final VoidCallback? onOpenDrawer;
+
+  const HomeScreen({super.key, this.onOpenDrawer});
 
   static const _activities = [
     ActivityItem(
@@ -53,28 +57,25 @@ class HomeScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.bgCard,
-              child: user.name.isNotEmpty
-                  ? Text(user.name[0].toUpperCase(),
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))
-                  : const Icon(Icons.person, color: Colors.white70, size: 26),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(greeting, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                Text('Halo, $displayName!',
-                    style: const TextStyle(
-                        color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ],
+        // Ikon hamburger (≡) — tap untuk buka Drawer
+        GestureDetector(
+          onTap: onOpenDrawer,
+          behavior: HitTestBehavior.opaque,
+          child: const Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: Icon(Icons.menu, color: Colors.white70, size: 26),
+          ),
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(greeting, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+              Text('Halo, $displayName!',
+                  style: const TextStyle(
+                      color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
+            ],
+          ),
         ),
         GestureDetector(
           onTap: () => Navigator.push(
