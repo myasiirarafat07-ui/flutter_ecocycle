@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../payment/payment_success_screen.dart';
 
 // ============================================================
 // CHECKOUT SCREEN
@@ -652,24 +653,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Row(
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.white, size: 18),
-                      SizedBox(width: 10),
-                      Text('Pembayaran berhasil!'),
-                    ],
+              Navigator.pop(ctx); // tutup dialog konfirmasi
+              // Navigasi ke halaman Payment Success
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PaymentSuccessScreen(
+                    orderId: '#EC-${(88000 + _total % 1000).abs()}',
+                    totalAmount: _formatRupiah(_total),
+                    paymentMethod: _useEcoPoints ? 'EcoWallet + Eco Points' : 'EcoWallet',
                   ),
-                  backgroundColor: AppColors.primary,
-                  duration: Duration(seconds: 2),
                 ),
               );
-              // Kembali ke halaman market setelah bayar
-              Navigator.of(context)
-                ..pop() // tutup checkout
-                ..pop(); // tutup product detail
             },
             child: const Text(
               'Bayar',
