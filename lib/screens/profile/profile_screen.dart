@@ -109,7 +109,9 @@ class ProfileScreen extends StatelessWidget {
         ],
         const SizedBox(height: 4),
         Text(
-          user.memberSince.isEmpty ? '' : 'Member sejak ${user.memberSince}',
+          user.memberSince.isEmpty
+            ? ''
+            : 'Member sejak ${user.memberSince}${user.userType.isNotEmpty ? ' · ${user.userType}' : ''}',
           style: const TextStyle(color: Colors.white54, fontSize: 13),
         ),
       ],

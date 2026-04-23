@@ -23,6 +23,7 @@ class AppDrawer extends StatelessWidget {
     final displayName = user.name.isEmpty ? 'Pengguna' : user.name;
     final displayEmail = user.email.isEmpty ? 'email@contoh.com' : user.email;
     final initials = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
+    final userType = user.userType;
 
     return Drawer(
       backgroundColor: const Color(0xFF0D1F0F),
@@ -35,6 +36,7 @@ class AppDrawer extends StatelessWidget {
               displayName: displayName,
               displayEmail: displayEmail,
               isPremium: user.isPremium,
+              userType: userType,
             ),
 
             const SizedBox(height: 8),
@@ -228,12 +230,14 @@ class _DrawerHeader extends StatelessWidget {
   final String displayName;
   final String displayEmail;
   final bool isPremium;
+  final String userType; // ← tambahan
 
   const _DrawerHeader({
     required this.initials,
     required this.displayName,
     required this.displayEmail,
     required this.isPremium,
+    required this.userType, // ← tambahan
   });
 
   @override
@@ -307,7 +311,11 @@ class _DrawerHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              isPremium ? 'Anggota Premium' : 'Penjaga Alam',
+              isPremium 
+                ? 'Anggota Premium' 
+                : userType.isNotEmpty 
+                  ? userType 
+                  : 'Penjaga Alam',
               style: const TextStyle(color: Color(0xFF66BB6A), fontSize: 12),
             ),
           ),
@@ -409,14 +417,19 @@ class _DrawerBranding extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
         children: [
-          Container(
+          Image.asset(
+            'assets/logo/ecocycle_logo.png', // ← pakai logo yang sudah ada
             width: 32,
             height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32),
-              borderRadius: BorderRadius.circular(8),
+            errorBuilder: (_, __, ___) => Container( // ← fallback jika gagal load
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2E7D32),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.eco, color: Colors.white, size: 18),
             ),
-            child: const Icon(Icons.eco, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           const Text(

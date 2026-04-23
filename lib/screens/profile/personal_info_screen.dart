@@ -315,22 +315,24 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
   Widget _buildBadge() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.shield_outlined, color: AppColors.primaryLight, size: 15),
-        const SizedBox(width: 5),
-        Text(
-          'Member EcoCycle',
-          style: TextStyle(
-            color: AppColors.primaryLight,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
+  final user = context.read<UserProvider>();
+  final badgeLabel = user.userType.isNotEmpty ? user.userType : 'Member EcoCycle';
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Icons.shield_outlined, color: AppColors.primaryLight, size: 15),
+      const SizedBox(width: 5),
+      Text(
+        badgeLabel,
+        style: TextStyle(
+          color: AppColors.primaryLight,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   Widget _buildSectionLabel(String label) {
     return Align(

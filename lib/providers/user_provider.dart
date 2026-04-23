@@ -11,6 +11,7 @@ class UserProvider extends ChangeNotifier {
   String _phone = '';
   String _address = '';
   String _memberSince = '';
+  String _userType = '';
   bool _isPremium = false;
   double _totalWasteKg = 0;
   double _weeklyChangePercent = 0;
@@ -23,6 +24,7 @@ class UserProvider extends ChangeNotifier {
   String get phone => _phone;
   String get address => _address;
   String get memberSince => _memberSince;
+  String get userType => _userType;
   bool get isPremium => _isPremium;
   double get totalWasteKg => _totalWasteKg;
   double get weeklyChangePercent => _weeklyChangePercent;
@@ -62,6 +64,7 @@ class UserProvider extends ChangeNotifier {
     _address = '';
     _memberSince = DateTime.now().year.toString();
     _isPremium = false;
+    _userType = userType;
     _totalWasteKg = 0;
     _weeklyChangePercent = 0;
     _treesPlanted = 0;
@@ -91,6 +94,7 @@ class UserProvider extends ChangeNotifier {
     _address = '';
     _memberSince = '';
     _isPremium = false;
+    _userType = '';
     _totalWasteKg = 0;
     _weeklyChangePercent = 0;
     _treesPlanted = 0;
