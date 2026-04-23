@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import '../widgets/app_bottom_nav_bar.dart';
 import '../widgets/app_drawer.dart';
 import 'home/home_screen.dart';
+import 'market/market_screen.dart';
 import 'profile/profile_screen.dart';
 // TODO: Import screen lain saat sudah dibuat:
-// import 'search/search_screen.dart';
 // import 'activity/activity_screen.dart';
 
 // ============================================================
@@ -34,12 +34,12 @@ class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
 
   // Daftar halaman. Index sesuai bottom nav:
-  // 0 = Home, 1 = Search, 2 = placeholder (FAB), 3 = Activity, 4 = Profile
+  // 0 = Home, 1 = Market, 2 = placeholder (FAB), 3 = Pesanan, 4 = Profile
   List<Widget> get _pages => [
-    HomeScreen(onOpenDrawer: _openDrawer), // kirim callback ke HomeScreen
-    const _PlaceholderScreen(label: 'Pencarian'),   // TODO: Ganti dengan SearchScreen()
-    const SizedBox(),                               // slot FAB (tidak dipakai)
-    const _PlaceholderScreen(label: 'Aktivitas'),   // TODO: Ganti dengan ActivityScreen()
+    HomeScreen(onOpenDrawer: _openDrawer, onNavigateToTab: _onNavTap),
+    const MarketScreen(),                               // Tab Market
+    const SizedBox(),                                   // slot FAB (tidak dipakai)
+    const _PlaceholderScreen(label: 'Pesanan'),         // TODO: Ganti dengan OrderScreen()
     const ProfileScreen(),
   ];
 

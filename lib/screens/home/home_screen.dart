@@ -10,7 +10,11 @@ class HomeScreen extends StatelessWidget {
   // MainWrapper yang akan membuka drawer-nya
   final VoidCallback? onOpenDrawer;
 
-  const HomeScreen({super.key, this.onOpenDrawer});
+  // Callback ini dipanggil saat user tap salah satu shortcut layanan
+  // agar MainWrapper bisa pindah tab
+  final ValueChanged<int>? onNavigateToTab;
+
+  const HomeScreen({super.key, this.onOpenDrawer, this.onNavigateToTab});
 
   static const _activities = [
     ActivityItem(
@@ -167,7 +171,11 @@ class HomeScreen extends StatelessWidget {
     final services = [
       _ServiceItem(label: 'Konsultasi\nAhli', icon: Icons.psychology_outlined, onTap: () {}),
       _ServiceItem(label: 'Limbah', icon: Icons.label_outline, onTap: () {}),
-      _ServiceItem(label: 'Pasar', icon: Icons.shopping_bag_outlined, onTap: () {}),
+      _ServiceItem(
+        label: 'Pasar',
+        icon: Icons.shopping_bag_outlined,
+        onTap: () => onNavigateToTab?.call(1), // ← pindah ke tab Market (index 1)
+      ),
       _ServiceItem(label: 'Edukasi', icon: Icons.school_outlined, onTap: () {}),
     ];
 
