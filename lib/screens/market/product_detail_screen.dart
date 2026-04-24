@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import 'checkout_screen.dart';
 
-// ============================================================
-// PRODUCT DETAIL SCREEN
-// Ditampilkan saat user tap salah satu produk di MarketScreen
-// ============================================================
 class ProductDetailScreen extends StatefulWidget {
   final String id;
   final String name;
@@ -37,7 +33,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   static const Map<String, _ProductDetail> _details = {
     '1': _ProductDetail(
       sellerName: 'EcoFarm Indonesia',
-      sellerRole: 'Official Partner • Verified Seller',
+      sellerRole: 'Mitra Resmi • Penjual Terverifikasi',
       description:
           'Pupuk Kompos Premium kami dibuat dari bahan organik pilihan melalui proses fermentasi alami selama 3 bulan. Kaya akan unsur hara makro dan mikro yang dibutuhkan tanaman. Cocok untuk semua jenis tanaman hortikultura maupun perkebunan.',
       tags: ['Organik Sertifikasi', 'Bebas Pestisida', 'Ramah Lingkungan'],
@@ -54,10 +50,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ),
     '2': _ProductDetail(
       sellerName: 'EcoLivestock Solutions',
-      sellerRole: 'Official Partner • Verified Seller',
+      sellerRole: 'Mitra Resmi • Penjual Terverifikasi',
       description:
           'Pelet Organik Ayam kami adalah pakan premium berkualitas tinggi yang dibuat dari 100% bahan alami. Kami menggunakan proses waste-to-feed unik, mengubah surplus pangan organik menjadi pelet bernutrisi tinggi. Membantu mengurangi dampak lingkungan sekaligus memberikan nutrisi terbaik untuk unggas Anda.',
-      tags: ['Zero Waste Production', 'No Synthetic Hormones', 'Antibiotic Free'],
+      tags: [
+        'Zero Waste Production',
+        'No Synthetic Hormones',
+        'Antibiotic Free',
+      ],
       specs: {
         'PROTEIN CONTENT': '18% - 20%',
         'NET WEIGHT': '5 kg',
@@ -69,7 +69,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ),
     '3': _ProductDetail(
       sellerName: 'KopiNusantara',
-      sellerRole: 'Verified Seller',
+      sellerRole: 'Penjual Terverifikasi',
       description:
           'Ampas kopi bekas pilihan dari biji arabika dan robusta premium. Kaya nitrogen, fosfor, dan kalium — sangat ideal sebagai pupuk organik, media tanam jamur, atau campuran kompos. Sudah melalui proses pengeringan sehingga tidak berbau dan tahan lama.',
       tags: ['Kaya Nitrogen', 'Media Tanam Jamur', 'Pupuk Organik'],
@@ -84,7 +84,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ),
     '4': _ProductDetail(
       sellerName: 'PetaniMaju',
-      sellerRole: 'Verified Seller',
+      sellerRole: 'Penjual Terverifikasi',
       description:
           'Jerami padi kering berkualitas tinggi dari sawah organik. Cocok untuk pakan ternak, alas kandang, mulsa tanaman, atau bahan baku kerajinan. Bebas pestisida dan sudah dikeringkan dengan sinar matahari langsung.',
       tags: ['Bebas Pestisida', 'Serbaguna', 'Sawah Organik'],
@@ -99,7 +99,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ),
     '5': _ProductDetail(
       sellerName: 'RecyclePro',
-      sellerRole: 'Verified Seller',
+      sellerRole: 'Penjual Terverifikasi',
       description:
           'Botol plastik PET bersih siap daur ulang. Sudah dipilah, dicuci, dan dipress. Cocok untuk industri daur ulang atau pengepul besar. Kontribusi nyata untuk mengurangi sampah plastik di lingkungan.',
       tags: ['Sudah Dicuci', 'Siap Daur Ulang', 'Dipilah Manual'],
@@ -114,7 +114,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ),
     '6': _ProductDetail(
       sellerName: 'EcoFarm Indonesia',
-      sellerRole: 'Official Partner • Verified Seller',
+      sellerRole: 'Mitra Resmi • Penjual Terverifikasi',
       description:
           'Pupuk kandang sapi murni yang sudah matang dan difermentasi. Meningkatkan kesuburan tanah secara alami, memperbaiki struktur tanah, dan menambah populasi mikroorganisme baik. Cocok untuk semua jenis tanaman.',
       tags: ['Fermentasi Alami', 'Bebas Bau', 'Ramah Lingkungan'],
@@ -133,7 +133,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       _details[widget.id] ??
       const _ProductDetail(
         sellerName: 'EcoCycle Seller',
-        sellerRole: 'Verified Seller',
+        sellerRole: 'Penjual Terverifikasi',
         description: 'Produk berkualitas dari mitra terpercaya EcoCycle.',
         tags: ['Ramah Lingkungan'],
         specs: {},
@@ -149,7 +149,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       backgroundColor: AppColors.bgDark,
       body: Stack(
         children: [
-          // ── Scrollable content ──────────────────────────────
           CustomScrollView(
             slivers: [
               _buildSliverAppBar(context),
@@ -176,7 +175,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
 
-          // ── Bottom action bar ───────────────────────────────
           Positioned(
             bottom: 0,
             left: 0,
@@ -188,7 +186,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Sliver AppBar dengan gambar hero ─────────────────────
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
       expandedHeight: 280,
@@ -206,7 +203,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
       ),
       title: const Text(
-        'Product Details',
+        'Detail Produk',
         style: TextStyle(
           color: AppColors.textWhite,
           fontSize: 17,
@@ -244,8 +241,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => Container(
             color: const Color(0xFF1E4D1E),
-            child: const Icon(Icons.image_not_supported,
-                color: Colors.white24, size: 60),
+            child: const Icon(
+              Icons.image_not_supported,
+              color: Colors.white24,
+              size: 60,
+            ),
           ),
           loadingBuilder: (_, child, progress) {
             if (progress == null) return child;
@@ -264,7 +264,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Judul, harga, rating ──────────────────────────────────
   Widget _buildTitleSection(_ProductDetail detail) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +272,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Nama produk
               Text(
                 widget.name,
                 style: const TextStyle(
@@ -326,10 +324,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               // Eco Points
               Row(
                 children: [
-                  const Icon(Icons.eco, color: AppColors.primaryLight, size: 15),
+                  const Icon(
+                    Icons.eco,
+                    color: AppColors.primaryLight,
+                    size: 15,
+                  ),
                   const SizedBox(width: 5),
                   Text(
-                    'Earn ${detail.ecoPoints} Eco Points',
+                    'Dapatkan ${detail.ecoPoints} Eco Points',
                     style: const TextStyle(
                       color: AppColors.primaryLight,
                       fontSize: 13,
@@ -341,7 +343,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ),
 
-        // Tombol favorit
         GestureDetector(
           onTap: () => setState(() => _isFavorite = !_isFavorite),
           child: Container(
@@ -362,7 +363,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Card penjual ──────────────────────────────────────────
   Widget _buildSellerCard(_ProductDetail detail) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -406,7 +406,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ),
 
-          // Tombol Follow
           OutlinedButton(
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -428,7 +427,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: const Text(
-              'Follow',
+              'Ikuti',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
@@ -437,13 +436,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Deskripsi & tag ───────────────────────────────────────
   Widget _buildDescription(_ProductDetail detail) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Description',
+          'Deskripsi',
           style: TextStyle(
             color: AppColors.textWhite,
             fontSize: 18,
@@ -465,24 +463,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: detail.tags.map((tag) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.bgCard,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF2E5C2E), width: 1),
-            ),
-            child: Text(
-              tag,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          )).toList(),
+          children: detail.tags
+              .map(
+                (tag) => Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgCard,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF2E5C2E),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    tag,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
   }
 
-  // ── Spesifikasi ───────────────────────────────────────────
   Widget _buildSpecifications(_ProductDetail detail) {
     final entries = detail.specs.entries.toList();
 
@@ -505,43 +512,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           childAspectRatio: 2.2,
-          children: entries.map((e) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.bgCard,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  e.key,
-                  style: const TextStyle(
-                    color: AppColors.primaryLight,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
+          children: entries
+              .map(
+                (e) => Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgCard,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        e.key,
+                        style: const TextStyle(
+                          color: AppColors.primaryLight,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        e.value,
+                        style: const TextStyle(
+                          color: AppColors.textWhite,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  e.value,
-                  style: const TextStyle(
-                    color: AppColors.textWhite,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+              )
+              .toList(),
         ),
       ],
     );
   }
 
-  // ── Bottom action bar ─────────────────────────────────────
   Widget _buildBottomBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
@@ -553,7 +566,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
       child: Row(
         children: [
-          // Tombol Chat
           GestureDetector(
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -567,16 +579,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Icon(Icons.chat_bubble_outline,
-                    color: Colors.white54, size: 22),
+                Icon(
+                  Icons.chat_bubble_outline,
+                  color: Colors.white54,
+                  size: 22,
+                ),
                 SizedBox(height: 3),
-                Text('Chat', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                Text(
+                  'Hubungi',
+                  style: TextStyle(color: Colors.white54, fontSize: 11),
+                ),
               ],
             ),
           ),
           const SizedBox(width: 20),
 
-          // Tombol Add to Cart
           Expanded(
             child: OutlinedButton.icon(
               onPressed: () {
@@ -588,23 +605,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 );
               },
-              icon: const Icon(Icons.shopping_cart_outlined, size: 18),
-              label: const Text('Add to Cart'),
+              icon: const Icon(Icons.shopping_cart_outlined, size: 16),
+              label: const Text(
+                'Tambah ke Keranjang',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primaryLight,
-                side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
+                side: const BorderSide(
+                  color: AppColors.primaryLight,
+                  width: 1.5,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
               ),
             ),
           ),
           const SizedBox(width: 12),
 
-          // Tombol Buy Now
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: 150,
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -628,8 +650,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 elevation: 0,
               ),
               child: const Text(
-                'Buy Now',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                'Beli Sekarang',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -639,9 +661,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 }
 
-// ============================================================
-// MODEL DETAIL PRODUK
-// ============================================================
 class _ProductDetail {
   final String sellerName;
   final String sellerRole;

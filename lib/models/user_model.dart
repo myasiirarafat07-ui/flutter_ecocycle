@@ -16,8 +16,8 @@ class UserModel {
     required this.treesPlanted,
     required this.co2OffsetKg,
   });
-
 }
+
 class ActivityItem {
   final String title;
   final String subtitle;

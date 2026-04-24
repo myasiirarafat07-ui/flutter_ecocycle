@@ -3,10 +3,8 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 
-// ============================================================
 // PERSONAL INFORMATION SCREEN
 // Menampilkan & memungkinkan edit data pribadi user
-// ============================================================
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
 
@@ -26,13 +24,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   void initState() {
     super.initState();
     final user = context.read<UserProvider>();
-    _nameController    = TextEditingController(text: user.name);
-    _emailController   = TextEditingController(text: user.email);
-    _phoneController   = TextEditingController(text: user.phone);
+    _nameController = TextEditingController(text: user.name);
+    _emailController = TextEditingController(text: user.email);
+    _phoneController = TextEditingController(text: user.phone);
     _addressController = TextEditingController(text: user.address);
 
     // Pantau perubahan
-    for (final c in [_nameController, _emailController, _phoneController, _addressController]) {
+    for (final c in [
+      _nameController,
+      _emailController,
+      _phoneController,
+      _addressController,
+    ]) {
       c.addListener(_onChanged);
     }
   }
@@ -40,9 +43,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   void _onChanged() {
     final user = context.read<UserProvider>();
     final changed =
-        _nameController.text    != user.name    ||
-        _emailController.text   != user.email   ||
-        _phoneController.text   != user.phone   ||
+        _nameController.text != user.name ||
+        _emailController.text != user.email ||
+        _phoneController.text != user.phone ||
         _addressController.text != user.address;
     if (changed != _hasChanges) setState(() => _hasChanges = changed);
   }
@@ -57,16 +60,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
   void _saveChanges() {
-    final name    = _nameController.text.trim();
-    final email   = _emailController.text.trim();
-    final phone   = _phoneController.text.trim();
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
     final address = _addressController.text.trim();
 
     if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Nama dan email tidak boleh kosong'),
-        backgroundColor: Colors.redAccent,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nama dan email tidak boleh kosong'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       return;
     }
 
@@ -109,7 +114,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(
           'Edit $title',
-          style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: AppColors.textWhite,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Container(
           decoration: BoxDecoration(
@@ -127,7 +136,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               hintText: 'Masukkan $title',
               hintStyle: const TextStyle(color: Colors.white30),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             ),
           ),
         ),
@@ -141,7 +153,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               controller.text = tempController.text;
               Navigator.pop(ctx);
             },
-            child: Text('Simpan', style: TextStyle(color: AppColors.primaryLight, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Simpan',
+              style: TextStyle(
+                color: AppColors.primaryLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -175,14 +193,21 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     _buildInfoCard(
                       icon: Icons.person_outline,
                       label: 'NAMA LENGKAP',
-                      value: _nameController.text.isEmpty ? '-' : _nameController.text,
-                      onEdit: () => _showEditDialog(title: 'Nama', controller: _nameController),
+                      value: _nameController.text.isEmpty
+                          ? '-'
+                          : _nameController.text,
+                      onEdit: () => _showEditDialog(
+                        title: 'Nama',
+                        controller: _nameController,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     _buildInfoCard(
                       icon: Icons.mail_outline,
                       label: 'EMAIL',
-                      value: _emailController.text.isEmpty ? '-' : _emailController.text,
+                      value: _emailController.text.isEmpty
+                          ? '-'
+                          : _emailController.text,
                       onEdit: () => _showEditDialog(
                         title: 'Email',
                         controller: _emailController,
@@ -193,7 +218,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     _buildInfoCard(
                       icon: Icons.phone_outlined,
                       label: 'NOMOR TELEPON',
-                      value: _phoneController.text.isEmpty ? 'Belum diisi' : _phoneController.text,
+                      value: _phoneController.text.isEmpty
+                          ? 'Belum diisi'
+                          : _phoneController.text,
                       onEdit: () => _showEditDialog(
                         title: 'Nomor Telepon',
                         controller: _phoneController,
@@ -204,7 +231,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     _buildInfoCard(
                       icon: Icons.location_on_outlined,
                       label: 'ALAMAT PENGIRIMAN',
-                      value: _addressController.text.isEmpty ? 'Belum diisi' : _addressController.text,
+                      value: _addressController.text.isEmpty
+                          ? 'Belum diisi'
+                          : _addressController.text,
                       onEdit: () => _showEditDialog(
                         title: 'Alamat',
                         controller: _addressController,
@@ -229,7 +258,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 24),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.textWhite,
+              size: 24,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           const Expanded(
@@ -295,7 +328,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.bgDark, width: 2),
               ),
-              child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 17),
+              child: const Icon(
+                Icons.camera_alt_outlined,
+                color: Colors.white,
+                size: 17,
+              ),
             ),
           ),
         ),
@@ -315,24 +352,26 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
   Widget _buildBadge() {
-  final user = context.read<UserProvider>();
-  final badgeLabel = user.userType.isNotEmpty ? user.userType : 'Member EcoCycle';
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(Icons.shield_outlined, color: AppColors.primaryLight, size: 15),
-      const SizedBox(width: 5),
-      Text(
-        badgeLabel,
-        style: TextStyle(
-          color: AppColors.primaryLight,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
+    final user = context.read<UserProvider>();
+    final badgeLabel = user.userType.isNotEmpty
+        ? user.userType
+        : 'Member EcoCycle';
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.shield_outlined, color: AppColors.primaryLight, size: 15),
+        const SizedBox(width: 5),
+        Text(
+          badgeLabel,
+          style: TextStyle(
+            color: AppColors.primaryLight,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget _buildSectionLabel(String label) {
     return Align(
@@ -390,9 +429,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 Text(
                   value,
                   style: TextStyle(
-                    color: value == 'Belum diisi' ? Colors.white38 : AppColors.textWhite,
+                    color: value == 'Belum diisi'
+                        ? Colors.white38
+                        : AppColors.textWhite,
                     fontSize: 15,
-                    fontStyle: value == 'Belum diisi' ? FontStyle.italic : FontStyle.normal,
+                    fontStyle: value == 'Belum diisi'
+                        ? FontStyle.italic
+                        : FontStyle.normal,
                   ),
                 ),
               ],
@@ -402,7 +445,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             onTap: onEdit,
             child: Container(
               padding: const EdgeInsets.all(8),
-              child: const Icon(Icons.edit_outlined, color: Colors.white38, size: 20),
+              child: const Icon(
+                Icons.edit_outlined,
+                color: Colors.white38,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -423,7 +470,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             foregroundColor: Colors.white,
             disabledBackgroundColor: AppColors.bgCard,
             disabledForegroundColor: Colors.white38,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 0,
           ),
           icon: const Icon(Icons.save_outlined, size: 20),

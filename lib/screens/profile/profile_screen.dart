@@ -5,6 +5,7 @@ import '../../providers/user_provider.dart';
 import '../auth/login_screen.dart';
 import '../notification/notification_screen.dart';
 import '../payment/payment_method_screen.dart';
+import '../support/help_center_screen.dart';
 import 'personal_info_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -38,14 +39,32 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
+    // Tampilkan tombol back hanya jika bisa pop (dibuka dari navigator push)
+    final canPop = Navigator.canPop(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(Icons.settings_outlined, color: Colors.white70, size: 26),
-          const Text('Profil Saya', style: TextStyle(
-              color: AppColors.textWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+          if (canPop)
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.white70,
+                size: 22,
+              ),
+            )
+          else
+            const SizedBox(width: 26),
+          const Text(
+            'Profil Saya',
+            style: TextStyle(
+              color: AppColors.textWhite,
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(width: 26),
         ],
       ),
@@ -58,7 +77,8 @@ class ProfileScreen extends StatelessWidget {
         Stack(
           children: [
             Container(
-              width: 110, height: 110,
+              width: 110,
+              height: 110,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.primary, width: 3),
@@ -67,18 +87,27 @@ class ProfileScreen extends StatelessWidget {
               child: ClipOval(
                 child: user.name.isNotEmpty
                     ? Center(
-                        child: Text(user.name[0].toUpperCase(),
-                            style: const TextStyle(color: Colors.white,
-                                fontSize: 40, fontWeight: FontWeight.bold)))
+                        child: Text(
+                          user.name[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
                     : const Icon(Icons.person, color: Colors.white54, size: 60),
               ),
             ),
             Positioned(
-              right: 0, bottom: 4,
+              right: 0,
+              bottom: 4,
               child: Container(
-                width: 30, height: 30,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
-                  color: AppColors.primary, shape: BoxShape.circle,
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
                   border: Border.all(color: AppColors.bgDark, width: 2),
                 ),
                 child: const Icon(Icons.edit, color: Colors.white, size: 14),
@@ -89,7 +118,11 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 14),
         Text(
           user.name.isEmpty ? 'Pengguna' : user.name,
-          style: const TextStyle(color: AppColors.textWhite, fontSize: 22, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: AppColors.textWhite,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 6),
         if (user.isPremium)
@@ -98,20 +131,29 @@ class ProfileScreen extends StatelessWidget {
             children: [
               Icon(Icons.verified, color: AppColors.primaryLight, size: 16),
               SizedBox(width: 4),
-              Text('PREMIUM MEMBER', style: TextStyle(
-                  color: AppColors.primaryLight, fontSize: 13,
-                  fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+              Text(
+                'PREMIUM MEMBER',
+                style: TextStyle(
+                  color: AppColors.primaryLight,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
             ],
           ),
         if (user.email.isNotEmpty) ...[
           const SizedBox(height: 4),
-          Text(user.email, style: const TextStyle(color: Colors.white38, fontSize: 13)),
+          Text(
+            user.email,
+            style: const TextStyle(color: Colors.white38, fontSize: 13),
+          ),
         ],
         const SizedBox(height: 4),
         Text(
           user.memberSince.isEmpty
-            ? ''
-            : 'Member sejak ${user.memberSince}${user.userType.isNotEmpty ? ' · ${user.userType}' : ''}',
+              ? ''
+              : 'Member sejak ${user.memberSince}${user.userType.isNotEmpty ? ' · ${user.userType}' : ''}',
           style: const TextStyle(color: Colors.white54, fontSize: 13),
         ),
       ],
@@ -124,29 +166,54 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
-            Icon(Icons.bar_chart_outlined, color: AppColors.textWhite, size: 22),
-            SizedBox(width: 8),
-            Text('Statistik Dampak', style: TextStyle(
-                color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
-          ]),
+          const Row(
+            children: [
+              Icon(
+                Icons.bar_chart_outlined,
+                color: AppColors.textWhite,
+                size: 22,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Statistik Dampak',
+                style: TextStyle(
+                  color: AppColors.textWhite,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: _StatCard(
-                icon: Icons.recycling, iconColor: AppColors.primaryLight,
-                value: '${user.totalWasteKg.toStringAsFixed(0)} kg', label: 'Limbah',
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.recycling,
+                  iconColor: AppColors.primaryLight,
+                  value: '${user.totalWasteKg.toStringAsFixed(0)} kg',
+                  label: 'Limbah',
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: _StatCard(
-                icon: Icons.park_outlined, iconColor: AppColors.primaryLight,
-                value: '${user.treesPlanted}', label: 'Pohon',
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.park_outlined,
+                  iconColor: AppColors.primaryLight,
+                  value: '${user.treesPlanted}',
+                  label: 'Pohon',
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: _StatCard(
-                icon: Icons.cloud_outlined, iconColor: AppColors.primaryLight,
-                value: '${user.co2OffsetKg.toStringAsFixed(0)} kg', label: 'Offset', topLabel: 'CO₂',
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.cloud_outlined,
+                  iconColor: AppColors.primaryLight,
+                  value: '${user.co2OffsetKg.toStringAsFixed(0)} kg',
+                  label: 'Offset',
+                  topLabel: 'CO₂',
+                ),
+              ),
             ],
           ),
         ],
@@ -159,16 +226,41 @@ class ProfileScreen extends StatelessWidget {
       _MenuItem(
         icon: Icons.person_outline,
         label: 'Informasi Pribadi',
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const PersonalInfoScreen())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PersonalInfoScreen()),
+        ),
       ),
-      _MenuItem(icon: Icons.credit_card_outlined, label: 'Metode Pembayaran', onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentMethodScreen()));
-      }),
-      _MenuItem(icon: Icons.notifications_outlined, label: 'Notifikasi', onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
-      }),
-      _MenuItem(icon: Icons.help_outline, label: 'Pusat Bantuan', onTap: () {}),
+      _MenuItem(
+        icon: Icons.credit_card_outlined,
+        label: 'Metode Pembayaran',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PaymentMethodScreen()),
+          );
+        },
+      ),
+      _MenuItem(
+        icon: Icons.notifications_outlined,
+        label: 'Notifikasi',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NotificationScreen()),
+          );
+        },
+      ),
+      _MenuItem(
+        icon: Icons.help_outline,
+        label: 'Pusat Bantuan',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HelpCenterScreen()),
+          );
+        },
+      ),
     ];
 
     return Padding(
@@ -176,8 +268,14 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Pengaturan Akun', style: TextStyle(
-              color: AppColors.textWhite, fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Pengaturan Akun',
+            style: TextStyle(
+              color: AppColors.textWhite,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 14),
           ...menuItems.map(_buildMenuItem),
         ],
@@ -191,13 +289,23 @@ class ProfileScreen extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(14)),
+        decoration: BoxDecoration(
+          color: AppColors.bgCard,
+          borderRadius: BorderRadius.circular(14),
+        ),
         child: Row(
           children: [
             Icon(item.icon, color: AppColors.primaryLight, size: 22),
             const SizedBox(width: 14),
-            Expanded(child: Text(item.label,
-                style: const TextStyle(color: AppColors.textWhite, fontSize: 15))),
+            Expanded(
+              child: Text(
+                item.label,
+                style: const TextStyle(
+                  color: AppColors.textWhite,
+                  fontSize: 15,
+                ),
+              ),
+            ),
             const Icon(Icons.chevron_right, color: Colors.white38, size: 22),
           ],
         ),
@@ -212,14 +320,24 @@ class ProfileScreen extends StatelessWidget {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: AppColors.bgCard,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            title: const Text('Keluar Akun', style: TextStyle(color: Colors.white)),
-            content: const Text('Apakah kamu yakin ingin keluar?',
-                style: TextStyle(color: Colors.white70)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            title: const Text(
+              'Keluar Akun',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: const Text(
+              'Apakah kamu yakin ingin keluar?',
+              style: TextStyle(color: Colors.white70),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Batal', style: TextStyle(color: Colors.white54)),
+                child: const Text(
+                  'Batal',
+                  style: TextStyle(color: Colors.white54),
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -231,7 +349,10 @@ class ProfileScreen extends StatelessWidget {
                     (_) => false,
                   );
                 },
-                child: const Text('Keluar', style: TextStyle(color: AppColors.danger)),
+                child: const Text(
+                  'Keluar',
+                  style: TextStyle(color: AppColors.danger),
+                ),
               ),
             ],
           ),
@@ -242,8 +363,14 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Icon(Icons.logout, color: AppColors.danger, size: 20),
           SizedBox(width: 8),
-          Text('Keluar Akun', style: TextStyle(
-              color: AppColors.danger, fontSize: 15, fontWeight: FontWeight.bold)),
+          Text(
+            'Keluar Akun',
+            style: TextStyle(
+              color: AppColors.danger,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -257,14 +384,22 @@ class _StatCard extends StatelessWidget {
   final String label;
   final String? topLabel;
 
-  const _StatCard({required this.icon, required this.iconColor,
-      required this.value, required this.label, this.topLabel});
+  const _StatCard({
+    required this.icon,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+    this.topLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
-      decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: AppColors.bgCard,
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Column(
         children: [
           SizedBox(
@@ -273,17 +408,32 @@ class _StatCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (topLabel != null)
-                  Text(topLabel!, style: const TextStyle(
-                      color: AppColors.primaryLight, fontSize: 11, fontWeight: FontWeight.w600)),
+                  Text(
+                    topLabel!,
+                    style: const TextStyle(
+                      color: AppColors.primaryLight,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 Icon(icon, color: iconColor, size: 26),
               ],
             ),
           ),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(
-              color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.textWhite,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white54, fontSize: 12),
+          ),
         ],
       ),
     );

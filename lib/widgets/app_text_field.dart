@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-// ============================================================
 // APP TEXT FIELD — reusable di login, register, dan screen lain
-// ============================================================
 class AppTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
@@ -39,13 +37,18 @@ class AppTextField extends StatelessWidget {
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white30, fontSize: 15),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           suffixIcon: suffixIcon != null
               ? GestureDetector(
                   onTap: onSuffixTap,
-                  child: Icon(suffixIcon,
-                      color: AppColors.primaryLight, size: 20),
+                  child: Icon(
+                    suffixIcon,
+                    color: AppColors.primaryLight,
+                    size: 20,
+                  ),
                 )
               : null,
         ),
@@ -54,9 +57,7 @@ class AppTextField extends StatelessWidget {
   }
 }
 
-// ============================================================
 // LABELED FIELD — reusable wrapper label + field
-// ============================================================
 class LabeledField extends StatelessWidget {
   final String label;
   final Widget child;
@@ -68,8 +69,10 @@ class LabeledField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(color: AppColors.textWhite, fontSize: 14)),
+        Text(
+          label,
+          style: const TextStyle(color: AppColors.textWhite, fontSize: 14),
+        ),
         const SizedBox(height: 8),
         child,
       ],

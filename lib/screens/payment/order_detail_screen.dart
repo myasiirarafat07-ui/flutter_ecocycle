@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../main_wrapper.dart';
 
-// ============================================================
-// ORDER DETAIL SCREEN
-// Ditampilkan saat user tap "Lihat Detail Pesanan" di
 // PaymentSuccessScreen
-// ============================================================
 class OrderDetailScreen extends StatelessWidget {
   final String orderId;
   final String totalAmount;
@@ -55,15 +51,17 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
-  // ── App Bar ───────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back,
-                color: AppColors.textWhite, size: 24),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.textWhite,
+              size: 24,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           const Expanded(
@@ -77,13 +75,14 @@ class OrderDetailScreen extends StatelessWidget {
             ),
           ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.primary.withOpacity(0.3),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                  color: AppColors.primaryLight.withOpacity(0.5), width: 1),
+                color: AppColors.primaryLight.withOpacity(0.5),
+                width: 1,
+              ),
             ),
             child: Text(
               orderId,
@@ -99,7 +98,6 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
-  // ── Action Buttons ────────────────────────────────────────
   Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
@@ -108,16 +106,15 @@ class OrderDetailScreen extends StatelessWidget {
             onPressed: () {},
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryLight,
-              side: const BorderSide(
-                  color: AppColors.primaryLight, width: 1.5),
+              side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: const Text(
               'Butuh Bantuan?',
-              style: TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -134,14 +131,14 @@ class OrderDetailScreen extends StatelessWidget {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: const Text(
               'Kembali ke Beranda',
-              style: TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -149,7 +146,6 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
-  // ── Status Pesanan ────────────────────────────────────────
   Widget _buildStatusPesanan() {
     return Container(
       width: double.infinity,
@@ -228,19 +224,21 @@ class OrderDetailScreen extends StatelessWidget {
     Color iconBg = isDone
         ? AppColors.primary
         : isActive
-            ? AppColors.bgCard
-            : AppColors.bgCard;
+        ? AppColors.bgCard
+        : AppColors.bgCard;
     Color iconColor = isDone
         ? Colors.white
         : isActive
-            ? AppColors.primaryLight
-            : Colors.white38;
-    Color labelColor = isDone || isActive ? AppColors.textWhite : Colors.white38;
+        ? AppColors.primaryLight
+        : Colors.white38;
+    Color labelColor = isDone || isActive
+        ? AppColors.textWhite
+        : Colors.white38;
     Color sublabelColor = isDone
         ? AppColors.primaryLight
         : isActive
-            ? Colors.white60
-            : Colors.white38;
+        ? Colors.white60
+        : Colors.white38;
 
     Border? iconBorder = isActive
         ? Border.all(color: AppColors.primaryLight, width: 1.5)
@@ -302,7 +300,6 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
-  // ── Informasi Pengiriman ──────────────────────────────────
   Widget _buildInfoPengiriman() {
     return Container(
       width: double.infinity,
@@ -316,8 +313,11 @@ class OrderDetailScreen extends StatelessWidget {
         children: [
           Row(
             children: const [
-              Icon(Icons.location_on_outlined,
-                  color: AppColors.primaryLight, size: 18),
+              Icon(
+                Icons.location_on_outlined,
+                color: AppColors.primaryLight,
+                size: 18,
+              ),
               SizedBox(width: 8),
               Text(
                 'Informasi Pengiriman',
@@ -343,15 +343,15 @@ class OrderDetailScreen extends StatelessWidget {
           const Text(
             'Budi Santoso',
             style: TextStyle(
-                color: AppColors.textWhite,
-                fontSize: 14,
-                fontWeight: FontWeight.w600),
+              color: AppColors.textWhite,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 2),
           const Text(
             'Jl. Kebon Jeruk No. 12, Jakarta Barat, DKI Jakarta,\n11530',
-            style: TextStyle(
-                color: Colors.white54, fontSize: 13, height: 1.5),
+            style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.5),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -366,13 +366,11 @@ class OrderDetailScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              Icon(Icons.eco_outlined,
-                  color: AppColors.primaryLight, size: 16),
+              Icon(Icons.eco_outlined, color: AppColors.primaryLight, size: 16),
               const SizedBox(width: 6),
               const Text(
                 'Eco-Courier - JNE Express (REG)',
-                style: TextStyle(
-                    color: AppColors.textWhite, fontSize: 13),
+                style: TextStyle(color: AppColors.textWhite, fontSize: 13),
               ),
             ],
           ),
@@ -381,7 +379,6 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
-  // ── Item Pesanan ──────────────────────────────────────────
   Widget _buildItemPesanan() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,8 +439,11 @@ class OrderDetailScreen extends StatelessWidget {
                 width: 68,
                 height: 68,
                 color: const Color(0xFF1E4D1E),
-                child: const Icon(Icons.image_not_supported,
-                    color: Colors.white24, size: 28),
+                child: const Icon(
+                  Icons.image_not_supported,
+                  color: Colors.white24,
+                  size: 28,
+                ),
               ),
             ),
           ),
@@ -463,8 +463,7 @@ class OrderDetailScreen extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   variant,
-                  style: const TextStyle(
-                      color: Colors.white54, fontSize: 12),
+                  style: const TextStyle(color: Colors.white54, fontSize: 12),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -481,16 +480,16 @@ class OrderDetailScreen extends StatelessWidget {
           Text(
             qty,
             style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 13,
-                fontWeight: FontWeight.w500),
+              color: Colors.white54,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── Rincian Pembayaran ────────────────────────────────────
   Widget _buildRincianPembayaran() {
     return Container(
       width: double.infinity,
@@ -549,18 +548,22 @@ class OrderDetailScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: const TextStyle(color: Colors.white54, fontSize: 13)),
-        Text(value,
-            style: const TextStyle(
-                color: AppColors.textWhite,
-                fontSize: 13,
-                fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white54, fontSize: 13),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppColors.textWhite,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }
 
-  // ── Eco Points Banner ─────────────────────────────────────
   Widget _buildEcoPointsBanner() {
     return Container(
       width: double.infinity,
@@ -568,29 +571,35 @@ class OrderDetailScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: AppColors.primary.withOpacity(0.4), width: 1),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1),
       ),
       child: Row(
         children: [
-          const Icon(Icons.eco_rounded,
-              color: AppColors.primaryLight, size: 18),
+          const Icon(
+            Icons.eco_rounded,
+            color: AppColors.primaryLight,
+            size: 18,
+          ),
           const SizedBox(width: 10),
           RichText(
             text: const TextSpan(
               style: TextStyle(fontSize: 13),
               children: [
                 TextSpan(
-                    text: 'Kamu mendapatkan ',
-                    style: TextStyle(color: Colors.white54)),
+                  text: 'Kamu mendapatkan ',
+                  style: TextStyle(color: Colors.white54),
+                ),
                 TextSpan(
-                    text: '129 Eco Points',
-                    style: TextStyle(
-                        color: AppColors.primaryLight,
-                        fontWeight: FontWeight.bold)),
+                  text: '129 Eco Points',
+                  style: TextStyle(
+                    color: AppColors.primaryLight,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 TextSpan(
-                    text: '.',
-                    style: TextStyle(color: Colors.white54)),
+                  text: '.',
+                  style: TextStyle(color: Colors.white54),
+                ),
               ],
             ),
           ),

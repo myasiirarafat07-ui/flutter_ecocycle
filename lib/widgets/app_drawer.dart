@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
-import '../screens/profile/profile_screen.dart';
-import '../screens/notification/notification_screen.dart';
-import '../screens/payment/payment_settings_screen.dart';
+import '../screens/payment/payment_method_screen.dart';
+import '../screens/support/help_center_screen.dart';
 
-// ============================================================
 // APP DRAWER
 // Panel samping kiri yang muncul saat:
 // - User swipe dari kiri ke kanan
 // - User tap ikon ☰ di AppBar (HomeScreen)
-//
-// Isi drawer: hal-hal yang tidak muat di bottom navbar,
-// seperti Settings, Bantuan, Tentang, dan Logout.
-// ============================================================
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  // Callback untuk navigasi tab di MainWrapper
+  final void Function(int index)? onNavigateToTab;
+
+  const AppDrawer({super.key, this.onNavigateToTab});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +27,6 @@ class AppDrawer extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // ── Header: Avatar + Nama + Role ──────────────────
             _DrawerHeader(
               initials: initials,
               displayName: displayName,
@@ -41,13 +37,15 @@ class AppDrawer extends StatelessWidget {
 
             const SizedBox(height: 8),
 
-            // ── Menu Utama ────────────────────────────────────
             _DrawerSectionLabel(label: 'Menu'),
             _DrawerItem(
               icon: Icons.home_outlined,
               activeIcon: Icons.home,
               label: 'Beranda',
-              onTap: () => Navigator.pop(context), // sudah di home, tutup saja
+              onTap: () {
+                Navigator.pop(context);
+                onNavigateToTab?.call(0);
+              },
             ),
             _DrawerItem(
               icon: Icons.person_outline,
@@ -55,40 +53,28 @@ class AppDrawer extends StatelessWidget {
               label: 'Profil Saya',
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
+                // Navigasi ke tab Profil (index 4) di MainWrapper
+                // supaya bottom navbar tetap tampil
+                onNavigateToTab?.call(4);
               },
             ),
             _DrawerItem(
-              icon: Icons.notifications_outlined,
-              activeIcon: Icons.notifications,
-              label: 'Notifikasi',
+              icon: Icons.credit_card_outlined,
+              activeIcon: Icons.credit_card,
+              label: 'Metode Pembayaran',
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
-                );
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.account_balance_wallet_outlined,
-              activeIcon: Icons.account_balance_wallet,
-              label: 'Pembayaran',
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PaymentSettingsScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const PaymentMethodScreen(),
+                  ),
                 );
               },
             ),
 
             const _DrawerDivider(),
 
-            // ── Menu Lainnya ──────────────────────────────────
             _DrawerSectionLabel(label: 'Lainnya'),
             _DrawerItem(
               icon: Icons.settings_outlined,
@@ -96,7 +82,6 @@ class AppDrawer extends StatelessWidget {
               label: 'Pengaturan',
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Buat SettingsScreen dan navigasi ke sana
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Halaman Pengaturan segera hadir!'),
@@ -112,13 +97,9 @@ class AppDrawer extends StatelessWidget {
               label: 'Pusat Bantuan',
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Buat HelpCenterScreen dan navigasi ke sana
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Halaman Bantuan segera hadir!'),
-                    backgroundColor: Color(0xFF2E7D32),
-                    duration: Duration(seconds: 1),
-                  ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HelpCenterScreen()),
                 );
               },
             ),
@@ -134,7 +115,6 @@ class AppDrawer extends StatelessWidget {
 
             const Spacer(),
 
-            // ── Logout ────────────────────────────────────────
             const _DrawerDivider(),
             _DrawerItem(
               icon: Icons.logout,
@@ -144,7 +124,6 @@ class AppDrawer extends StatelessWidget {
               onTap: () => _confirmLogout(context),
             ),
 
-            // ── Branding bawah ────────────────────────────────
             const _DrawerBranding(),
             const SizedBox(height: 12),
           ],
@@ -153,7 +132,6 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  // Dialog konfirmasi sebelum logout
   void _confirmLogout(BuildContext context) {
     showDialog(
       context: context,
@@ -171,19 +149,23 @@ class AppDrawer extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx); // tutup dialog
-              Navigator.pop(context); // tutup drawer
+              Navigator.pop(ctx);
+              Navigator.pop(context);
               context.read<UserProvider>().logout();
-              Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/login', (_) => false);
             },
-            child: const Text('Keluar', style: TextStyle(color: Color(0xFFE53935))),
+            child: const Text(
+              'Keluar',
+              style: TextStyle(color: Color(0xFFE53935)),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Dialog info tentang app
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -192,13 +174,12 @@ class AppDrawer extends StatelessWidget {
         title: Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32),
-                borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/logo/ecocycle_logo.png',
+                width: 20,
+                height: 20,
+                fit: BoxFit.contain,
               ),
-              child: const Icon(Icons.eco, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 10),
             const Text('EcoCycle', style: TextStyle(color: Colors.white)),
@@ -213,7 +194,10 @@ class AppDrawer extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Tutup', style: TextStyle(color: Color(0xFF66BB6A))),
+            child: const Text(
+              'Tutup',
+              style: TextStyle(color: Color(0xFF66BB6A)),
+            ),
           ),
         ],
       ),
@@ -221,23 +205,21 @@ class AppDrawer extends StatelessWidget {
   }
 }
 
-// ============================================================
 // SUB-WIDGETS DRAWER
-// ============================================================
 
 class _DrawerHeader extends StatelessWidget {
   final String initials;
   final String displayName;
   final String displayEmail;
   final bool isPremium;
-  final String userType; // ← tambahan
+  final String userType;
 
   const _DrawerHeader({
     required this.initials,
     required this.displayName,
     required this.displayEmail,
     required this.isPremium,
-    required this.userType, // ← tambahan
+    required this.userType,
   });
 
   @override
@@ -252,7 +234,6 @@ class _DrawerHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar dengan badge verified
           Stack(
             children: [
               Container(
@@ -261,7 +242,10 @@ class _DrawerHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF2E7D32),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF66BB6A), width: 2.5),
+                  border: Border.all(
+                    color: const Color(0xFF66BB6A),
+                    width: 2.5,
+                  ),
                 ),
                 child: Center(
                   child: Text(
@@ -283,16 +267,21 @@ class _DrawerHeader extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFF2E7D32),
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF0D1F0F), width: 2),
+                    border: Border.all(
+                      color: const Color(0xFF0D1F0F),
+                      width: 2,
+                    ),
                   ),
-                  child: const Icon(Icons.verified, color: Colors.white, size: 14),
+                  child: const Icon(
+                    Icons.verified,
+                    color: Colors.white,
+                    size: 14,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
-
-          // Nama user
           Text(
             displayName,
             style: const TextStyle(
@@ -302,8 +291,6 @@ class _DrawerHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 3),
-
-          // Role / badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
@@ -311,17 +298,15 @@ class _DrawerHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              isPremium 
-                ? 'Anggota Premium' 
-                : userType.isNotEmpty 
-                  ? userType 
+              isPremium
+                  ? 'Anggota Premium'
+                  : userType.isNotEmpty
+                  ? userType
                   : 'Penjaga Alam',
               style: const TextStyle(color: Color(0xFF66BB6A), fontSize: 12),
             ),
           ),
           const SizedBox(height: 6),
-
-          // Email
           Text(
             displayEmail,
             style: const TextStyle(color: Colors.white54, fontSize: 12),
@@ -361,10 +346,7 @@ class _DrawerItem extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 22),
             const SizedBox(width: 16),
-            Text(
-              label,
-              style: TextStyle(color: color, fontSize: 15),
-            ),
+            Text(label, style: TextStyle(color: color, fontSize: 15)),
           ],
         ),
       ),
@@ -417,18 +399,12 @@ class _DrawerBranding extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
         children: [
-          Image.asset(
-            'assets/logo/ecocycle_logo.png', // ← pakai logo yang sudah ada
-            width: 32,
-            height: 32,
-            errorBuilder: (_, __, ___) => Container( // ← fallback jika gagal load
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.eco, color: Colors.white, size: 18),
+          Container(
+            child: Image.asset(
+              'assets/logo/ecocycle_logo.png',
+              width: 20,
+              height: 20,
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(width: 10),

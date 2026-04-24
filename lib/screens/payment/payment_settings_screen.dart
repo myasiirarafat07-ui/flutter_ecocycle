@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
-// ============================================================
 // PAYMENT SETTINGS SCREEN
-// ============================================================
 class PaymentSettingsScreen extends StatefulWidget {
   const PaymentSettingsScreen({super.key});
 
@@ -39,13 +37,15 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                       anak: [
                         _buildToggleItem(
                           label: 'Notifikasi Transaksi',
-                          deskripsi: 'Terima pemberitahuan setiap ada transaksi',
+                          deskripsi:
+                              'Terima pemberitahuan setiap ada transaksi',
                           nilai: _notifTransaksi,
                           onUbah: (v) => setState(() => _notifTransaksi = v),
                         ),
                         _buildToggleItem(
                           label: 'Notifikasi Poin',
-                          deskripsi: 'Pemberitahuan saat poin bertambah atau berkurang',
+                          deskripsi:
+                              'Pemberitahuan saat poin bertambah atau berkurang',
                           nilai: _notifPoin,
                           onUbah: (v) => setState(() => _notifPoin = v),
                         ),
@@ -58,13 +58,16 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                       anak: [
                         _buildToggleItem(
                           label: 'Konfirmasi Pembayaran',
-                          deskripsi: 'Minta konfirmasi sebelum setiap pembayaran',
+                          deskripsi:
+                              'Minta konfirmasi sebelum setiap pembayaran',
                           nilai: _konfirmasiPembayaran,
-                          onUbah: (v) => setState(() => _konfirmasiPembayaran = v),
+                          onUbah: (v) =>
+                              setState(() => _konfirmasiPembayaran = v),
                         ),
                         _buildToggleItem(
                           label: 'Mode Hemat (PIN)',
-                          deskripsi: 'Gunakan PIN untuk transaksi di atas Rp 50.000',
+                          deskripsi:
+                              'Gunakan PIN untuk transaksi di atas Rp 50.000',
                           nilai: _modePinaman,
                           onUbah: (v) => setState(() => _modePinaman = v),
                         ),
@@ -77,7 +80,8 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                       anak: [
                         _buildToggleItem(
                           label: 'Auto Tukar Poin',
-                          deskripsi: 'Tukar poin otomatis saat mencapai batas reward',
+                          deskripsi:
+                              'Tukar poin otomatis saat mencapai batas reward',
                           nilai: _autoPenukaranPoin,
                           onUbah: (v) => setState(() => _autoPenukaranPoin = v),
                         ),
@@ -91,12 +95,14 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                         _buildTombolItem(
                           label: 'Ubah PIN Pembayaran',
                           ikon: Icons.lock_outline,
-                          onTap: () => _tampilSnackbar('Fitur ubah PIN segera hadir!'),
+                          onTap: () =>
+                              _tampilSnackbar('Fitur ubah PIN segera hadir!'),
                         ),
                         _buildTombolItem(
                           label: 'Ekspor Riwayat Transaksi',
                           ikon: Icons.download_outlined,
-                          onTap: () => _tampilSnackbar('Mengekspor data transaksi...'),
+                          onTap: () =>
+                              _tampilSnackbar('Mengekspor data transaksi...'),
                         ),
                         _buildTombolItem(
                           label: 'Hapus Semua Metode',
@@ -155,11 +161,14 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
           children: [
             Icon(ikon, color: AppColors.primaryLight, size: 18),
             const SizedBox(width: 8),
-            Text(judul,
-                style: const TextStyle(
-                    color: AppColors.textWhite,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              judul,
+              style: const TextStyle(
+                color: AppColors.textWhite,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 10),
@@ -188,12 +197,19 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(deskripsi,
-                    style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                Text(
+                  deskripsi,
+                  style: const TextStyle(color: Colors.white38, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -223,14 +239,29 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         child: Row(
           children: [
-            Icon(ikon, color: warnaMerah ? AppColors.danger : AppColors.primaryLight, size: 20),
+            Icon(
+              ikon,
+              color: warnaMerah ? AppColors.danger : AppColors.primaryLight,
+              size: 20,
+            ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(label,
-                  style: TextStyle(color: warna, fontSize: 14, fontWeight: FontWeight.w500)),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: warna,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-            Icon(Icons.chevron_right,
-                color: warnaMerah ? AppColors.danger.withOpacity(0.6) : Colors.white24, size: 20),
+            Icon(
+              Icons.chevron_right,
+              color: warnaMerah
+                  ? AppColors.danger.withOpacity(0.6)
+                  : Colors.white24,
+              size: 20,
+            ),
           ],
         ),
       ),
@@ -253,7 +284,10 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.bgCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Hapus Semua Metode', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Hapus Semua Metode',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'Tindakan ini akan menghapus semua metode pembayaran tersimpan. Lanjutkan?',
           style: TextStyle(color: Colors.white70),
@@ -268,7 +302,10 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
               Navigator.pop(ctx);
               _tampilSnackbar('Semua metode pembayaran dihapus.');
             },
-            child: const Text('Hapus', style: TextStyle(color: AppColors.danger)),
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: AppColors.danger),
+            ),
           ),
         ],
       ),

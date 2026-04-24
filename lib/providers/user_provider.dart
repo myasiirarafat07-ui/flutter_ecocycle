@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-// ============================================================
 // USER PROVIDER — state management sederhana tanpa library
 // Menyimpan data user yang aktif login dan bisa diubah
 // dari mana saja (login, register, personal info screen)
-// ============================================================
 class UserProvider extends ChangeNotifier {
   String _name = '';
   String _email = '';
@@ -18,7 +16,6 @@ class UserProvider extends ChangeNotifier {
   int _treesPlanted = 0;
   double _co2OffsetKg = 0;
 
-  // ── Getters ──────────────────────────────────────────────
   String get name => _name;
   String get email => _email;
   String get phone => _phone;
@@ -31,7 +28,6 @@ class UserProvider extends ChangeNotifier {
   int get treesPlanted => _treesPlanted;
   double get co2OffsetKg => _co2OffsetKg;
 
-  // ── Dipanggil saat login berhasil ────────────────────────
   void loginAs({
     required String name,
     required String email,
@@ -51,7 +47,6 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Dipanggil saat register berhasil ─────────────────────
   void registerAs({
     required String name,
     required String email,
@@ -72,7 +67,6 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Dipanggil dari PersonalInfoScreen saat Save Changes ──
   void updatePersonalInfo({
     required String name,
     required String email,
@@ -86,7 +80,6 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Reset saat logout ────────────────────────────────────
   void logout() {
     _name = '';
     _email = '';

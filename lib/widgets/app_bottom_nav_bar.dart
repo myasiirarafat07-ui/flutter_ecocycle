@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-// ============================================================
 // SHARED BOTTOM NAVIGATION BAR
 // Dipakai di semua screen melalui MainWrapper
-// ============================================================
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -30,9 +28,7 @@ class AppBottomNavBar extends StatelessWidget {
       height: 70,
       decoration: const BoxDecoration(
         color: AppColors.bgDark,
-        border: Border(
-          top: BorderSide(color: AppColors.divider, width: 1),
-        ),
+        border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -73,7 +69,6 @@ class AppBottomNavBar extends StatelessWidget {
             ],
           ),
 
-          // Tombol tambah (FAB tengah)
           Positioned(
             top: -18,
             child: GestureDetector(

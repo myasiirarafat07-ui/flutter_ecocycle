@@ -5,10 +5,7 @@ import 'screens/onboarding/onboarding_screen.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => UserProvider(),
-      child: const MyApp(),
-    ),
+    ChangeNotifierProvider(create: (_) => UserProvider(), child: const MyApp()),
   );
 }
 

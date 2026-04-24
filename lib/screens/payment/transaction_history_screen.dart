@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
-// ============================================================
 // MODEL TRANSAKSI
-// ============================================================
 enum TipeTransaksi { penjualan, pembelian, penukaran, bonus }
 
 class ItemTransaksi {
@@ -26,19 +24,23 @@ class ItemTransaksi {
   });
 }
 
-// ============================================================
 // TRANSACTION HISTORY SCREEN
-// ============================================================
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
 
   @override
-  State<TransactionHistoryScreen> createState() => _TransactionHistoryScreenState();
+  State<TransactionHistoryScreen> createState() =>
+      _TransactionHistoryScreenState();
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   String _filterAktif = 'Semua';
-  final List<String> _filterList = ['Semua', 'Penjualan', 'Pembelian', 'Penukaran'];
+  final List<String> _filterList = [
+    'Semua',
+    'Penjualan',
+    'Pembelian',
+    'Penukaran',
+  ];
 
   final List<ItemTransaksi> _semuaTransaksi = const [
     ItemTransaksi(
@@ -121,9 +123,13 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               child: _transaksiTerfilter.isEmpty
                   ? _buildKosong()
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       itemCount: _transaksiTerfilter.length,
-                      itemBuilder: (_, i) => _buildTileTransaksi(_transaksiTerfilter[i]),
+                      itemBuilder: (_, i) =>
+                          _buildTileTransaksi(_transaksiTerfilter[i]),
                     ),
             ),
           ],
@@ -203,7 +209,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       child: Row(
         children: [
           Container(
-            width: 44, height: 44,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: item.isPositif
                   ? AppColors.primary.withOpacity(0.3)
@@ -221,15 +228,24 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.judul,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(
+                  item.judul,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(item.subjudul,
-                    style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                Text(
+                  item.subjudul,
+                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                ),
                 const SizedBox(height: 2),
-                Text(item.tanggal,
-                    style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                Text(
+                  item.tanggal,
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                ),
               ],
             ),
           ),
@@ -253,8 +269,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         children: [
           Icon(Icons.receipt_long_outlined, color: Colors.white24, size: 56),
           SizedBox(height: 14),
-          Text('Tidak ada transaksi',
-              style: TextStyle(color: Colors.white38, fontSize: 15)),
+          Text(
+            'Tidak ada transaksi',
+            style: TextStyle(color: Colors.white38, fontSize: 15),
+          ),
         ],
       ),
     );
@@ -262,10 +280,14 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
   IconData _getIkonTransaksi(TipeTransaksi tipe) {
     switch (tipe) {
-      case TipeTransaksi.penjualan: return Icons.sell_outlined;
-      case TipeTransaksi.pembelian: return Icons.shopping_bag_outlined;
-      case TipeTransaksi.penukaran: return Icons.swap_horiz;
-      case TipeTransaksi.bonus: return Icons.stars_outlined;
+      case TipeTransaksi.penjualan:
+        return Icons.sell_outlined;
+      case TipeTransaksi.pembelian:
+        return Icons.shopping_bag_outlined;
+      case TipeTransaksi.penukaran:
+        return Icons.swap_horiz;
+      case TipeTransaksi.bonus:
+        return Icons.stars_outlined;
     }
   }
 }

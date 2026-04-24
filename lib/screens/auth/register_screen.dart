@@ -12,14 +12,14 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _nameController     = TextEditingController();
-  final _emailController    = TextEditingController();
-  final _phoneController    = TextEditingController();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
-  bool _agreeToTerms    = false;
-  bool _isLoading       = false;
+  bool _agreeToTerms = false;
+  bool _isLoading = false;
 
   String _selectedUserType = 'Individual';
   final List<String> _userTypes = [
@@ -40,19 +40,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Harap setujui Syarat Layanan terlebih dahulu'),
-        backgroundColor: Colors.redAccent,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap setujui Syarat Layanan terlebih dahulu'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       return;
     }
     if (_nameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Harap lengkapi semua kolom yang wajib diisi'),
-        backgroundColor: Colors.redAccent,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap lengkapi semua kolom yang wajib diisi'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       return;
     }
 
@@ -102,33 +106,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 28),
                         _buildHeading(),
                         const SizedBox(height: 24),
-                        LabeledField(label: 'Nama Lengkap',
-                          child: AppTextField(controller: _nameController,
-                              hint: 'Masukkan nama lengkap Anda',
-                              suffixIcon: Icons.person_outline)),
+                        LabeledField(
+                          label: 'Nama Lengkap',
+                          child: AppTextField(
+                            controller: _nameController,
+                            hint: 'Masukkan nama lengkap Anda',
+                            suffixIcon: Icons.person_outline,
+                          ),
+                        ),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'Email',
-                          child: AppTextField(controller: _emailController,
-                              hint: 'Masukkan email Anda',
-                              keyboardType: TextInputType.emailAddress,
-                              suffixIcon: Icons.mail_outline)),
+                        LabeledField(
+                          label: 'Email',
+                          child: AppTextField(
+                            controller: _emailController,
+                            hint: 'Masukkan email Anda',
+                            keyboardType: TextInputType.emailAddress,
+                            suffixIcon: Icons.mail_outline,
+                          ),
+                        ),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'Nomor Telepon',
-                          child: AppTextField(controller: _phoneController,
-                              hint: 'Masukkan nomor telepon Anda',
-                              keyboardType: TextInputType.phone,
-                              suffixIcon: Icons.phone_outlined)),
+                        LabeledField(
+                          label: 'Nomor Telepon',
+                          child: AppTextField(
+                            controller: _phoneController,
+                            hint: 'Masukkan nomor telepon Anda',
+                            keyboardType: TextInputType.phone,
+                            suffixIcon: Icons.phone_outlined,
+                          ),
+                        ),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'Jenis Pengguna', child: _buildUserTypeDropdown()),
+                        LabeledField(
+                          label: 'Jenis Pengguna',
+                          child: _buildUserTypeDropdown(),
+                        ),
                         const SizedBox(height: 16),
-                        LabeledField(label: 'Kata Sandi',
-                          child: AppTextField(controller: _passwordController,
-                              hint: 'Masukkan kata sandi Anda',
-                              obscureText: _obscurePassword,
-                              suffixIcon: _obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              onSuffixTap: () => setState(() => _obscurePassword = !_obscurePassword))),
+                        LabeledField(
+                          label: 'Kata Sandi',
+                          child: AppTextField(
+                            controller: _passwordController,
+                            hint: 'Masukkan kata sandi Anda',
+                            obscureText: _obscurePassword,
+                            suffixIcon: _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            onSuffixTap: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 20),
                         _buildTermsCheckbox(),
                         const SizedBox(height: 24),
@@ -138,13 +163,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('Sudah memiliki akun? ',
-                                  style: TextStyle(color: Colors.white54, fontSize: 14)),
+                              const Text(
+                                'Sudah memiliki akun? ',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 14,
+                                ),
+                              ),
                               GestureDetector(
                                 onTap: _goToLogin,
-                                child: const Text('Masuk',
-                                    style: TextStyle(color: AppColors.primaryLight,
-                                        fontSize: 14, fontWeight: FontWeight.bold)),
+                                child: const Text(
+                                  'Masuk',
+                                  style: TextStyle(
+                                    color: AppColors.primaryLight,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -153,11 +188,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.recycling, color: Colors.white24, size: 24),
+                            Icon(
+                              Icons.recycling,
+                              color: Colors.white24,
+                              size: 24,
+                            ),
                             SizedBox(width: 28),
                             Icon(Icons.eco, color: Colors.white24, size: 24),
                             SizedBox(width: 28),
-                            Icon(Icons.park_outlined, color: Colors.white24, size: 24),
+                            Icon(
+                              Icons.park_outlined,
+                              color: Colors.white24,
+                              size: 24,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 32),
@@ -174,46 +217,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildHeroTop() => SizedBox(
-    height: 280, width: double.infinity,
-    child: Image.asset('assets/images/register_picture.png',
-        fit: BoxFit.cover, width: double.infinity),
+    height: 280,
+    width: double.infinity,
+    child: Image.asset(
+      'assets/images/register_picture.png',
+      fit: BoxFit.cover,
+      width: double.infinity,
+    ),
   );
 
   Widget _buildOverlayBrand() => Padding(
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-    child: Row(children: [
-      SizedBox(width: 22, height: 22,
-          child: Image.asset('assets/logo/ecocycle_logo.png')),
-      const SizedBox(width: 8),
-      const Text('EcoCycle', style: TextStyle(color: AppColors.textWhite,
-          fontSize: 18, fontWeight: FontWeight.bold)),
-    ]),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 22,
+          height: 22,
+          child: Image.asset('assets/logo/ecocycle_logo.png'),
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          'EcoCycle',
+          style: TextStyle(
+            color: AppColors.textWhite,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    ),
   );
 
   Widget _buildHeading() => const Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text('Buat Akun Baru', style: TextStyle(color: AppColors.textWhite,
-          fontSize: 26, fontWeight: FontWeight.bold)),
+      Text(
+        'Buat Akun Baru',
+        style: TextStyle(
+          color: AppColors.textWhite,
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       SizedBox(height: 4),
-      Text('Bergabunglah dengan kami di komunitas peduli lingkungan.',
-          style: TextStyle(color: Colors.white54, fontSize: 14)),
+      Text(
+        'Bergabunglah dengan kami di komunitas peduli lingkungan.',
+        style: TextStyle(color: Colors.white54, fontSize: 14),
+      ),
     ],
   );
 
   Widget _buildUserTypeDropdown() => Container(
-    decoration: BoxDecoration(color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12)),
+    decoration: BoxDecoration(
+      color: AppColors.bgCard,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.white12),
+    ),
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: DropdownButtonHideUnderline(
       child: DropdownButton<String>(
-        value: _selectedUserType, isExpanded: true,
+        value: _selectedUserType,
+        isExpanded: true,
         dropdownColor: AppColors.bgCard,
-        icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryLight),
+        icon: const Icon(
+          Icons.keyboard_arrow_down,
+          color: AppColors.primaryLight,
+        ),
         style: const TextStyle(color: AppColors.textWhite, fontSize: 15),
-        items: _userTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-        onChanged: (val) { if (val != null) setState(() => _selectedUserType = val); },
+        items: _userTypes
+            .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+            .toList(),
+        onChanged: (val) {
+          if (val != null) setState(() => _selectedUserType = val);
+        },
       ),
     ),
   );
@@ -221,11 +297,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildTermsCheckbox() => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      SizedBox(width: 22, height: 22,
+      SizedBox(
+        width: 22,
+        height: 22,
         child: Checkbox(
           value: _agreeToTerms,
           onChanged: (v) => setState(() => _agreeToTerms = v ?? false),
-          activeColor: AppColors.primary, checkColor: Colors.white,
+          activeColor: AppColors.primary,
+          checkColor: Colors.white,
           side: const BorderSide(color: Colors.white38),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
@@ -234,16 +313,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Expanded(
         child: RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.4),
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 13,
+              height: 1.4,
+            ),
             children: [
               const TextSpan(text: 'Saya setuju dengan '),
-              WidgetSpan(child: GestureDetector(onTap: () {},
-                  child: const Text('Syarat Layanan',
-                      style: TextStyle(color: AppColors.primaryLight, fontSize: 13)))),
+              WidgetSpan(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: const Text(
+                    'Syarat Layanan',
+                    style: TextStyle(
+                      color: AppColors.primaryLight,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
               const TextSpan(text: ' dan '),
-              WidgetSpan(child: GestureDetector(onTap: () {},
-                  child: const Text('Kebijakan Privasi',
-                      style: TextStyle(color: AppColors.primaryLight, fontSize: 13)))),
+              WidgetSpan(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: const Text(
+                    'Kebijakan Privasi',
+                    style: TextStyle(
+                      color: AppColors.primaryLight,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
               const TextSpan(text: '.'),
             ],
           ),
@@ -253,21 +354,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   );
 
   Widget _buildCreateButton() => SizedBox(
-    width: double.infinity, height: 54,
+    width: double.infinity,
+    height: 54,
     child: ElevatedButton(
       onPressed: _isLoading ? null : _handleRegister,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary, foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 0,
       ),
       child: _isLoading
-          ? const SizedBox(width: 22, height: 22,
-              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
           : const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Buat Akun Baru', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  'Buat Akun Baru',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 SizedBox(width: 8),
                 Icon(Icons.arrow_forward, size: 18),
               ],

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
-// ============================================================
 // MODEL NOTIFIKASI
-// ============================================================
 enum NotifType { pickup, expertReply, article, ecoPoints, communityEvent }
 
 class NotifItem {
@@ -22,9 +20,7 @@ class NotifItem {
   });
 }
 
-// ============================================================
 // NOTIFICATION SCREEN
-// ============================================================
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -40,21 +36,24 @@ class _NotificationScreenState extends State<NotificationScreen>
     NotifItem(
       type: NotifType.pickup,
       title: 'Penjemputan tiba dalam 5 menit',
-      body: 'Petugas sampah sudah dekat lokasimu. Pastikan tempat sampah mudah dijangkau.',
+      body:
+          'Petugas sampah sudah dekat lokasimu. Pastikan tempat sampah mudah dijangkau.',
       timeAgo: '5m',
       isRead: false,
     ),
     NotifItem(
       type: NotifType.expertReply,
       title: 'Ahli Budi menjawab pertanyaanmu',
-      body: '"Untuk mengompos kulit jeruk secara efektif, sebaiknya potong kecil-kecil terlebih dahulu..."',
+      body:
+          '"Untuk mengompos kulit jeruk secara efektif, sebaiknya potong kecil-kecil terlebih dahulu..."',
       timeAgo: '2j',
       isRead: false,
     ),
     NotifItem(
       type: NotifType.article,
       title: 'Artikel baru: Tips Urban Farming',
-      body: 'Pelajari cara memaksimalkan balkon untuk kebun herbal yang berkelanjutan.',
+      body:
+          'Pelajari cara memaksimalkan balkon untuk kebun herbal yang berkelanjutan.',
       timeAgo: '6j',
       isRead: true,
     ),
@@ -101,7 +100,8 @@ class _NotificationScreenState extends State<NotificationScreen>
   Map<String, List<NotifItem>> _groupNotifs(List<NotifItem> items) {
     final Map<String, List<NotifItem>> grouped = {};
     for (final item in items) {
-      final timeVal = int.tryParse(item.timeAgo.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      final timeVal =
+          int.tryParse(item.timeAgo.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
       final isMinutes = item.timeAgo.contains('m');
       final isHours = item.timeAgo.contains('j');
 
@@ -166,7 +166,9 @@ class _NotificationScreenState extends State<NotificationScreen>
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white70),
             color: AppColors.bgCard,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             onSelected: (val) {
               if (val == 'read_all') _markAllRead();
             },
@@ -177,8 +179,10 @@ class _NotificationScreenState extends State<NotificationScreen>
                   children: [
                     Icon(Icons.done_all, color: Colors.white70, size: 18),
                     SizedBox(width: 10),
-                    Text('Tandai semua dibaca',
-                        style: TextStyle(color: Colors.white, fontSize: 14)),
+                    Text(
+                      'Tandai semua dibaca',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
                   ],
                 ),
               ),
@@ -197,7 +201,10 @@ class _NotificationScreenState extends State<NotificationScreen>
         labelColor: AppColors.primaryLight,
         unselectedLabelColor: Colors.white54,
         labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 15,
+        ),
         indicatorColor: AppColors.primaryLight,
         indicatorWeight: 2.5,
         indicatorSize: TabBarIndicatorSize.label,
@@ -212,7 +219,10 @@ class _NotificationScreenState extends State<NotificationScreen>
                 if (_unreadNotifs.isNotEmpty) ...[
                   const SizedBox(width: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(10),
@@ -220,7 +230,10 @@ class _NotificationScreenState extends State<NotificationScreen>
                     child: Text(
                       '${_unreadNotifs.length}',
                       style: const TextStyle(
-                          color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -275,7 +288,9 @@ class _NotificationScreenState extends State<NotificationScreen>
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: item.isRead ? AppColors.bgCard : AppColors.bgCard.withOpacity(0.9),
+          color: item.isRead
+              ? AppColors.bgCard
+              : AppColors.bgCard.withOpacity(0.9),
           borderRadius: BorderRadius.circular(14),
           border: item.isRead
               ? null
@@ -299,21 +314,30 @@ class _NotificationScreenState extends State<NotificationScreen>
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
-                            fontWeight: item.isRead ? FontWeight.w500 : FontWeight.bold,
+                            fontWeight: item.isRead
+                                ? FontWeight.w500
+                                : FontWeight.bold,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         item.timeAgo,
-                        style: const TextStyle(color: Colors.white38, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     item.body,
-                    style: const TextStyle(color: Colors.white60, fontSize: 13, height: 1.4),
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),
@@ -373,7 +397,11 @@ class _NotificationScreenState extends State<NotificationScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_off_outlined, color: Colors.white24, size: 64),
+          Icon(
+            Icons.notifications_off_outlined,
+            color: Colors.white24,
+            size: 64,
+          ),
           const SizedBox(height: 16),
           const Text(
             'Tidak ada notifikasi',

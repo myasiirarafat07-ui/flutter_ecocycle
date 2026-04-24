@@ -111,12 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
 
             if (_currentPage > 0)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _buildAppBar(),
-              ),
+              Positioned(top: 0, left: 0, right: 0, child: _buildAppBar()),
 
             Positioned(
               bottom: 0,
@@ -137,8 +132,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           GestureDetector(
             onTap: _goToPrev,
-            child: const Icon(Icons.arrow_back,
-                color: AppColors.textWhite, size: 24),
+            child: const Icon(
+              Icons.arrow_back,
+              color: AppColors.textWhite,
+              size: 24,
+            ),
           ),
           const Expanded(
             child: Text(
@@ -203,7 +201,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Text(
                     _isLastPage ? 'Mulai' : 'Lanjut',
                     style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   const Icon(Icons.arrow_forward, size: 18),
@@ -228,9 +228,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: const Text(
                   'Kembali',
                   style: TextStyle(
-                      color: AppColors.primaryLight,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600),
+                    color: AppColors.primaryLight,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../payment/payment_success_screen.dart';
 
-// ============================================================
 // CHECKOUT SCREEN
-// Ditampilkan saat user tap "Buy Now" di ProductDetailScreen
-// ============================================================
 class CheckoutScreen extends StatefulWidget {
   final String productName;
   final String productPrice;
@@ -97,19 +94,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ── AppBar ────────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 24),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.textWhite,
+              size: 24,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           const Expanded(
             child: Text(
-              'Checkout',
+              'Pembayaran',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textWhite,
@@ -124,7 +124,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ── Alamat Pengiriman ─────────────────────────────────────
   Widget _buildAlamatPengiriman() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,8 +178,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   color: AppColors.primary.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.location_on_outlined,
-                    color: AppColors.primaryLight, size: 22),
+                child: const Icon(
+                  Icons.location_on_outlined,
+                  color: AppColors.primaryLight,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 14),
               const Expanded(
@@ -198,12 +200,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     SizedBox(height: 4),
                     Text(
                       'Jl. Hijau Lestari No. 12,\nJakarta Selatan, DKI\nJakarta, 12345',
-                      style: TextStyle(color: Colors.white60, fontSize: 13, height: 1.5),
+                      style: TextStyle(
+                        color: Colors.white60,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
                     ),
                     SizedBox(height: 4),
                     Text(
                       '(+62) 812-3456-7890',
-                      style: TextStyle(color: AppColors.primaryLight, fontSize: 13),
+                      style: TextStyle(
+                        color: AppColors.primaryLight,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -215,7 +224,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ── Ringkasan Pesanan ─────────────────────────────────────
   Widget _buildRingkasanPesanan() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +263,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          // Gambar produk
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
@@ -267,8 +274,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 width: 64,
                 height: 64,
                 color: const Color(0xFF1E4D1E),
-                child: const Icon(Icons.image_not_supported,
-                    color: Colors.white24, size: 28),
+                child: const Icon(
+                  Icons.image_not_supported,
+                  color: Colors.white24,
+                  size: 28,
+                ),
               ),
             ),
           ),
@@ -309,7 +319,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ── Metode Pengiriman ─────────────────────────────────────
   Widget _buildMetodePengiriman() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,9 +376,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon,
-                color: isSelected ? AppColors.primaryLight : Colors.white54,
-                size: 22),
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primaryLight : Colors.white54,
+              size: 22,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -378,9 +389,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Text(
                     label,
                     style: TextStyle(
-                      color: isSelected
-                          ? AppColors.textWhite
-                          : Colors.white70,
+                      color: isSelected ? AppColors.textWhite : Colors.white70,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -407,7 +416,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ── Metode Pembayaran ─────────────────────────────────────
   Widget _buildMetodePembayaran() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -441,8 +449,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.account_balance_wallet_outlined,
-                    color: AppColors.primaryLight, size: 22),
+                const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: AppColors.primaryLight,
+                  size: 22,
+                ),
                 const SizedBox(width: 14),
                 const Expanded(
                   child: Column(
@@ -464,28 +475,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.white38, size: 22),
+                const Icon(
+                  Icons.chevron_right,
+                  color: Colors.white38,
+                  size: 22,
+                ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 10),
 
-        // Eco Points toggle
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: _useEcoPoints
-                ? AppColors.primary
-                : AppColors.bgCard,
+            color: _useEcoPoints ? AppColors.primary : AppColors.bgCard,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
             children: [
-              Icon(Icons.eco,
-                  color: _useEcoPoints ? Colors.white : AppColors.primaryLight,
-                  size: 22),
+              Icon(
+                Icons.eco,
+                color: _useEcoPoints ? Colors.white : AppColors.primaryLight,
+                size: 22,
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -494,7 +508,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     Text(
                       'Gunakan Eco Points',
                       style: TextStyle(
-                        color: _useEcoPoints ? Colors.white : AppColors.textWhite,
+                        color: _useEcoPoints
+                            ? Colors.white
+                            : AppColors.textWhite,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -503,9 +519,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     Text(
                       'Tersedia $_ecoPointsCount poin (${_formatRupiah(_ecoPointsValue)})',
                       style: TextStyle(
-                        color: _useEcoPoints
-                            ? Colors.white70
-                            : Colors.white54,
+                        color: _useEcoPoints ? Colors.white70 : Colors.white54,
                         fontSize: 12,
                       ),
                     ),
@@ -527,7 +541,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ── Ringkasan Harga ───────────────────────────────────────
   Widget _buildRingkasanHarga() {
     return Column(
       children: [
@@ -584,7 +597,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white60, fontSize: 14)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white60, fontSize: 14),
+        ),
         Text(
           value,
           style: TextStyle(
@@ -597,7 +613,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ── Bottom Bar ────────────────────────────────────────────
   Widget _buildBottomBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
@@ -638,8 +653,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           children: [
             Icon(Icons.eco, color: AppColors.primaryLight, size: 22),
             SizedBox(width: 8),
-            Text('Konfirmasi Pembayaran',
-                style: TextStyle(color: Colors.white, fontSize: 16)),
+            Text(
+              'Konfirmasi Pembayaran',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ],
         ),
         content: Text(
@@ -660,7 +677,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   builder: (_) => PaymentSuccessScreen(
                     orderId: '#EC-${(88000 + _total % 1000).abs()}',
                     totalAmount: _formatRupiah(_total),
-                    paymentMethod: _useEcoPoints ? 'EcoWallet + Eco Points' : 'EcoWallet',
+                    paymentMethod: _useEcoPoints
+                        ? 'EcoWallet + Eco Points'
+                        : 'EcoWallet',
                   ),
                 ),
               );
@@ -668,7 +687,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: const Text(
               'Bayar',
               style: TextStyle(
-                  color: AppColors.primaryLight, fontWeight: FontWeight.bold),
+                color: AppColors.primaryLight,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

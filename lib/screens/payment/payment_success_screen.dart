@@ -3,11 +3,8 @@ import '../../constants/app_colors.dart';
 import '../main_wrapper.dart';
 import 'order_detail_screen.dart';
 
-// ============================================================
-// PAYMENT SUCCESS SCREEN
 // Ditampilkan setelah user berhasil melakukan pembayaran
 // Menerima: orderId, totalAmount, paymentMethod
-// ============================================================
 class PaymentSuccessScreen extends StatefulWidget {
   final String orderId;
   final String totalAmount;
@@ -49,13 +46,13 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
       curve: const Interval(0.4, 1.0, curve: Curves.easeIn),
     );
 
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
-    ));
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+          ),
+        );
 
     // Mulai animasi setelah frame pertama
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -102,7 +99,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     );
   }
 
-  // ── Top Bar ───────────────────────────────────────────────
   Widget _buildTopBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
@@ -114,7 +110,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
           ),
           const Expanded(
             child: Text(
-              'PAYMENT SUCCESS',
+              'PEMBAYARAN BERHASIL',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textWhite,
@@ -130,7 +126,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     );
   }
 
-  // ── Success Icon (animated) ───────────────────────────────
   Widget _buildSuccessIcon() {
     return ScaleTransition(
       scale: _scaleAnim,
@@ -157,7 +152,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     );
   }
 
-  // ── Thank You Text ────────────────────────────────────────
   Widget _buildThankYouText() {
     return FadeTransition(
       opacity: _fadeAnim,
@@ -189,7 +183,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     );
   }
 
-  // ── Transaction Detail Card ───────────────────────────────
   Widget _buildTransactionDetail() {
     return FadeTransition(
       opacity: _fadeAnim,
@@ -218,7 +211,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
               child: Column(
                 children: [
                   _buildDetailRow(
-                    label: 'Order ID',
+                    label: 'ID Pesanan',
                     value: widget.orderId,
                     valueBold: true,
                   ),
@@ -254,32 +247,39 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white60,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.white60, fontSize: 14),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, color: Colors.white70, size: 16),
-                const SizedBox(width: 6),
-              ],
-              Text(
-                value,
-                style: TextStyle(
-                  color: valueColor ?? AppColors.textWhite,
-                  fontSize: 14,
-                  fontWeight:
-                      valueBold ? FontWeight.bold : FontWeight.normal,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (icon != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Icon(icon, color: Colors.white70, size: 16),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Flexible(
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.end,
+                    softWrap: true,
+                    style: TextStyle(
+                      color: valueColor ?? AppColors.textWhite,
+                      fontSize: 14,
+                      fontWeight: valueBold ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -287,14 +287,9 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
   }
 
   Widget _buildDivider() {
-    return const Divider(
-      color: Color(0xFF2A4D2A),
-      thickness: 1,
-      height: 1,
-    );
+    return const Divider(color: Color(0xFF2A4D2A), thickness: 1, height: 1);
   }
 
-  // ── Eco Impact Banner ─────────────────────────────────────
   Widget _buildEcoImpactBanner() {
     return FadeTransition(
       opacity: _fadeAnim,
@@ -357,7 +352,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     );
   }
 
-  // ── Bottom Buttons ────────────────────────────────────────
   Widget _buildBottomButtons(BuildContext context) {
     return FadeTransition(
       opacity: _fadeAnim,
@@ -365,9 +359,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
         decoration: const BoxDecoration(
           color: AppColors.bgDark,
-          border: Border(
-            top: BorderSide(color: AppColors.divider, width: 1),
-          ),
+          border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -426,7 +418,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     );
   }
 
-  // ── Helper: navigasi ke Home ──────────────────────────────
   void _goToHome(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const MainWrapper()),

@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import 'product_detail_screen.dart';
 
-// ============================================================
-// MARKET SCREEN — Eco-Market / Pasar
-// Menampilkan daftar produk dengan filter kategori,
 // pencarian, dan grid produk.
-// ============================================================
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
 
@@ -36,7 +32,8 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 4.9,
       sold: 120,
       price: 'Rp 45.000',
-      imageUrl: 'https://images.unsplash.com/photo-1611735341450-74d61e660ad2?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1611735341450-74d61e660ad2?w=400',
       isFavorite: false,
     ),
     _Product(
@@ -47,7 +44,8 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 4.8,
       sold: 85,
       price: 'Rp 120.000',
-      imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
       isFavorite: false,
     ),
     _Product(
@@ -58,7 +56,8 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 4.7,
       sold: 240,
       price: 'Rp 5.000 /kg',
-      imageUrl: 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?w=400',
       isFavorite: false,
     ),
     _Product(
@@ -69,7 +68,8 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 5.0,
       sold: 54,
       price: 'Rp 20.000 /kg',
-      imageUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400',
       isFavorite: false,
     ),
     _Product(
@@ -80,7 +80,8 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 4.5,
       sold: 320,
       price: 'Rp 2.500 /kg',
-      imageUrl: 'https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=400',
       isFavorite: false,
     ),
     _Product(
@@ -91,7 +92,8 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 4.6,
       sold: 98,
       price: 'Rp 35.000',
-      imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
       isFavorite: false,
     ),
   ];
@@ -103,8 +105,7 @@ class _MarketScreenState extends State<MarketScreen> {
     return _allProducts.where((p) {
       final matchCategory =
           _selectedCategory == 'Semua' || p.category == _selectedCategory;
-      final matchSearch =
-          query.isEmpty || p.name.toLowerCase().contains(query);
+      final matchSearch = query.isEmpty || p.name.toLowerCase().contains(query);
       return matchCategory && matchSearch;
     }).toList();
   }
@@ -146,21 +147,18 @@ class _MarketScreenState extends State<MarketScreen> {
     );
   }
 
-  // ── Header ────────────────────────────────────────────────
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
         children: [
-          // Logo daun kecil
           Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              'assets/logo/ecocycle_logo.png',
+              width: 20,
+              height: 20,
+              fit: BoxFit.contain,
             ),
-            child: const Icon(Icons.eco, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -177,21 +175,23 @@ class _MarketScreenState extends State<MarketScreen> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Notifikasi segera hadir!'),
+                  content: Text('Keranjang belanja segera hadir!'),
                   backgroundColor: AppColors.primary,
                   duration: Duration(seconds: 1),
                 ),
               );
             },
-            icon: const Icon(Icons.notifications_outlined,
-                color: Colors.white70, size: 26),
+            icon: const Icon(
+              Icons.shopping_cart_outlined,
+              color: Colors.white70,
+              size: 26,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── Search Bar ────────────────────────────────────────────
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -209,21 +209,19 @@ class _MarketScreenState extends State<MarketScreen> {
             hintStyle: TextStyle(color: Colors.white38, fontSize: 14),
             prefixIcon: Icon(Icons.search, color: Colors.white38, size: 22),
             border: InputBorder.none,
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
       ),
     );
   }
 
-  // ── Category Chips ────────────────────────────────────────
   Widget _buildCategoryChips() {
     return SizedBox(
-      height: 44,
+      height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
         itemCount: _categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
@@ -233,11 +231,11 @@ class _MarketScreenState extends State<MarketScreen> {
             onTap: () => setState(() => _selectedCategory = cat),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primary : AppColors.bgCard,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(100), // capsule
                 border: Border.all(
                   color: isSelected
                       ? AppColors.primary
@@ -248,12 +246,9 @@ class _MarketScreenState extends State<MarketScreen> {
               child: Text(
                 cat,
                 style: TextStyle(
-                  color:
-                      isSelected ? Colors.white : Colors.white60,
+                  color: isSelected ? Colors.white : Colors.white60,
                   fontSize: 13,
-                  fontWeight: isSelected
-                      ? FontWeight.w600
-                      : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
             ),
@@ -263,7 +258,6 @@ class _MarketScreenState extends State<MarketScreen> {
     );
   }
 
-  // ── Section Title ─────────────────────────────────────────
   Widget _buildSectionTitle() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
@@ -294,7 +288,6 @@ class _MarketScreenState extends State<MarketScreen> {
     );
   }
 
-  // ── Product Grid ──────────────────────────────────────────
   Widget _buildProductGrid() {
     final products = _filteredProducts;
 
@@ -305,8 +298,10 @@ class _MarketScreenState extends State<MarketScreen> {
           children: [
             Icon(Icons.search_off, color: Colors.white24, size: 56),
             SizedBox(height: 12),
-            Text('Produk tidak ditemukan',
-                style: TextStyle(color: Colors.white38, fontSize: 15)),
+            Text(
+              'Produk tidak ditemukan',
+              style: TextStyle(color: Colors.white38, fontSize: 15),
+            ),
           ],
         ),
       );
@@ -318,7 +313,7 @@ class _MarketScreenState extends State<MarketScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.72,
+        childAspectRatio: 0.68,
       ),
       itemCount: products.length,
       itemBuilder: (_, i) => GestureDetector(
@@ -355,9 +350,6 @@ class _MarketScreenState extends State<MarketScreen> {
   }
 }
 
-// ============================================================
-// PRODUCT CARD WIDGET
-// ============================================================
 class _ProductCard extends StatelessWidget {
   final _Product product;
   final bool isFavorite;
@@ -381,12 +373,12 @@ class _ProductCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Gambar produk ─────────────────────────────────
           Stack(
             children: [
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
                 child: Image.network(
                   product.imageUrl,
                   height: 140,
@@ -395,8 +387,11 @@ class _ProductCard extends StatelessWidget {
                   errorBuilder: (_, __, ___) => Container(
                     height: 140,
                     color: const Color(0xFF1E4D1E),
-                    child: const Icon(Icons.image_not_supported,
-                        color: Colors.white24, size: 40),
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: Colors.white24,
+                      size: 40,
+                    ),
                   ),
                   loadingBuilder: (_, child, loadingProgress) {
                     if (loadingProgress == null) return child;
@@ -413,7 +408,6 @@ class _ProductCard extends StatelessWidget {
                   },
                 ),
               ),
-              // Tombol favorit (hati)
               Positioned(
                 top: 8,
                 right: 8,
@@ -437,14 +431,12 @@ class _ProductCard extends StatelessWidget {
             ],
           ),
 
-          // ── Info produk ───────────────────────────────────
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Label kategori
                   Text(
                     product.categoryLabel,
                     style: const TextStyle(
@@ -456,7 +448,6 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
 
-                  // Nama produk
                   Text(
                     product.name,
                     maxLines: 2,
@@ -472,13 +463,18 @@ class _ProductCard extends StatelessWidget {
                   // Rating & terjual
                   Row(
                     children: [
-                      const Icon(Icons.star,
-                          color: Color(0xFFFFC107), size: 13),
+                      const Icon(
+                        Icons.star,
+                        color: Color(0xFFFFC107),
+                        size: 13,
+                      ),
                       const SizedBox(width: 3),
                       Text(
                         '${product.rating} (${product.sold} terjual)',
                         style: const TextStyle(
-                            color: Colors.white54, fontSize: 10),
+                          color: Colors.white54,
+                          fontSize: 10,
+                        ),
                       ),
                     ],
                   ),
@@ -527,9 +523,7 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// ============================================================
 // MODEL PRODUK
-// ============================================================
 class _Product {
   final String id;
   final String category;
