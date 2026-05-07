@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
-import '../auth/login_screen.dart';
+import '../../utils/logout_dialog.dart';
 import '../notification/notification_screen.dart';
 import '../payment/payment_method_screen.dart';
 import '../support/help_center_screen.dart';
@@ -315,49 +315,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildKeluar(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: AppColors.bgCard,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            title: const Text(
-              'Keluar Akun',
-              style: TextStyle(color: Colors.white),
-            ),
-            content: const Text(
-              'Apakah kamu yakin ingin keluar?',
-              style: TextStyle(color: Colors.white70),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text(
-                  'Batal',
-                  style: TextStyle(color: Colors.white54),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.read<UserProvider>().logout();
-                  Navigator.pop(ctx);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (_) => false,
-                  );
-                },
-                child: const Text(
-                  'Keluar',
-                  style: TextStyle(color: AppColors.danger),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      onTap: () => showLogoutDialog(context),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

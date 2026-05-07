@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../screens/payment/payment_method_screen.dart';
 import '../screens/support/help_center_screen.dart';
+import '../utils/logout_dialog.dart';
 
 // APP DRAWER
 // Panel samping kiri yang muncul saat:
@@ -27,93 +28,100 @@ class AppDrawer extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            _DrawerHeader(
-              initials: initials,
-              displayName: displayName,
-              displayEmail: displayEmail,
-              isPremium: user.isPremium,
-              userType: userType,
-            ),
-
-            const SizedBox(height: 8),
-
-            _DrawerSectionLabel(label: 'Menu'),
-            _DrawerItem(
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home,
-              label: 'Beranda',
-              onTap: () {
-                Navigator.pop(context);
-                onNavigateToTab?.call(0);
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.person_outline,
-              activeIcon: Icons.person,
-              label: 'Profil Saya',
-              onTap: () {
-                Navigator.pop(context);
-                // Navigasi ke tab Profil (index 4) di MainWrapper
-                // supaya bottom navbar tetap tampil
-                onNavigateToTab?.call(4);
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.credit_card_outlined,
-              activeIcon: Icons.credit_card,
-              label: 'Metode Pembayaran',
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PaymentMethodScreen(),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _DrawerHeader(
+                    initials: initials,
+                    displayName: displayName,
+                    displayEmail: displayEmail,
+                    isPremium: user.isPremium,
+                    userType: userType,
                   ),
-                );
-              },
-            ),
 
-            const _DrawerDivider(),
+                  const SizedBox(height: 8),
 
-            _DrawerSectionLabel(label: 'Lainnya'),
-            _DrawerItem(
-              icon: Icons.settings_outlined,
-              activeIcon: Icons.settings,
-              label: 'Pengaturan',
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Halaman Pengaturan segera hadir!'),
-                    backgroundColor: Color(0xFF2E7D32),
-                    duration: Duration(seconds: 1),
+                  _DrawerSectionLabel(label: 'Menu'),
+                  _DrawerItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home,
+                    label: 'Beranda',
+                    onTap: () {
+                      Navigator.pop(context);
+                      onNavigateToTab?.call(0);
+                    },
                   ),
-                );
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.help_outline,
-              activeIcon: Icons.help,
-              label: 'Pusat Bantuan',
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HelpCenterScreen()),
-                );
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.info_outline,
-              activeIcon: Icons.info,
-              label: 'Tentang Aplikasi',
-              onTap: () {
-                Navigator.pop(context);
-                _showAboutDialog(context);
-              },
-            ),
+                  _DrawerItem(
+                    icon: Icons.person_outline,
+                    activeIcon: Icons.person,
+                    label: 'Profil Saya',
+                    onTap: () {
+                      Navigator.pop(context);
+                      // Navigasi ke tab Profil (index 4) di MainWrapper
+                      // supaya bottom navbar tetap tampil
+                      onNavigateToTab?.call(4);
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.credit_card_outlined,
+                    activeIcon: Icons.credit_card,
+                    label: 'Metode Pembayaran',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PaymentMethodScreen(),
+                        ),
+                      );
+                    },
+                  ),
 
-            const Spacer(),
+                  const _DrawerDivider(),
+
+                  _DrawerSectionLabel(label: 'Lainnya'),
+                  _DrawerItem(
+                    icon: Icons.settings_outlined,
+                    activeIcon: Icons.settings,
+                    label: 'Pengaturan',
+                    onTap: () {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Halaman Pengaturan segera hadir!'),
+                          backgroundColor: Color(0xFF2E7D32),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.help_outline,
+                    activeIcon: Icons.help,
+                    label: 'Pusat Bantuan',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HelpCenterScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.info_outline,
+                    activeIcon: Icons.info,
+                    label: 'Tentang Aplikasi',
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showAboutDialog(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
 
             const _DrawerDivider(),
             _DrawerItem(
@@ -121,47 +129,13 @@ class AppDrawer extends StatelessWidget {
               activeIcon: Icons.logout,
               label: 'Keluar',
               isDestructive: true,
-              onTap: () => _confirmLogout(context),
+              onTap: () => showLogoutDialog(context, closeDrawer: true),
             ),
 
             const _DrawerBranding(),
             const SizedBox(height: 12),
           ],
         ),
-      ),
-    );
-  }
-
-  void _confirmLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A3B1A),
-        title: const Text('Keluar?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Kamu akan keluar dari akun ini.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white60)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-              context.read<UserProvider>().logout();
-              Navigator.of(
-                context,
-              ).pushNamedAndRemoveUntil('/login', (_) => false);
-            },
-            child: const Text(
-              'Keluar',
-              style: TextStyle(color: Color(0xFFE53935)),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -346,7 +320,14 @@ class _DrawerItem extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 22),
             const SizedBox(width: 16),
-            Text(label, style: TextStyle(color: color, fontSize: 15)),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: color, fontSize: 15),
+              ),
+            ),
           ],
         ),
       ),
