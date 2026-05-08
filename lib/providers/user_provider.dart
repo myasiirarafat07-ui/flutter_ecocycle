@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-// USER PROVIDER — state management sederhana tanpa library
-// Menyimpan data user yang aktif login dan bisa diubah
-// dari mana saja (login, register, personal info screen)
 class UserProvider extends ChangeNotifier {
+  String _token = '';
   String _name = '';
   String _email = '';
   String _phone = '';
@@ -16,6 +14,7 @@ class UserProvider extends ChangeNotifier {
   int _treesPlanted = 0;
   double _co2OffsetKg = 0;
 
+  String get token => _token;
   String get name => _name;
   String get email => _email;
   String get phone => _phone;
@@ -28,42 +27,30 @@ class UserProvider extends ChangeNotifier {
   int get treesPlanted => _treesPlanted;
   double get co2OffsetKg => _co2OffsetKg;
 
-  void loginAs({
-    required String name,
-    required String email,
-    String phone = '',
-    String address = '',
-  }) {
-    _name = name;
-    _email = email;
-    _phone = phone;
-    _address = address;
-    _memberSince = DateTime.now().year.toString();
-    _isPremium = false;
-    _totalWasteKg = 0;
-    _weeklyChangePercent = 0;
-    _treesPlanted = 0;
-    _co2OffsetKg = 0;
-    notifyListeners();
-  }
+  bool get isLoggedIn => _token.isNotEmpty && _email.isNotEmpty;
 
-  void registerAs({
-    required String name,
-    required String email,
-    String phone = '',
-    String userType = '',
+  void setAuthenticatedUser({
+    required String token,
+    required Map<String, dynamic> user,
   }) {
-    _name = name;
-    _email = email;
-    _phone = phone;
-    _address = '';
-    _memberSince = DateTime.now().year.toString();
-    _isPremium = false;
-    _userType = userType;
-    _totalWasteKg = 0;
+    _token = token;
+    _name = user['full_name']?.toString() ?? '';
+    _email = user['email']?.toString() ?? '';
+    _phone = user['phone_number']?.toString() ?? '';
+    _address = user['address']?.toString() ?? '';
+    _memberSince =
+        DateTime.tryParse(
+          user['created_at']?.toString() ?? '',
+        )?.year.toString() ??
+        DateTime.now().year.toString();
+    _userType = user['user_type']?.toString() ?? '';
+    _isPremium = user['is_premium'] == true || user['is_premium'] == 1;
+    _totalWasteKg =
+        double.tryParse(user['total_waste_kg']?.toString() ?? '0') ?? 0;
     _weeklyChangePercent = 0;
-    _treesPlanted = 0;
-    _co2OffsetKg = 0;
+    _treesPlanted = int.tryParse(user['trees_planted']?.toString() ?? '0') ?? 0;
+    _co2OffsetKg =
+        double.tryParse(user['co2_offset_kg']?.toString() ?? '0') ?? 0;
     notifyListeners();
   }
 
@@ -81,6 +68,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   void logout() {
+    _token = '';
     _name = '';
     _email = '';
     _phone = '';

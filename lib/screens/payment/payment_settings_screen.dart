@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
-// PAYMENT SETTINGS SCREEN
 class PaymentSettingsScreen extends StatefulWidget {
   const PaymentSettingsScreen({super.key});
 

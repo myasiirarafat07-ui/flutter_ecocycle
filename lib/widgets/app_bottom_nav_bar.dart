@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-// SHARED BOTTOM NAVIGATION BAR
-// Dipakai di semua screen melalui MainWrapper
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -14,13 +12,6 @@ class AppBottomNavBar extends StatelessWidget {
     required this.onTap,
     required this.onAddTap,
   });
-
-  // Index mapping:
-  // 0 = Home
-  // 1 = Search
-  // 2 = (tombol tambah — tidak ada index)
-  // 3 = Activity
-  // 4 = Profile
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +42,7 @@ class AppBottomNavBar extends StatelessWidget {
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
-              const SizedBox(width: 60), // ruang untuk tombol +
+              const SizedBox(width: 60),
               _NavItem(
                 icon: Icons.history_outlined,
                 activeIcon: Icons.history,
@@ -68,7 +59,6 @@ class AppBottomNavBar extends StatelessWidget {
               ),
             ],
           ),
-
           Positioned(
             top: -18,
             child: GestureDetector(

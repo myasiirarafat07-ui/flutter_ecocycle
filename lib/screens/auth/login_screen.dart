@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
+import '../../services/auth_api_service.dart';
 import '../../widgets/app_text_field.dart';
 import '../main_wrapper.dart';
 import 'register_screen.dart';
@@ -15,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authApi = AuthApiService();
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -26,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
@@ -39,31 +41,56 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Format email tidak valid'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
 
-    // Derive display name dari email (sebelum '@')
-    final displayName = email.contains('@')
-        ? _toTitleCase(
-            email.split('@').first.replaceAll(RegExp(r'[._\-]'), ' '),
-          )
-        : email;
+    try {
+      final result = await _authApi.login(email: email, password: password);
 
-    context.read<UserProvider>().loginAs(name: displayName, email: email);
+      if (!mounted) return;
 
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const MainWrapper()),
-    );
+      context.read<UserProvider>().setAuthenticatedUser(
+        token: result.token,
+        user: result.user,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainWrapper()),
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tidak bisa terhubung ke server'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
-  String _toTitleCase(String s) => s
-      .split(' ')
-      .map((w) => w.isEmpty ? '' : w[0].toUpperCase() + w.substring(1))
-      .join(' ');
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email);
+  }
 
   void _goToRegister() => Navigator.push(
     context,

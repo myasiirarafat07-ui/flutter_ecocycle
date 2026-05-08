@@ -1,8 +1,3 @@
-// This is a basic Flutter widget test for EcoCycle app.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +9,6 @@ import 'package:ecocycle/widgets/app_drawer.dart';
 
 void main() {
   testWidgets('EcoCycle app smoke test', (WidgetTester tester) async {
-    // Build our app wrapped with required Provider
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => UserProvider(),
@@ -22,7 +16,6 @@ void main() {
       ),
     );
 
-    // Verify the app renders without crashing
     expect(find.byType(MaterialApp), findsOneWidget);
   });
 
@@ -30,7 +23,20 @@ void main() {
     WidgetTester tester,
   ) async {
     final userProvider = UserProvider()
-      ..loginAs(name: 'Eco User', email: 'eco@example.com');
+      ..setAuthenticatedUser(
+        token: 'test-token',
+        user: {
+          'full_name': 'Eco User',
+          'email': 'eco@example.com',
+          'phone_number': '',
+          'address': '',
+          'user_type': 'Individual',
+          'is_premium': false,
+          'total_waste_kg': 0,
+          'trees_planted': 0,
+          'co2_offset_kg': 0,
+        },
+      );
 
     await tester.pumpWidget(
       ChangeNotifierProvider.value(

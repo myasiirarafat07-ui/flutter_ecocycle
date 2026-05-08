@@ -39,7 +39,6 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    // Tampilkan tombol back hanya jika bisa pop (dibuka dari navigator push)
     final canPop = Navigator.canPop(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

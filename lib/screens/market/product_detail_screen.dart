@@ -29,7 +29,6 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isFavorite = false;
 
-  // Data detail statis per produk (bisa diganti API nanti)
   static const Map<String, _ProductDetail> _details = {
     '1': _ProductDetail(
       sellerName: 'EcoFarm Indonesia',
@@ -283,7 +282,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               const SizedBox(height: 8),
 
-              // Rating & terjual
               Row(
                 children: [
                   const Icon(Icons.star, color: Color(0xFFFFC107), size: 16),
@@ -310,7 +308,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               const SizedBox(height: 14),
 
-              // Harga
               Text(
                 widget.price,
                 style: const TextStyle(
@@ -321,7 +318,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               const SizedBox(height: 6),
 
-              // Eco Points
               Row(
                 children: [
                   const Icon(
@@ -372,7 +368,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
       child: Row(
         children: [
-          // Avatar penjual
           Container(
             width: 46,
             height: 46,
@@ -384,7 +379,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           const SizedBox(width: 14),
 
-          // Info penjual
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,7 +453,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         const SizedBox(height: 14),
 
-        // Tags
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -619,7 +612,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 10,
+                ),
               ),
             ),
           ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../payment/payment_success_screen.dart';
 
-// CHECKOUT SCREEN
 class CheckoutScreen extends StatefulWidget {
   final String productName;
   final String productPrice;
@@ -23,13 +22,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _selectedShipping = 'standar';
   bool _useEcoPoints = false;
 
-  // Harga pengiriman
   static const int _shippingStandar = 15000;
   static const int _shippingEkspres = 35000;
   static const int _ecoPointsValue = 12500;
   static const int _ecoPointsCount = 1250;
 
-  // Parse harga produk dari string "Rp 45.000" → int
   int get _productPriceInt {
     final clean = widget.productPrice
         .replaceAll('Rp', '')
@@ -430,7 +427,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         const SizedBox(height: 12),
 
-        // E-Wallet
         GestureDetector(
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -670,8 +666,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx); // tutup dialog konfirmasi
-              // Navigasi ke halaman Payment Success
+              Navigator.pop(ctx);
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => PaymentSuccessScreen(

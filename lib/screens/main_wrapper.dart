@@ -16,7 +16,6 @@ class MainWrapper extends StatefulWidget {
 class _MainWrapperState extends State<MainWrapper> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Index aktif: 0=Home, 1=Market, 3=Activity, 4=Profile
   int _currentIndex = 0;
 
   List<Widget> get _pages => [
@@ -51,9 +50,6 @@ class _MainWrapperState extends State<MainWrapper> {
       key: _scaffoldKey,
       backgroundColor: const Color(0xFF0D1F0F),
 
-      // Drawer menerima callback navigasi tab supaya
-      // saat user pilih "Profil Saya" dari drawer,
-      // bottom navbar tetap tampil (tidak hilang)
       drawer: AppDrawer(onNavigateToTab: _onNavTap),
 
       body: IndexedStack(index: _currentIndex, children: _pages),

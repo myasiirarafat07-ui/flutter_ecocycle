@@ -384,19 +384,27 @@ class _ConsultationChatScreenState extends State<ConsultationChatScreen> {
                 itemCount: consultationQuickPrompts.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 10),
                 itemBuilder: (_, index) => GestureDetector(
-                  onTap: () =>
-                      _sendMessage(consultationQuickPrompts[index]),
+                  onTap: () => _sendMessage(consultationQuickPrompts[index]),
                   child: Container(
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A3B1A),
                       borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: const Color(0xFF2E5C2E), width: 1),
+                      border: Border.all(
+                        color: const Color(0xFF2E5C2E),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       consultationQuickPrompts[index],
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),

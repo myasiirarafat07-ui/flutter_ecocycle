@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
-// MODEL TRANSAKSI
 enum TipeTransaksi { penjualan, pembelian, penukaran, bonus }
 
 class ItemTransaksi {
@@ -24,7 +23,6 @@ class ItemTransaksi {
   });
 }
 
-// TRANSACTION HISTORY SCREEN
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
 

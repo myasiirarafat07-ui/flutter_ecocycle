@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-// APP TEXT FIELD — reusable di login, register, dan screen lain
 class AppTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
@@ -57,7 +56,6 @@ class AppTextField extends StatelessWidget {
   }
 }
 
-// LABELED FIELD — reusable wrapper label + field
 class LabeledField extends StatelessWidget {
   final String label;
   final Widget child;

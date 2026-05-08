@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../main_wrapper.dart';
 
-// PaymentSuccessScreen
 class OrderDetailScreen extends StatelessWidget {
   final String orderId;
   final String totalAmount;
@@ -247,7 +246,6 @@ class OrderDetailScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Icon + line
         Column(
           children: [
             Container(

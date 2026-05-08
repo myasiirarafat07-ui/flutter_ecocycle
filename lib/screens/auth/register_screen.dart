@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
+import '../../services/auth_api_service.dart';
 import '../../widgets/app_text_field.dart';
 import '../main_wrapper.dart';
 
@@ -16,18 +17,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authApi = AuthApiService();
 
   bool _obscurePassword = true;
   bool _agreeToTerms = false;
   bool _isLoading = false;
 
   String _selectedUserType = 'Individual';
-  final List<String> _userTypes = [
-    'Individual',
-    'Petani',
-    'Bisnis',
-    'Organisasi',
-  ];
+  final List<String> _userTypes = ['Individual', 'Petani', 'Bisnis'];
 
   @override
   void dispose() {
@@ -39,6 +36,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text;
+
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -48,9 +50,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       return;
     }
-    if (_nameController.text.trim().isEmpty ||
-        _emailController.text.trim().isEmpty ||
-        _passwordController.text.isEmpty) {
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Harap lengkapi semua kolom yang wajib diisi'),
@@ -60,25 +61,82 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    if (name.length < 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nama minimal 3 karakter'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Format email tidak valid'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kata sandi minimal 6 karakter'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
 
-    // Simpan data user ke provider
-    context.read<UserProvider>().registerAs(
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      phone: _phoneController.text.trim(),
-      userType: _selectedUserType,
-    );
+    try {
+      final result = await _authApi.register(
+        fullName: name,
+        email: email,
+        phoneNumber: phone,
+        password: password,
+        userType: _selectedUserType,
+      );
 
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const MainWrapper()),
-      (_) => false,
-    );
+      if (!mounted) return;
+
+      context.read<UserProvider>().setAuthenticatedUser(
+        token: result.token,
+        user: result.user,
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainWrapper()),
+        (_) => false,
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tidak bisa terhubung ke server'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email);
   }
 
   void _goToLogin() => Navigator.pop(context);

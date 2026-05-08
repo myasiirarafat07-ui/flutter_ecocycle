@@ -711,10 +711,7 @@ class _SupportOptionCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: Colors.white54,
-                      height: 1.4,
-                    ),
+                    style: const TextStyle(color: Colors.white54, height: 1.4),
                   ),
                 ],
               ),

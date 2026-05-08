@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 
-// PERSONAL INFORMATION SCREEN
-// Menampilkan & memungkinkan edit data pribadi user
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
 
@@ -29,7 +27,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     _phoneController = TextEditingController(text: user.phone);
     _addressController = TextEditingController(text: user.address);
 
-    // Pantau perubahan
     for (final c in [
       _nameController,
       _emailController,

@@ -3,8 +3,6 @@ import '../../constants/app_colors.dart';
 import '../main_wrapper.dart';
 import 'order_detail_screen.dart';
 
-// Ditampilkan setelah user berhasil melakukan pembayaran
-// Menerima: orderId, totalAmount, paymentMethod
 class PaymentSuccessScreen extends StatefulWidget {
   final String orderId;
   final String totalAmount;
@@ -54,7 +52,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
           ),
         );
 
-    // Mulai animasi setelah frame pertama
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.forward();
     });
@@ -274,7 +271,9 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                     style: TextStyle(
                       color: valueColor ?? AppColors.textWhite,
                       fontSize: 14,
-                      fontWeight: valueBold ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: valueBold
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),

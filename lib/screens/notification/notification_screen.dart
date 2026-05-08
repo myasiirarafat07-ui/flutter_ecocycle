@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
-// MODEL NOTIFIKASI
 enum NotifType { pickup, expertReply, article, ecoPoints, communityEvent }
 
 class NotifItem {
@@ -20,7 +19,6 @@ class NotifItem {
   });
 }
 
-// NOTIFICATION SCREEN
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -96,7 +94,6 @@ class _NotificationScreenState extends State<NotificationScreen>
     });
   }
 
-  // Kelompokkan notifikasi berdasarkan waktu
   Map<String, List<NotifItem>> _groupNotifs(List<NotifItem> items) {
     final Map<String, List<NotifItem>> grouped = {};
     for (final item in items) {

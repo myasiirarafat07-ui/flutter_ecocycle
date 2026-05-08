@@ -5,12 +5,7 @@ import '../screens/payment/payment_method_screen.dart';
 import '../screens/support/help_center_screen.dart';
 import '../utils/logout_dialog.dart';
 
-// APP DRAWER
-// Panel samping kiri yang muncul saat:
-// - User swipe dari kiri ke kanan
-// - User tap ikon ☰ di AppBar (HomeScreen)
 class AppDrawer extends StatelessWidget {
-  // Callback untuk navigasi tab di MainWrapper
   final void Function(int index)? onNavigateToTab;
 
   const AppDrawer({super.key, this.onNavigateToTab});
@@ -58,8 +53,6 @@ class AppDrawer extends StatelessWidget {
                     label: 'Profil Saya',
                     onTap: () {
                       Navigator.pop(context);
-                      // Navigasi ke tab Profil (index 4) di MainWrapper
-                      // supaya bottom navbar tetap tampil
                       onNavigateToTab?.call(4);
                     },
                   ),
@@ -178,8 +171,6 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
-
-// SUB-WIDGETS DRAWER
 
 class _DrawerHeader extends StatelessWidget {
   final String initials;

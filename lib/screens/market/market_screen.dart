@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import 'product_detail_screen.dart';
 
-// pencarian, dan grid produk.
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
 
@@ -22,7 +21,6 @@ class _MarketScreenState extends State<MarketScreen> {
     'Pakan Ternak',
   ];
 
-  // Data produk dummy
   final List<_Product> _allProducts = const [
     _Product(
       id: '1',
@@ -460,7 +458,6 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
 
-                  // Rating & terjual
                   Row(
                     children: [
                       const Icon(
@@ -481,7 +478,6 @@ class _ProductCard extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Harga + tombol keranjang
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -523,7 +519,6 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// MODEL PRODUK
 class _Product {
   final String id;
   final String category;
