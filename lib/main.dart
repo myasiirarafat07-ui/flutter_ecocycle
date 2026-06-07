@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/user_provider.dart';
+import 'providers/theme_provider.dart';
+import 'providers/cart_provider.dart';
+import 'providers/wishlist_provider.dart';
+import 'utils/app_theme.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(create: (_) => UserProvider(), child: const MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -14,14 +26,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'EcoCycle',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF0D1F0F),
-        fontFamily: 'Poppins',
-      ),
-      home: const OnboardingScreen(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'EcoCycle',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.themeMode,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: const OnboardingScreen(),
+        );
+      },
     );
   }
 }

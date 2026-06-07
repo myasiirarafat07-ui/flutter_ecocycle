@@ -18,7 +18,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -128,15 +128,15 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+            icon: Icon(Icons.arrow_back, color: context.textColor, size: 24),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Pengaturan Pembayaran',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
               ),
@@ -158,12 +158,12 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
       children: [
         Row(
           children: [
-            Icon(ikon, color: AppColors.primaryLight, size: 18),
+            Icon(ikon, color: AppColors.primary, size: 18),
             const SizedBox(width: 8),
             Text(
               judul,
-              style: const TextStyle(
-                color: AppColors.textWhite,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -173,7 +173,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.bgCard,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(children: anak),
@@ -198,8 +198,8 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.textColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -207,7 +207,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                 const SizedBox(height: 3),
                 Text(
                   deskripsi,
-                  style: const TextStyle(color: Colors.white38, fontSize: 12),
+                  style: TextStyle(color: context.mutedColor, fontSize: 12),
                 ),
               ],
             ),
@@ -215,10 +215,10 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
           Switch(
             value: nilai,
             onChanged: onUbah,
-            activeColor: AppColors.primaryLight,
+            activeColor: AppColors.primary,
             activeTrackColor: AppColors.primary.withOpacity(0.5),
-            inactiveThumbColor: Colors.white38,
-            inactiveTrackColor: Colors.white12,
+            inactiveThumbColor: context.mutedColor,
+            inactiveTrackColor: context.dividerColor,
           ),
         ],
       ),
@@ -231,7 +231,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     required VoidCallback onTap,
     bool warnaMerah = false,
   }) {
-    final warna = warnaMerah ? AppColors.danger : Colors.white;
+    final warna = warnaMerah ? AppColors.danger : context.textColor;
     return GestureDetector(
       onTap: onTap,
       child: Padding(
@@ -240,7 +240,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
           children: [
             Icon(
               ikon,
-              color: warnaMerah ? AppColors.danger : AppColors.primaryLight,
+              color: warnaMerah ? AppColors.danger : AppColors.primary,
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -258,7 +258,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
               Icons.chevron_right,
               color: warnaMerah
                   ? AppColors.danger.withOpacity(0.6)
-                  : Colors.white24,
+                  : context.dividerColor,
               size: 20,
             ),
           ],
@@ -281,20 +281,20 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCard,
+        backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Hapus Semua Metode',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: context.textColor),
         ),
-        content: const Text(
+        content: Text(
           'Tindakan ini akan menghapus semua metode pembayaran tersimpan. Lanjutkan?',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: context.mutedColor),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white54)),
+            child: Text('Batal', style: TextStyle(color: context.mutedColor)),
           ),
           TextButton(
             onPressed: () {

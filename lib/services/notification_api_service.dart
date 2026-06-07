@@ -1,0 +1,39 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../models/notification_model.dart';
+
+class NotificationApiService {
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:3000',
+  );
+
+  Map<String, String> _headers(String token) => {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+  Future<List<AppNotification>> list(String token) async {
+    final r = await http.get(Uri.parse('$baseUrl/api/notifications'),
+        headers: _headers(token));
+    if (r.statusCode != 200) {
+      throw Exception('Gagal memuat notifikasi');
+    }
+    final data = (jsonDecode(r.body) as Map)['data'] as List<dynamic>?;
+    return (data ?? [])
+        .map((e) => AppNotification.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> markRead(String token, int id) async {
+    await http.put(Uri.parse('$baseUrl/api/notifications/$id/read'),
+        headers: _headers(token));
+  }
+
+  Future<void> markAllRead(String token) async {
+    await http.put(Uri.parse('$baseUrl/api/notifications/read-all'),
+        headers: _headers(token));
+  }
+}

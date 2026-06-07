@@ -1,6 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../constants/app_colors.dart';
+import '../../models/product_model.dart';
+import '../../providers/cart_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../services/product_api_service.dart';
+import '../cart/cart_screen.dart';
 import 'product_detail_screen.dart';
+
+const List<String> kProductCategories = [
+  'Semua',
+  'Pupuk & Kompos',
+  'Karya Daur Ulang',
+];
+
+const Map<String, String> kSortOptions = {
+  'terbaru': 'Terbaru',
+  'termurah': 'Harga Termurah',
+  'termahal': 'Harga Termahal',
+  'terlaris': 'Terlaris',
+};
 
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
@@ -10,116 +30,18 @@ class MarketScreen extends StatefulWidget {
 }
 
 class _MarketScreenState extends State<MarketScreen> {
+  final ProductApiService _api = ProductApiService();
   final TextEditingController _searchController = TextEditingController();
+
   String _selectedCategory = 'Semua';
+  String _sort = 'terbaru';
+  late Future<List<Product>> _future;
 
-  final List<String> _categories = [
-    'Semua',
-    'Limbah pertanian',
-    'Limbah daur ulang',
-    'Pupuk & Kompos',
-    'Pakan Ternak',
-  ];
-
-  final List<_Product> _allProducts = const [
-    _Product(
-      id: '1',
-      category: 'Pupuk & Kompos',
-      categoryLabel: 'PUPUK ORGANIK',
-      name: 'Pupuk Kompos Premium',
-      rating: 4.9,
-      sold: 120,
-      price: 'Rp 45.000',
-      imageUrl:
-          'https://images.unsplash.com/photo-1611735341450-74d61e660ad2?w=400',
-      isFavorite: false,
-    ),
-    _Product(
-      id: '2',
-      category: 'Pakan Ternak',
-      categoryLabel: 'PAKAN TERNAK',
-      name: 'Pelet Organik Ayam',
-      rating: 4.8,
-      sold: 85,
-      price: 'Rp 120.000',
-      imageUrl:
-          'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
-      isFavorite: false,
-    ),
-    _Product(
-      id: '3',
-      category: 'Limbah pertanian',
-      categoryLabel: 'LIMBAH MENTAH',
-      name: 'Ampas Kopi Bekas',
-      rating: 4.7,
-      sold: 240,
-      price: 'Rp 5.000 /kg',
-      imageUrl:
-          'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?w=400',
-      isFavorite: false,
-    ),
-    _Product(
-      id: '4',
-      category: 'Limbah pertanian',
-      categoryLabel: 'PRODUK DAUR ULANG',
-      name: 'Jerami',
-      rating: 5.0,
-      sold: 54,
-      price: 'Rp 20.000 /kg',
-      imageUrl:
-          'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400',
-      isFavorite: false,
-    ),
-    _Product(
-      id: '5',
-      category: 'Limbah daur ulang',
-      categoryLabel: 'LIMBAH DAUR ULANG',
-      name: 'Botol Plastik PET',
-      rating: 4.5,
-      sold: 320,
-      price: 'Rp 2.500 /kg',
-      imageUrl:
-          'https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=400',
-      isFavorite: false,
-    ),
-    _Product(
-      id: '6',
-      category: 'Pupuk & Kompos',
-      categoryLabel: 'PUPUK ORGANIK',
-      name: 'Pupuk Kandang Sapi',
-      rating: 4.6,
-      sold: 98,
-      price: 'Rp 35.000',
-      imageUrl:
-          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
-      isFavorite: false,
-    ),
-  ];
-
-  List<_Product> _favorites = [];
-
-  List<_Product> get _filteredProducts {
-    final query = _searchController.text.toLowerCase();
-    return _allProducts.where((p) {
-      final matchCategory =
-          _selectedCategory == 'Semua' || p.category == _selectedCategory;
-      final matchSearch = query.isEmpty || p.name.toLowerCase().contains(query);
-      return matchCategory && matchSearch;
-    }).toList();
+  @override
+  void initState() {
+    super.initState();
+    _future = _load();
   }
-
-  void _toggleFavorite(_Product product) {
-    setState(() {
-      if (_favorites.any((p) => p.id == product.id)) {
-        _favorites.removeWhere((p) => p.id == product.id);
-      } else {
-        _favorites.add(product);
-      }
-    });
-  }
-
-  bool _isFavorite(_Product product) =>
-      _favorites.any((p) => p.id == product.id);
 
   @override
   void dispose() {
@@ -127,18 +49,64 @@ class _MarketScreenState extends State<MarketScreen> {
     super.dispose();
   }
 
+  Future<List<Product>> _load() {
+    return _api.fetchProducts(
+      category: _selectedCategory,
+      search: _searchController.text.trim(),
+      sort: _sort,
+      token: context.read<UserProvider>().token,
+    );
+  }
+
+  void _reload() {
+    setState(() => _future = _load());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
             _buildSearchBar(),
             _buildCategoryChips(),
-            _buildSectionTitle(),
-            Expanded(child: _buildProductGrid()),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  _reload();
+                  await _future;
+                },
+                child: FutureBuilder<List<Product>>(
+                  future: _future,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return _buildMessage(
+                        Icons.cloud_off,
+                        'Gagal memuat produk.\n${snapshot.error}',
+                        showRetry: true,
+                      );
+                    }
+                    final products = snapshot.data ?? [];
+                    if (products.isEmpty) {
+                      return _buildMessage(
+                        Icons.inventory_2_outlined,
+                        'Belum ada produk.',
+                      );
+                    }
+                    return _buildGrid(products);
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -150,43 +118,70 @@ class _MarketScreenState extends State<MarketScreen> {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
         children: [
-          Container(
-            child: Image.asset(
-              'assets/logo/ecocycle_logo.png',
-              width: 20,
-              height: 20,
-              fit: BoxFit.contain,
-            ),
+          Image.asset(
+            'assets/logo/ecocycle_logo.png',
+            width: 20,
+            height: 20,
+            fit: BoxFit.contain,
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               'Eco-Market',
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Keranjang belanja segera hadir!'),
-                  backgroundColor: AppColors.primary,
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-            icon: const Icon(
-              Icons.shopping_cart_outlined,
-              color: Colors.white70,
-              size: 26,
-            ),
+            tooltip: 'Urutkan',
+            onPressed: _showSortSheet,
+            icon: Icon(Icons.sort, color: context.textColor, size: 24),
           ),
+          _buildCartIcon(),
         ],
       ),
+    );
+  }
+
+  Widget _buildCartIcon() {
+    final count = context.watch<CartProvider>().totalCount;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          tooltip: 'Keranjang',
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CartScreen()),
+          ),
+          icon: Icon(
+            Icons.shopping_cart_outlined,
+            color: context.textColor,
+            size: 24,
+          ),
+        ),
+        if (count > 0)
+          Positioned(
+            right: 4,
+            top: 4,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: AppColors.danger,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Text(
+                '$count',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 10),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -195,19 +190,26 @@ class _MarketScreenState extends State<MarketScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.bgCard,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
         ),
         child: TextField(
           controller: _searchController,
-          onChanged: (_) => setState(() {}),
-          style: const TextStyle(color: AppColors.textWhite, fontSize: 14),
-          decoration: const InputDecoration(
-            hintText: 'Cari pupuk, pakan, atau limbah...',
-            hintStyle: TextStyle(color: Colors.white38, fontSize: 14),
-            prefixIcon: Icon(Icons.search, color: Colors.white38, size: 22),
+          onSubmitted: (_) => _reload(),
+          style: TextStyle(color: context.textColor, fontSize: 14),
+          decoration: InputDecoration(
+            hintText: 'Cari pupuk atau karya daur ulang...',
+            hintStyle: TextStyle(color: context.mutedColor, fontSize: 14),
+            prefixIcon: Icon(Icons.search, color: context.mutedColor, size: 22),
+            suffixIcon: IconButton(
+              icon: Icon(Icons.arrow_forward, color: context.mutedColor, size: 20),
+              onPressed: _reload,
+            ),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
         ),
       ),
@@ -220,31 +222,32 @@ class _MarketScreenState extends State<MarketScreen> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-        itemCount: _categories.length,
+        itemCount: kProductCategories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
-          final cat = _categories[i];
+          final cat = kProductCategories[i];
           final isSelected = _selectedCategory == cat;
           return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = cat),
+            onTap: () {
+              setState(() => _selectedCategory = cat);
+              _reload();
+            },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 18),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.bgCard,
-                borderRadius: BorderRadius.circular(100), // capsule
+                color: isSelected ? AppColors.primary : context.surfaceColor,
+                borderRadius: BorderRadius.circular(100),
                 border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFF2E5C2E),
+                  color: isSelected ? AppColors.primary : context.dividerColor,
                   width: 1,
                 ),
               ),
               child: Text(
                 cat,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white60,
+                  color: isSelected ? Colors.white : context.mutedColor,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
@@ -256,92 +259,89 @@ class _MarketScreenState extends State<MarketScreen> {
     );
   }
 
-  Widget _buildSectionTitle() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Produk Terbaru',
-            style: TextStyle(
-              color: AppColors.textWhite,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+  Widget _buildGrid(List<Product> products) {
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 0.66,
+      ),
+      itemCount: products.length,
+      itemBuilder: (_, i) => _ProductCard(
+        product: products[i],
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProductDetailScreen(product: products[i]),
             ),
-          ),
-          GestureDetector(
-            onTap: () {},
-            child: const Text(
-              'Lihat Semua',
-              style: TextStyle(
-                color: AppColors.primaryLight,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildProductGrid() {
-    final products = _filteredProducts;
-
-    if (products.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.search_off, color: Colors.white24, size: 56),
-            SizedBox(height: 12),
-            Text(
-              'Produk tidak ditemukan',
-              style: TextStyle(color: Colors.white38, fontSize: 15),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.68,
-      ),
-      itemCount: products.length,
-      itemBuilder: (_, i) => GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetailScreen(
-              id: products[i].id,
-              name: products[i].name,
-              categoryLabel: products[i].categoryLabel,
-              rating: products[i].rating,
-              sold: products[i].sold,
-              price: products[i].price,
-              imageUrl: products[i].imageUrl,
-            ),
+  Widget _buildMessage(IconData icon, String text, {bool showRetry = false}) {
+    return ListView(
+      children: [
+        const SizedBox(height: 120),
+        Icon(icon, color: context.mutedColor, size: 56),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.mutedColor, fontSize: 15),
           ),
         ),
-        child: _ProductCard(
-          product: products[i],
-          isFavorite: _isFavorite(products[i]),
-          onFavorite: () => _toggleFavorite(products[i]),
-          onAddToCart: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${products[i].name} ditambahkan ke keranjang'),
-                backgroundColor: AppColors.primary,
-                duration: const Duration(seconds: 1),
+        if (showRetry) ...[
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton(
+              onPressed: _reload,
+              child: const Text(
+                'Coba Lagi',
+                style: TextStyle(color: AppColors.primary),
               ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showSortSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: kSortOptions.entries.map((e) {
+            final selected = _sort == e.key;
+            return ListTile(
+              title: Text(
+                e.value,
+                style: TextStyle(
+                  color: selected ? AppColors.primary : context.textColor,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              trailing: selected
+                  ? const Icon(Icons.check, color: AppColors.primary)
+                  : null,
+              onTap: () {
+                setState(() => _sort = e.key);
+                Navigator.pop(context);
+                _reload();
+              },
             );
-          },
+          }).toList(),
         ),
       ),
     );
@@ -349,196 +349,101 @@ class _MarketScreenState extends State<MarketScreen> {
 }
 
 class _ProductCard extends StatelessWidget {
-  final _Product product;
-  final bool isFavorite;
-  final VoidCallback onFavorite;
-  final VoidCallback onAddToCart;
+  final Product product;
+  final VoidCallback onTap;
 
-  const _ProductCard({
-    required this.product,
-    required this.isFavorite,
-    required this.onFavorite,
-    required this.onAddToCart,
-  });
+  const _ProductCard({required this.product, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-                child: Image.network(
-                  product.imageUrl,
-                  height: 140,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 140,
-                    color: const Color(0xFF1E4D1E),
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: Colors.white24,
-                      size: 40,
-                    ),
-                  ),
-                  loadingBuilder: (_, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      height: 140,
-                      color: const Color(0xFF1E4D1E),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryLight,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: onFavorite,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.35),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.redAccent : Colors.white,
-                      size: 17,
-                    ),
+              child: Image.network(
+                product.imageUrl,
+                height: 130,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: 130,
+                  color: context.surfaceAltColor,
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: context.mutedColor,
+                    size: 40,
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.categoryLabel,
-                    style: const TextStyle(
-                      color: AppColors.primaryLight,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-
-                  Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textWhite,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        color: Color(0xFFFFC107),
-                        size: 13,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        '${product.rating} (${product.sold} terjual)',
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const Spacer(),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          product.price,
-                          style: const TextStyle(
-                            color: AppColors.primaryLight,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: onAddToCart,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          child: const Icon(
-                            Icons.shopping_cart_outlined,
-                            color: Colors.white,
-                            size: 17,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.category.toUpperCase(),
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: context.textColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: AppColors.warning, size: 13),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${product.rating} (${product.sold} terjual)',
+                          style: TextStyle(
+                            color: context.mutedColor,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Text(
+                      product.formattedPrice,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-}
-
-class _Product {
-  final String id;
-  final String category;
-  final String categoryLabel;
-  final String name;
-  final double rating;
-  final int sold;
-  final String price;
-  final String imageUrl;
-  final bool isFavorite;
-
-  const _Product({
-    required this.id,
-    required this.category,
-    required this.categoryLabel,
-    required this.name,
-    required this.rating,
-    required this.sold,
-    required this.price,
-    required this.imageUrl,
-    required this.isFavorite,
-  });
 }

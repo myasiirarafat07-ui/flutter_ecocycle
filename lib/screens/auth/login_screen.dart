@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../services/auth_api_service.dart';
 import '../../widgets/app_text_field.dart';
 import '../main_wrapper.dart';
@@ -62,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
         token: result.token,
         user: result.user,
       );
+      context.read<CartProvider>().load(result.token);
 
       Navigator.pushReplacement(
         context,
@@ -101,13 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
     const SnackBar(content: Text('Fitur lupa password segera hadir')),
   );
 
-  void _loginWithGoogle() {}
-  void _loginWithApple() {}
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -136,60 +135,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     _buildPasswordField(),
                     const SizedBox(height: 24),
                     _buildLoginButton(),
-                    const SizedBox(height: 24),
-                    const Row(
-                      children: [
-                        Expanded(child: Divider(color: Colors.white24)),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 14),
-                          child: Text(
-                            'Atau masuk dengan',
-                            style: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        Expanded(child: Divider(color: Colors.white24)),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _SocialButton(
-                            icon: Image.asset(
-                              'assets/logo/google_logo.png',
-                              width: 22,
-                              height: 22,
-                            ),
-                            label: 'Google',
-                            onTap: _loginWithGoogle,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _SocialButton(
-                            icon: Image.asset(
-                              'assets/logo/apple_logo.png',
-                              width: 25,
-                              height: 25,
-                            ),
-                            label: 'Apple',
-                            onTap: _loginWithApple,
-                          ),
-                        ),
-                      ],
-                    ),
                     const SizedBox(height: 28),
                     Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             "Tidak memiliki akun? ",
                             style: TextStyle(
-                              color: Colors.white54,
+                              color: context.mutedColor,
                               fontSize: 14,
                             ),
                           ),
@@ -198,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: const Text(
                               'Daftar',
                               style: TextStyle(
-                                color: AppColors.primaryLight,
+                                color: AppColors.primary,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -208,10 +162,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Center(
+                    Center(
                       child: Text(
                         '© 2026 EcoCycle. All rights reserved.',
-                        style: TextStyle(color: Colors.white24, fontSize: 12),
+                        style: TextStyle(color: context.mutedColor, fontSize: 12),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -234,12 +188,12 @@ class _LoginScreenState extends State<LoginScreen> {
           height: 30,
           child: Image.asset('assets/logo/ecocycle_logo.png'),
         ),
-        const Expanded(
+        Expanded(
           child: Text(
             'EcoCycle',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: AppColors.textWhite,
+              color: context.textColor,
               fontSize: 17,
               fontWeight: FontWeight.bold,
             ),
@@ -255,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
     margin: const EdgeInsets.symmetric(horizontal: 20),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(16),
-      color: AppColors.bgCard,
+      color: context.surfaceColor,
     ),
     clipBehavior: Clip.hardEdge,
     child: Image.asset(
@@ -266,21 +220,21 @@ class _LoginScreenState extends State<LoginScreen> {
     ),
   );
 
-  Widget _buildHeading() => const Column(
+  Widget _buildHeading() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
         'Selamat Datang Kembali!',
         style: TextStyle(
-          color: AppColors.textWhite,
+          color: context.textColor,
           fontSize: 28,
           fontWeight: FontWeight.bold,
         ),
       ),
-      SizedBox(height: 6),
+      const SizedBox(height: 6),
       Text(
         "Mari lanjutkan perjalananmu menuju dunia yang lebih hijau",
-        style: TextStyle(color: Colors.white54, fontSize: 14, height: 1.4),
+        style: TextStyle(color: context.mutedColor, fontSize: 14, height: 1.4),
       ),
     ],
   );
@@ -291,16 +245,16 @@ class _LoginScreenState extends State<LoginScreen> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             'Kata Sandi',
-            style: TextStyle(color: AppColors.textWhite, fontSize: 14),
+            style: TextStyle(color: context.textColor, fontSize: 14),
           ),
           GestureDetector(
             onTap: _handleForgotPassword,
             child: const Text(
               'Lupa Kata Sandi?',
               style: TextStyle(
-                color: AppColors.primaryLight,
+                color: AppColors.primary,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -345,41 +299,6 @@ class _LoginScreenState extends State<LoginScreen> {
               'Masuk',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-    ),
-  );
-}
-
-class _SocialButton extends StatelessWidget {
-  final Widget icon;
-  final String label;
-  final VoidCallback onTap;
-  const _SocialButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          icon,
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
-          ),
-        ],
-      ),
     ),
   );
 }

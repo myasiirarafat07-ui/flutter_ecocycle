@@ -53,12 +53,6 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     ),
   ];
 
-  final int _ecoPoints = 2450;
-  final int _pointsNextReward = 150;
-  final int _currentXP = 2450;
-  final int _maxXP = 2600;
-  final String _level = 'ECO WARRIOR';
-
   void _setPrimary(String id) {
     setState(() {
       for (final m in _methods) {
@@ -71,20 +65,20 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCard,
+        backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Hapus Metode',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: context.textColor),
         ),
-        content: const Text(
+        content: Text(
           'Apakah kamu yakin ingin menghapus metode pembayaran ini?',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: context.mutedColor),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white54)),
+            child: Text('Batal', style: TextStyle(color: context.mutedColor)),
           ),
           TextButton(
             onPressed: () {
@@ -104,7 +98,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   void _tambahMetode() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgCard,
+      backgroundColor: context.surfaceColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -120,7 +114,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -132,8 +126,6 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
-                    _buildEcoPointsSection(),
-                    const SizedBox(height: 28),
                     _buildSavedMethodsSection(),
                     const SizedBox(height: 28),
                     _buildQuickActions(context),
@@ -154,15 +146,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+            icon: Icon(Icons.arrow_back, color: context.textColor, size: 24),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Metode Pembayaran',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
               ),
@@ -174,132 +166,6 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  Widget _buildEcoPointsSection() {
-    final double progress = _currentXP / _maxXP;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Saldo Eco Points',
-          style: TextStyle(
-            color: AppColors.textWhite,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.bgCard,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.primary.withOpacity(0.4),
-              width: 1,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.eco,
-                    color: AppColors.primaryLight,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    '${_formatAngka(_ecoPoints)} Poin',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '$_pointsNextReward poin lagi untuk reward berikutnya',
-                style: const TextStyle(color: Colors.white54, fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Fitur tukar poin segera hadir!'),
-                      backgroundColor: Color(0xFF2E7D32),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'Tukarkan Poin',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'LEVEL: $_level',
-                    style: const TextStyle(
-                      color: AppColors.primaryLight,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  Text(
-                    '${(progress * 100).toInt()}%',
-                    style: const TextStyle(
-                      color: AppColors.primaryLight,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: AppColors.bgDark,
-                  color: AppColors.accent,
-                  minHeight: 8,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '$_currentXP / $_maxXP XP',
-                style: const TextStyle(color: Colors.white38, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSavedMethodsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,10 +173,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Metode Tersimpan',
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -321,14 +187,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 children: [
                   Icon(
                     Icons.add_circle_outline,
-                    color: AppColors.primaryLight,
+                    color: AppColors.primary,
                     size: 18,
                   ),
                   const SizedBox(width: 4),
                   const Text(
                     'Tambah Baru',
                     style: TextStyle(
-                      color: AppColors.primaryLight,
+                      color: AppColors.primary,
                       fontSize: 13,
                     ),
                   ),
@@ -351,7 +217,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.bgCard,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
         border: method.isPrimary
             ? Border.all(color: AppColors.primary.withOpacity(0.6), width: 1)
@@ -363,12 +229,12 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: AppColors.bgDark,
+              color: context.bgColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               _getPaymentIcon(method.tipe),
-              color: AppColors.primaryLight,
+              color: AppColors.primary,
               size: 22,
             ),
           ),
@@ -380,7 +246,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 Text(
                   method.nama,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: context.textColor,
                     fontSize: 15,
                     fontWeight: method.isPrimary
                         ? FontWeight.bold
@@ -390,7 +256,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 const SizedBox(height: 2),
                 Text(
                   method.detail,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: TextStyle(color: context.mutedColor, fontSize: 12),
                 ),
               ],
             ),
@@ -398,17 +264,17 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           if (method.isPrimary)
             const Icon(
               Icons.check_circle,
-              color: AppColors.primaryLight,
+              color: AppColors.primary,
               size: 24,
             )
           else
             PopupMenuButton<String>(
-              icon: const Icon(
+              icon: Icon(
                 Icons.more_vert,
-                color: Colors.white54,
+                color: context.mutedColor,
                 size: 22,
               ),
-              color: AppColors.bgCard,
+              color: context.surfaceColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -417,15 +283,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 if (val == 'hapus') _hapusMetode(method.id);
               },
               itemBuilder: (_) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'utama',
                   child: Row(
                     children: [
-                      Icon(Icons.star_outline, color: Colors.white70, size: 18),
+                      Icon(Icons.star_outline, color: context.mutedColor, size: 18),
                       SizedBox(width: 10),
                       Text(
                         'Jadikan Utama',
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(color: context.textColor, fontSize: 14),
                       ),
                     ],
                   ),
@@ -462,20 +328,20 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 32),
       decoration: BoxDecoration(
-        color: AppColors.bgCard,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
-          const Icon(
+          Icon(
             Icons.credit_card_off_outlined,
-            color: Colors.white24,
+            color: context.dividerColor,
             size: 48,
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Belum ada metode pembayaran',
-            style: TextStyle(color: Colors.white38, fontSize: 14),
+            style: TextStyle(color: context.mutedColor, fontSize: 14),
           ),
           const SizedBox(height: 16),
           GestureDetector(
@@ -504,10 +370,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Aksi Cepat',
           style: TextStyle(
-            color: AppColors.textWhite,
+            color: context.textColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -556,18 +422,18 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
         decoration: BoxDecoration(
-          color: AppColors.bgCard,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
           children: [
-            Icon(icon, color: AppColors.primaryLight, size: 32),
+            Icon(icon, color: AppColors.primary, size: 32),
             const SizedBox(height: 10),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 height: 1.4,
@@ -590,12 +456,6 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     }
   }
 
-  String _formatAngka(int angka) {
-    return angka.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    );
-  }
 }
 
 class _TambahMetodeSheet extends StatefulWidget {
@@ -641,7 +501,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: context.dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -658,10 +518,10 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Tambah Metode Baru',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.textColor,
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
@@ -670,7 +530,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
                   const Text(
                     'Kartu',
                     style: TextStyle(
-                      color: AppColors.primaryLight,
+                      color: AppColors.primary,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.8,
@@ -682,7 +542,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
                   const Text(
                     'E-Wallet',
                     style: TextStyle(
-                      color: AppColors.primaryLight,
+                      color: AppColors.primary,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.8,
@@ -697,7 +557,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
                       onPressed: _terpilih == null ? null : _konfirmasi,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        disabledBackgroundColor: AppColors.bgCard,
+                        disabledBackgroundColor: context.surfaceColor,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -732,10 +592,10 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
         decoration: BoxDecoration(
           color: dipilih
               ? AppColors.primary.withOpacity(0.3)
-              : AppColors.bgDark,
+              : context.bgColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: dipilih ? AppColors.primaryLight : Colors.white12,
+            color: dipilih ? AppColors.primary : context.dividerColor,
             width: 1,
           ),
         ),
@@ -745,14 +605,14 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
               opsi['tipe'] == PaymentType.eWallet
                   ? Icons.account_balance_wallet_outlined
                   : Icons.credit_card,
-              color: dipilih ? AppColors.primaryLight : Colors.white54,
+              color: dipilih ? AppColors.primary : context.mutedColor,
               size: 20,
             ),
             const SizedBox(width: 12),
             Text(
               opsi['nama'],
               style: TextStyle(
-                color: dipilih ? Colors.white : Colors.white70,
+                color: dipilih ? Colors.white : context.mutedColor,
                 fontSize: 14,
                 fontWeight: dipilih ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -761,7 +621,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
             if (dipilih)
               const Icon(
                 Icons.check_circle,
-                color: AppColors.primaryLight,
+                color: AppColors.primary,
                 size: 18,
               ),
           ],

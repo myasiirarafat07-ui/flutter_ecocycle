@@ -17,9 +17,9 @@ class AppBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 70,
-      decoration: const BoxDecoration(
-        color: AppColors.bgDark,
-        border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        border: Border(top: BorderSide(color: context.dividerColor, width: 1)),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -36,17 +36,17 @@ class AppBottomNavBar extends StatelessWidget {
                 onTap: () => onTap(0),
               ),
               _NavItem(
-                icon: Icons.search_outlined,
-                activeIcon: Icons.search,
-                label: 'Pencarian',
+                icon: Icons.storefront_outlined,
+                activeIcon: Icons.storefront,
+                label: 'Pasar',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
               const SizedBox(width: 60),
               _NavItem(
-                icon: Icons.history_outlined,
-                activeIcon: Icons.history,
-                label: 'Aktivitas',
+                icon: Icons.receipt_long_outlined,
+                activeIcon: Icons.receipt_long,
+                label: 'Pesanan',
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),
@@ -104,7 +104,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? AppColors.primaryLight : AppColors.textSubtle;
+    final color = isActive ? AppColors.primary : context.mutedColor;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,

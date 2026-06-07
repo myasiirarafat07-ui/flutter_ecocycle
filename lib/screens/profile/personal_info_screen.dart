@@ -107,12 +107,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCard,
+        backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(
           'Edit $title',
-          style: const TextStyle(
-            color: AppColors.textWhite,
+          style: TextStyle(
+            color: context.textColor,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -121,17 +121,17 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFF0D2A0D),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white12),
+            border: Border.all(color: context.dividerColor),
           ),
           child: TextField(
             controller: tempController,
             keyboardType: keyboardType,
             maxLines: maxLines,
             autofocus: true,
-            style: const TextStyle(color: AppColors.textWhite, fontSize: 15),
+            style: TextStyle(color: context.textColor, fontSize: 15),
             decoration: InputDecoration(
               hintText: 'Masukkan $title',
-              hintStyle: const TextStyle(color: Colors.white30),
+              hintStyle: TextStyle(color: context.mutedColor),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -143,7 +143,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white54)),
+            child: Text('Batal', style: TextStyle(color: context.mutedColor)),
           ),
           TextButton(
             onPressed: () {
@@ -153,7 +153,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             child: Text(
               'Simpan',
               style: TextStyle(
-                color: AppColors.primaryLight,
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -168,7 +168,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     final user = context.watch<UserProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -255,19 +255,19 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back,
-              color: AppColors.textWhite,
+              color: context.textColor,
               size: 24,
             ),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Informasi Pribadi',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -288,7 +288,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.primary, width: 3),
-            color: AppColors.bgCard,
+            color: context.surfaceColor,
           ),
           child: ClipOval(
             child: user.name.isNotEmpty
@@ -296,13 +296,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     child: Text(
                       user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.primary,
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   )
-                : const Icon(Icons.person, color: Colors.white54, size: 60),
+                : Icon(Icons.person, color: context.mutedColor, size: 60),
           ),
         ),
         Positioned(
@@ -323,7 +323,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.bgDark, width: 2),
+                border: Border.all(color: context.bgColor, width: 2),
               ),
               child: const Icon(
                 Icons.camera_alt_outlined,
@@ -340,8 +340,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   Widget _buildUserName(UserProvider user) {
     return Text(
       user.name.isEmpty ? 'Pengguna' : user.name,
-      style: const TextStyle(
-        color: AppColors.textWhite,
+      style: TextStyle(
+        color: context.textColor,
         fontSize: 22,
         fontWeight: FontWeight.bold,
       ),
@@ -356,12 +356,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.shield_outlined, color: AppColors.primaryLight, size: 15),
+        Icon(Icons.shield_outlined, color: AppColors.primary, size: 15),
         const SizedBox(width: 5),
         Text(
           badgeLabel,
           style: TextStyle(
-            color: AppColors.primaryLight,
+            color: AppColors.primary,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -375,8 +375,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white38,
+        style: TextStyle(
+          color: context.mutedColor,
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
@@ -394,7 +394,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.bgCard,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -416,7 +416,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 Text(
                   label,
                   style: const TextStyle(
-                    color: AppColors.primaryLight,
+                    color: AppColors.primary,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
@@ -427,8 +427,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   value,
                   style: TextStyle(
                     color: value == 'Belum diisi'
-                        ? Colors.white38
-                        : AppColors.textWhite,
+                        ? context.mutedColor
+                        : context.textColor,
                     fontSize: 15,
                     fontStyle: value == 'Belum diisi'
                         ? FontStyle.italic
@@ -442,9 +442,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             onTap: onEdit,
             child: Container(
               padding: const EdgeInsets.all(8),
-              child: const Icon(
+              child: Icon(
                 Icons.edit_outlined,
-                color: Colors.white38,
+                color: context.mutedColor,
                 size: 20,
               ),
             ),
@@ -463,10 +463,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         child: ElevatedButton.icon(
           onPressed: _hasChanges ? _saveChanges : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _hasChanges ? AppColors.primary : AppColors.bgCard,
+            backgroundColor: _hasChanges ? AppColors.primary : context.surfaceColor,
             foregroundColor: Colors.white,
-            disabledBackgroundColor: AppColors.bgCard,
-            disabledForegroundColor: Colors.white38,
+            disabledBackgroundColor: context.surfaceColor,
+            disabledForegroundColor: context.mutedColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),

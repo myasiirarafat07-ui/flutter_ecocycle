@@ -82,7 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -102,7 +102,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: const Text(
                     'Lewati',
                     style: TextStyle(
-                      color: AppColors.primaryLight,
+                      color: AppColors.primary,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -132,18 +132,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           GestureDetector(
             onTap: _goToPrev,
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back,
-              color: AppColors.textWhite,
+              color: context.textColor,
               size: 24,
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'EcoCycle',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
               ),
@@ -158,7 +158,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildBottomSection() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-      color: AppColors.bgDark,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -173,8 +173,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 8,
                 decoration: BoxDecoration(
                   color: i == _currentPage
-                      ? AppColors.primaryLight
-                      : Colors.white24,
+                      ? AppColors.primary
+                      : context.dividerColor,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -220,7 +220,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: OutlinedButton(
                 onPressed: _goToPrev,
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white24),
+                  side: BorderSide(color: context.dividerColor),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -228,7 +228,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: const Text(
                   'Kembali',
                   style: TextStyle(
-                    color: AppColors.primaryLight,
+                    color: AppColors.primary,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -269,8 +269,8 @@ class _OnboardingPage extends StatelessWidget {
           Text(
             data.title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.textWhite,
+            style: TextStyle(
+              color: context.textColor,
               fontSize: 26,
               fontWeight: FontWeight.bold,
               height: 1.2,
@@ -281,8 +281,8 @@ class _OnboardingPage extends StatelessWidget {
           Text(
             data.description,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: context.mutedColor,
               fontSize: 15,
               height: 1.5,
             ),
@@ -298,16 +298,16 @@ class _PlaceholderImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: AppColors.bgCard,
-      child: const Column(
+      color: Theme.of(context).cardColor,
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.image_outlined, color: Colors.white24, size: 60),
-          SizedBox(height: 12),
+          Icon(Icons.image_outlined, color: context.mutedColor, size: 60),
+          const SizedBox(height: 12),
           Text(
             'Gambar belum ditambahkan',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white24, fontSize: 13),
+            style: TextStyle(color: context.mutedColor, fontSize: 13),
           ),
         ],
       ),

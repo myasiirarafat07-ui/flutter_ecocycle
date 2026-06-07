@@ -23,18 +23,18 @@ class AppTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bgCard,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.dividerColor),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: const TextStyle(color: AppColors.textWhite, fontSize: 15),
+        style: TextStyle(color: context.textColor, fontSize: 15),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white30, fontSize: 15),
+          hintStyle: TextStyle(color: context.mutedColor, fontSize: 15),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -45,7 +45,7 @@ class AppTextField extends StatelessWidget {
                   onTap: onSuffixTap,
                   child: Icon(
                     suffixIcon,
-                    color: AppColors.primaryLight,
+                    color: AppColors.primary,
                     size: 20,
                   ),
                 )
@@ -69,7 +69,7 @@ class LabeledField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppColors.textWhite, fontSize: 14),
+          style: TextStyle(color: context.textColor, fontSize: 14),
         ),
         const SizedBox(height: 8),
         child,

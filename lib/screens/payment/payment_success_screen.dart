@@ -4,13 +4,15 @@ import '../main_wrapper.dart';
 import 'order_detail_screen.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
-  final String orderId;
+  final int orderId;
+  final String orderCode;
   final String totalAmount;
   final String paymentMethod;
 
   const PaymentSuccessScreen({
     super.key,
     required this.orderId,
+    required this.orderCode,
     required this.totalAmount,
     this.paymentMethod = 'EcoWallet',
   });
@@ -66,7 +68,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -102,15 +104,15 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.close, color: AppColors.textWhite, size: 24),
+            icon: Icon(Icons.close, color: context.textColor, size: 24),
             onPressed: () => _goToHome(context),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'PEMBAYARAN BERHASIL',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
@@ -154,12 +156,12 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
       opacity: _fadeAnim,
       child: SlideTransition(
         position: _slideAnim,
-        child: const Column(
+        child: Column(
           children: [
             Text(
               'Terima kasih!',
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
@@ -169,7 +171,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
               'Pesanan Anda telah berhasil\nditempatkan.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white60,
+                color: context.mutedColor,
                 fontSize: 14,
                 height: 1.6,
               ),
@@ -188,10 +190,10 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'DETAIL TRANSAKSI',
               style: TextStyle(
-                color: Colors.white54,
+                color: context.mutedColor,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
@@ -202,21 +204,21 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.bgCard,
+                color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 children: [
                   _buildDetailRow(
                     label: 'ID Pesanan',
-                    value: widget.orderId,
+                    value: widget.orderCode,
                     valueBold: true,
                   ),
                   _buildDivider(),
                   _buildDetailRow(
                     label: 'Jumlah',
                     value: widget.totalAmount,
-                    valueColor: AppColors.primaryLight,
+                    valueColor: AppColors.primary,
                     valueBold: true,
                   ),
                   _buildDivider(),
@@ -248,7 +250,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         children: [
           Text(
             label,
-            style: const TextStyle(color: Colors.white60, fontSize: 14),
+            style: TextStyle(color: context.mutedColor, fontSize: 14),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -259,7 +261,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                 if (icon != null) ...[
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
-                    child: Icon(icon, color: Colors.white70, size: 16),
+                    child: Icon(icon, color: context.mutedColor, size: 16),
                   ),
                   const SizedBox(width: 6),
                 ],
@@ -269,7 +271,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                     textAlign: TextAlign.end,
                     softWrap: true,
                     style: TextStyle(
-                      color: valueColor ?? AppColors.textWhite,
+                      color: valueColor ?? context.textColor,
                       fontSize: 14,
                       fontWeight: valueBold
                           ? FontWeight.bold
@@ -297,7 +299,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.bgCard,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: AppColors.primary.withOpacity(0.4),
@@ -315,19 +317,19 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                 ),
                 child: const Icon(
                   Icons.eco_rounded,
-                  color: AppColors.primaryLight,
+                  color: AppColors.primary,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Dampak Lingkungan',
                       style: TextStyle(
-                        color: AppColors.textWhite,
+                        color: context.textColor,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -336,7 +338,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                     Text(
                       'Anda membantu planet ini dengan memilih siklus yang berkelanjutan.',
                       style: TextStyle(
-                        color: Colors.white60,
+                        color: context.mutedColor,
                         fontSize: 12,
                         height: 1.5,
                       ),
@@ -356,9 +358,9 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
       opacity: _fadeAnim,
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-        decoration: const BoxDecoration(
-          color: AppColors.bgDark,
-          border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
+        decoration: BoxDecoration(
+          color: context.bgColor,
+          border: Border(top: BorderSide(color: context.dividerColor, width: 1)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -372,8 +374,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                     MaterialPageRoute(
                       builder: (_) => OrderDetailScreen(
                         orderId: widget.orderId,
-                        totalAmount: widget.totalAmount,
-                        paymentMethod: widget.paymentMethod,
                       ),
                     ),
                   );
@@ -399,7 +399,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
               child: OutlinedButton(
                 onPressed: () => _goToHome(context),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.textColor,
                   side: const BorderSide(color: Color(0xFF2A4D2A), width: 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),

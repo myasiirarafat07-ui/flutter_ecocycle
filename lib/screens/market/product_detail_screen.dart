@@ -1,151 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../constants/app_colors.dart';
+import '../../models/product_model.dart';
+import '../../providers/cart_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../providers/wishlist_provider.dart';
+import '../../services/product_api_service.dart';
+import '../seller/sell_product_screen.dart';
 import 'checkout_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
-  final String id;
-  final String name;
-  final String categoryLabel;
-  final double rating;
-  final int sold;
-  final String price;
-  final String imageUrl;
+  final Product product;
 
-  const ProductDetailScreen({
-    super.key,
-    required this.id,
-    required this.name,
-    required this.categoryLabel,
-    required this.rating,
-    required this.sold,
-    required this.price,
-    required this.imageUrl,
-  });
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  bool _isFavorite = false;
+  final _api = ProductApiService();
+  late Future<List<Review>> _reviewsFuture;
 
-  static const Map<String, _ProductDetail> _details = {
-    '1': _ProductDetail(
-      sellerName: 'EcoFarm Indonesia',
-      sellerRole: 'Mitra Resmi • Penjual Terverifikasi',
-      description:
-          'Pupuk Kompos Premium kami dibuat dari bahan organik pilihan melalui proses fermentasi alami selama 3 bulan. Kaya akan unsur hara makro dan mikro yang dibutuhkan tanaman. Cocok untuk semua jenis tanaman hortikultura maupun perkebunan.',
-      tags: ['Organik Sertifikasi', 'Bebas Pestisida', 'Ramah Lingkungan'],
-      specs: {
-        'KANDUNGAN N': '2,5%',
-        'KANDUNGAN P': '1,8%',
-        'BERAT BERSIH': '10 kg',
-        'KANDUNGAN K': '1,2%',
-        'JENIS': 'Granular',
-        'PH': '6,5 - 7,0',
-      },
-      ecoPoints: 225,
-      reviewCount: '980',
-    ),
-    '2': _ProductDetail(
-      sellerName: 'EcoLivestock Solutions',
-      sellerRole: 'Mitra Resmi • Penjual Terverifikasi',
-      description:
-          'Pelet Organik Ayam kami adalah pakan premium berkualitas tinggi yang dibuat dari 100% bahan alami. Kami menggunakan proses waste-to-feed unik, mengubah surplus pangan organik menjadi pelet bernutrisi tinggi. Membantu mengurangi dampak lingkungan sekaligus memberikan nutrisi terbaik untuk unggas Anda.',
-      tags: [
-        'Zero Waste Production',
-        'No Synthetic Hormones',
-        'Antibiotic Free',
-      ],
-      specs: {
-        'PROTEIN CONTENT': '18% - 20%',
-        'NET WEIGHT': '5 kg',
-        'VITAMINS': 'A, D3, E, B12',
-        'FEED TYPE': 'Layer Pellet',
-      },
-      ecoPoints: 425,
-      reviewCount: '1.2k',
-    ),
-    '3': _ProductDetail(
-      sellerName: 'KopiNusantara',
-      sellerRole: 'Penjual Terverifikasi',
-      description:
-          'Ampas kopi bekas pilihan dari biji arabika dan robusta premium. Kaya nitrogen, fosfor, dan kalium — sangat ideal sebagai pupuk organik, media tanam jamur, atau campuran kompos. Sudah melalui proses pengeringan sehingga tidak berbau dan tahan lama.',
-      tags: ['Kaya Nitrogen', 'Media Tanam Jamur', 'Pupuk Organik'],
-      specs: {
-        'KANDUNGAN N': '~2%',
-        'BERAT': 'per kg',
-        'KONDISI': 'Kering',
-        'AROMA': 'Kopi Arabika',
-      },
-      ecoPoints: 25,
-      reviewCount: '1.8k',
-    ),
-    '4': _ProductDetail(
-      sellerName: 'PetaniMaju',
-      sellerRole: 'Penjual Terverifikasi',
-      description:
-          'Jerami padi kering berkualitas tinggi dari sawah organik. Cocok untuk pakan ternak, alas kandang, mulsa tanaman, atau bahan baku kerajinan. Bebas pestisida dan sudah dikeringkan dengan sinar matahari langsung.',
-      tags: ['Bebas Pestisida', 'Serbaguna', 'Sawah Organik'],
-      specs: {
-        'KONDISI': 'Kering',
-        'BERAT': 'per kg',
-        'PENGGUNAAN': 'Pakan & Mulsa',
-        'ASAL': 'Sawah Organik',
-      },
-      ecoPoints: 100,
-      reviewCount: '320',
-    ),
-    '5': _ProductDetail(
-      sellerName: 'RecyclePro',
-      sellerRole: 'Penjual Terverifikasi',
-      description:
-          'Botol plastik PET bersih siap daur ulang. Sudah dipilah, dicuci, dan dipress. Cocok untuk industri daur ulang atau pengepul besar. Kontribusi nyata untuk mengurangi sampah plastik di lingkungan.',
-      tags: ['Sudah Dicuci', 'Siap Daur Ulang', 'Dipilah Manual'],
-      specs: {
-        'JENIS': 'PET / Plastik #1',
-        'BERAT': 'per kg',
-        'KONDISI': 'Bersih & Kering',
-        'BENTUK': 'Dipress',
-      },
-      ecoPoints: 13,
-      reviewCount: '2.1k',
-    ),
-    '6': _ProductDetail(
-      sellerName: 'EcoFarm Indonesia',
-      sellerRole: 'Mitra Resmi • Penjual Terverifikasi',
-      description:
-          'Pupuk kandang sapi murni yang sudah matang dan difermentasi. Meningkatkan kesuburan tanah secara alami, memperbaiki struktur tanah, dan menambah populasi mikroorganisme baik. Cocok untuk semua jenis tanaman.',
-      tags: ['Fermentasi Alami', 'Bebas Bau', 'Ramah Lingkungan'],
-      specs: {
-        'KANDUNGAN N': '1,5%',
-        'BERAT BERSIH': '10 kg',
-        'PROSES': 'Fermentasi 2 Bln',
-        'JENIS': 'Granular',
-      },
-      ecoPoints: 175,
-      reviewCount: '760',
-    ),
-  };
+  Product get product => widget.product;
 
-  _ProductDetail get _detail =>
-      _details[widget.id] ??
-      const _ProductDetail(
-        sellerName: 'EcoCycle Seller',
-        sellerRole: 'Penjual Terverifikasi',
-        description: 'Produk berkualitas dari mitra terpercaya EcoCycle.',
-        tags: ['Ramah Lingkungan'],
-        specs: {},
-        ecoPoints: 100,
-        reviewCount: '100',
-      );
+  @override
+  void initState() {
+    super.initState();
+    _reviewsFuture = _api.fetchReviews(product.id);
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.primary,
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final detail = _detail;
-
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: Stack(
         children: [
           CustomScrollView(
@@ -157,23 +56,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitleSection(detail),
+                      _buildTitleSection(context),
                       const SizedBox(height: 20),
-                      _buildSellerCard(detail),
+                      _buildSellerCard(context),
                       const SizedBox(height: 24),
-                      _buildDescription(detail),
+                      _buildDescription(context),
                       const SizedBox(height: 24),
-                      if (detail.specs.isNotEmpty) ...[
-                        _buildSpecifications(detail),
-                        const SizedBox(height: 24),
-                      ],
+                      _buildReviews(context),
                     ],
                   ),
                 ),
               ),
             ],
           ),
-
           Positioned(
             bottom: 0,
             left: 0,
@@ -186,184 +81,134 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildSliverAppBar(BuildContext context) {
+    final isFav = context.watch<WishlistProvider>().isFavorite(product.id);
     return SliverAppBar(
       expandedHeight: 280,
       pinned: true,
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.surfaceColor,
+      foregroundColor: context.textColor,
       leading: GestureDetector(
         onTap: () => Navigator.pop(context),
         child: Container(
           margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.black45,
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
         ),
       ),
-      title: const Text(
+      actions: [
+        if (!product.isMine)
+          GestureDetector(
+            onTap: () => context.read<WishlistProvider>().toggle(product),
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Colors.black45,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isFav ? Icons.favorite : Icons.favorite_border,
+                color: isFav ? Colors.redAccent : Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+      ],
+      title: Text(
         'Detail Produk',
         style: TextStyle(
-          color: AppColors.textWhite,
+          color: context.textColor,
           fontSize: 17,
           fontWeight: FontWeight.bold,
         ),
       ),
       centerTitle: true,
-      actions: [
-        GestureDetector(
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Fitur bagikan segera hadir!'),
-                backgroundColor: AppColors.primary,
-                duration: Duration(seconds: 1),
-              ),
-            );
-          },
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black45,
-              shape: BoxShape.circle,
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(6),
-              child: Icon(Icons.share_outlined, color: Colors.white, size: 20),
-            ),
-          ),
-        ),
-      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Image.network(
-          widget.imageUrl,
+          product.imageUrl,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => Container(
-            color: const Color(0xFF1E4D1E),
-            child: const Icon(
+            color: context.surfaceAltColor,
+            child: Icon(
               Icons.image_not_supported,
-              color: Colors.white24,
+              color: context.mutedColor,
               size: 60,
             ),
           ),
-          loadingBuilder: (_, child, progress) {
-            if (progress == null) return child;
-            return Container(
-              color: const Color(0xFF1E4D1E),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primaryLight,
-                  strokeWidth: 2,
-                ),
-              ),
-            );
-          },
         ),
       ),
     );
   }
 
-  Widget _buildTitleSection(_ProductDetail detail) {
-    return Row(
+  Widget _buildTitleSection(BuildContext context) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.name,
-                style: const TextStyle(
-                  color: AppColors.textWhite,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Color(0xFFFFC107), size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.rating}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '• ${detail.reviewCount} reviews',
-                    style: const TextStyle(color: Colors.white54, fontSize: 13),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '• ${widget.sold} terjual',
-                    style: const TextStyle(color: Colors.white54, fontSize: 13),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-
-              Text(
-                widget.price,
-                style: const TextStyle(
-                  color: AppColors.primaryLight,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              Row(
-                children: [
-                  const Icon(
-                    Icons.eco,
-                    color: AppColors.primaryLight,
-                    size: 15,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Dapatkan ${detail.ecoPoints} Eco Points',
-                    style: const TextStyle(
-                      color: AppColors.primaryLight,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+        Text(
+          product.category.toUpperCase(),
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
           ),
         ),
-
-        GestureDetector(
-          onTap: () => setState(() => _isFavorite = !_isFavorite),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.bgCard,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.redAccent : Colors.white54,
-              size: 20,
-            ),
+        const SizedBox(height: 6),
+        Text(
+          product.name,
+          style: TextStyle(
+            color: context.textColor,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            height: 1.3,
           ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(Icons.star, color: AppColors.warning, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              '${product.rating}',
+              style: TextStyle(
+                color: context.textColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '• ${product.reviewCount} ulasan  •  ${product.sold} terjual',
+              style: TextStyle(color: context.mutedColor, fontSize: 13),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Text(
+          product.formattedPrice,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Stok tersedia: ${product.stock}',
+          style: TextStyle(color: context.mutedColor, fontSize: 13),
         ),
       ],
     );
   }
 
-  Widget _buildSellerCard(_ProductDetail detail) {
+  Widget _buildSellerCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.bgCard,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -371,58 +216,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Container(
             width: 46,
             height: 46,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primary,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.storefront, color: Colors.white, size: 22),
           ),
           const SizedBox(width: 14),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  detail.sellerName,
-                  style: const TextStyle(
-                    color: AppColors.textWhite,
+                  product.sellerName,
+                  style: TextStyle(
+                    color: context.textColor,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  detail.sellerRole,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  'Penjual EcoCycle',
+                  style: TextStyle(color: context.mutedColor, fontSize: 12),
                 ),
               ],
-            ),
-          ),
-
-          OutlinedButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Mengikuti penjual...'),
-                  backgroundColor: AppColors.primary,
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primaryLight,
-              side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text(
-              'Ikuti',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -430,208 +248,266 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildDescription(_ProductDetail detail) {
+  Widget _buildDescription(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Deskripsi',
           style: TextStyle(
-            color: AppColors.textWhite,
+            color: context.textColor,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 10),
         Text(
-          detail.description,
-          style: const TextStyle(
-            color: Colors.white70,
+          product.description.isEmpty
+              ? 'Tidak ada deskripsi.'
+              : product.description,
+          style: TextStyle(
+            color: context.mutedColor,
             fontSize: 14,
             height: 1.6,
           ),
-        ),
-        const SizedBox(height: 14),
-
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: detail.tags
-              .map(
-                (tag) => Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgCard,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFF2E5C2E),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    tag,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ),
-              )
-              .toList(),
         ),
       ],
     );
   }
 
-  Widget _buildSpecifications(_ProductDetail detail) {
-    final entries = detail.specs.entries.toList();
-
+  Widget _buildReviews(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Specifications',
-          style: TextStyle(
-            color: AppColors.textWhite,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Ulasan',
+              style: TextStyle(
+                color: context.textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: _openReviewDialog,
+              icon: const Icon(Icons.edit_outlined,
+                  size: 16, color: AppColors.primary),
+              label: const Text(
+                'Tulis Ulasan',
+                style: TextStyle(color: AppColors.primary),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 2.2,
-          children: entries
-              .map(
-                (e) => Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgCard,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        e.key,
-                        style: const TextStyle(
-                          color: AppColors.primaryLight,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        e.value,
-                        style: const TextStyle(
-                          color: AppColors.textWhite,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+        const SizedBox(height: 8),
+        FutureBuilder<List<Review>>(
+          future: _reviewsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
                 ),
-              )
-              .toList(),
+              );
+            }
+            final reviews = snapshot.data ?? [];
+            if (reviews.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  'Belum ada ulasan. Jadilah yang pertama!',
+                  style: TextStyle(color: context.mutedColor),
+                ),
+              );
+            }
+            return Column(
+              children: reviews.map((r) => _buildReviewTile(context, r)).toList(),
+            );
+          },
         ),
       ],
     );
+  }
+
+  Widget _buildReviewTile(BuildContext context, Review review) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                review.userName,
+                style: TextStyle(
+                  color: context.textColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Row(
+                children: List.generate(
+                  5,
+                  (i) => Icon(
+                    i < review.rating ? Icons.star : Icons.star_border,
+                    color: AppColors.warning,
+                    size: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (review.comment.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              review.comment,
+              style: TextStyle(color: context.mutedColor, fontSize: 13),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _openReviewDialog() {
+    final token = context.read<UserProvider>().token;
+    if (token.isEmpty) {
+      _snack('Kamu harus login untuk menulis ulasan');
+      return;
+    }
+
+    int rating = 5;
+    final commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setStateDialog) => AlertDialog(
+          backgroundColor: ctx.surfaceColor,
+          title: Text('Tulis Ulasan', style: TextStyle(color: ctx.textColor)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  5,
+                  (i) => IconButton(
+                    onPressed: () => setStateDialog(() => rating = i + 1),
+                    icon: Icon(
+                      i < rating ? Icons.star : Icons.star_border,
+                      color: AppColors.warning,
+                    ),
+                  ),
+                ),
+              ),
+              TextField(
+                controller: commentController,
+                maxLines: 3,
+                style: TextStyle(color: ctx.textColor),
+                decoration: InputDecoration(
+                  hintText: 'Tulis komentarmu...',
+                  hintStyle: TextStyle(color: ctx.mutedColor),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Batal', style: TextStyle(color: ctx.mutedColor)),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await _submitReview(rating, commentController.text.trim());
+              },
+              child: const Text('Kirim',
+                  style: TextStyle(color: AppColors.primary)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _submitReview(int rating, String comment) async {
+    final token = context.read<UserProvider>().token;
+    try {
+      await _api.createReview(
+        token: token,
+        productId: product.id,
+        rating: rating,
+        comment: comment,
+      );
+      if (!mounted) return;
+      _snack('Ulasan terkirim');
+      setState(() => _reviewsFuture = _api.fetchReviews(product.id));
+    } on ProductApiException catch (e) {
+      if (mounted) _snack(e.message);
+    } catch (_) {
+      if (mounted) _snack('Tidak bisa terhubung ke server');
+    }
   }
 
   Widget _buildBottomBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
       decoration: BoxDecoration(
-        color: AppColors.bgDark,
-        border: const Border(
-          top: BorderSide(color: AppColors.divider, width: 1),
-        ),
+        color: context.surfaceColor,
+        border: Border(top: BorderSide(color: context.dividerColor, width: 1)),
       ),
-      child: Row(
+      child: product.isMine
+          ? _buildOwnerBar(context)
+          : Row(
         children: [
-          GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fitur chat segera hadir!'),
-                  backgroundColor: AppColors.primary,
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(
-                  Icons.chat_bubble_outline,
-                  color: Colors.white54,
-                  size: 22,
-                ),
-                SizedBox(height: 3),
-                Text(
-                  'Hubungi',
-                  style: TextStyle(color: Colors.white54, fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 20),
-
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${widget.name} ditambahkan ke keranjang'),
-                    backgroundColor: AppColors.primary,
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
+              onPressed: () async {
+                final token = context.read<UserProvider>().token;
+                if (token.isEmpty) {
+                  _snack('Login dulu untuk menambah ke keranjang');
+                  return;
+                }
+                try {
+                  await context.read<CartProvider>().add(token, product);
+                  _snack('Ditambahkan ke keranjang');
+                } catch (e) {
+                  _snack('$e');
+                }
               },
               icon: const Icon(Icons.shopping_cart_outlined, size: 16),
               label: const Text(
-                'Tambah ke Keranjang',
+                'Keranjang',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primaryLight,
-                side: const BorderSide(
-                  color: AppColors.primaryLight,
-                  width: 1.5,
-                ),
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary, width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 10,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
           ),
           const SizedBox(width: 12),
-
-          SizedBox(
-            width: 150,
+          Expanded(
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => CheckoutScreen(
-                      productName: widget.name,
-                      productPrice: widget.price,
-                      productImageUrl: widget.imageUrl,
+                      items: [CartItem(product: product)],
                     ),
                   ),
                 );
@@ -655,24 +531,44 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
-}
 
-class _ProductDetail {
-  final String sellerName;
-  final String sellerRole;
-  final String description;
-  final List<String> tags;
-  final Map<String, String> specs;
-  final int ecoPoints;
-  final String reviewCount;
-
-  const _ProductDetail({
-    required this.sellerName,
-    required this.sellerRole,
-    required this.description,
-    required this.tags,
-    required this.specs,
-    required this.ecoPoints,
-    required this.reviewCount,
-  });
+  Widget _buildOwnerBar(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Ini produk Anda',
+          style: TextStyle(color: context.mutedColor, fontSize: 12),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              final changed = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SellProductScreen(product: product),
+                ),
+              );
+              if (changed == true && mounted) Navigator.pop(context);
+            },
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            label: const Text(
+              'Edit Produk',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              elevation: 0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

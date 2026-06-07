@@ -90,6 +90,14 @@ async function register(req, res, next) {
       selectedUserTypeId = types[0]?.user_type_id || 0;
     }
 
+    // Default: tiap akun adalah pembeli & penjual; pakai 'Individual'.
+    if (!selectedUserTypeId) {
+      const [defaults] = await connection.query(
+        "SELECT user_type_id FROM user_types WHERE type_name = 'Individual' LIMIT 1",
+      );
+      selectedUserTypeId = defaults[0]?.user_type_id || 0;
+    }
+
     if (!selectedUserTypeId) {
       throw new HttpError(400, 'Tipe pengguna tidak valid');
     }

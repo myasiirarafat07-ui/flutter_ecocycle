@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_bottom_nav_bar.dart';
 import '../widgets/app_drawer.dart';
-import 'consultation/expert_consultation_screen.dart';
 import 'home/home_screen.dart';
 import 'market/market_screen.dart';
+import 'payment/transaction_history_screen.dart';
 import 'profile/profile_screen.dart';
+import 'seller/sell_product_screen.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -22,7 +23,7 @@ class _MainWrapperState extends State<MainWrapper> {
     HomeScreen(onOpenDrawer: _openDrawer, onNavigateToTab: _onNavTap),
     const MarketScreen(),
     const SizedBox(),
-    const ConsultationNotesScreen(embedded: true),
+    const TransactionHistoryScreen(embedded: true),
     const ProfileScreen(),
   ];
 
@@ -35,12 +36,9 @@ class _MainWrapperState extends State<MainWrapper> {
   }
 
   void _onAddTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tambah laporan baru'),
-        backgroundColor: Color(0xFF2E7D32),
-        duration: Duration(seconds: 1),
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SellProductScreen()),
     );
   }
 
@@ -48,7 +46,7 @@ class _MainWrapperState extends State<MainWrapper> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFF0D1F0F),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       drawer: AppDrawer(onNavigateToTab: _onNavTap),
 

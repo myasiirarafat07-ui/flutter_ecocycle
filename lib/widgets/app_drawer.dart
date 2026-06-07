@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/theme_provider.dart';
 import '../screens/payment/payment_method_screen.dart';
-import '../screens/support/help_center_screen.dart';
 import '../utils/logout_dialog.dart';
+import '../constants/app_colors.dart';
 
 class AppDrawer extends StatelessWidget {
   final void Function(int index)? onNavigateToTab;
@@ -13,13 +14,16 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+    
     final displayName = user.name.isEmpty ? 'Pengguna' : user.name;
     final displayEmail = user.email.isEmpty ? 'email@contoh.com' : user.email;
     final initials = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
     final userType = user.userType;
 
     return Drawer(
-      backgroundColor: const Color(0xFF0D1F0F),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
         child: Column(
           children: [
@@ -31,17 +35,18 @@ class AppDrawer extends StatelessWidget {
                     initials: initials,
                     displayName: displayName,
                     displayEmail: displayEmail,
-                    isPremium: user.isPremium,
                     userType: userType,
+                    isDark: isDark,
                   ),
 
                   const SizedBox(height: 8),
 
-                  _DrawerSectionLabel(label: 'Menu'),
+                  _DrawerSectionLabel(label: 'Menu', isDark: isDark),
                   _DrawerItem(
                     icon: Icons.home_outlined,
                     activeIcon: Icons.home,
                     label: 'Beranda',
+                    isDark: isDark,
                     onTap: () {
                       Navigator.pop(context);
                       onNavigateToTab?.call(0);
@@ -51,6 +56,7 @@ class AppDrawer extends StatelessWidget {
                     icon: Icons.person_outline,
                     activeIcon: Icons.person,
                     label: 'Profil Saya',
+                    isDark: isDark,
                     onTap: () {
                       Navigator.pop(context);
                       onNavigateToTab?.call(4);
@@ -60,6 +66,7 @@ class AppDrawer extends StatelessWidget {
                     icon: Icons.credit_card_outlined,
                     activeIcon: Icons.credit_card,
                     label: 'Metode Pembayaran',
+                    isDark: isDark,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -71,34 +78,21 @@ class AppDrawer extends StatelessWidget {
                     },
                   ),
 
-                  const _DrawerDivider(),
+                  _DrawerDivider(isDark: isDark),
 
-                  _DrawerSectionLabel(label: 'Lainnya'),
+                  _DrawerSectionLabel(label: 'Lainnya', isDark: isDark),
                   _DrawerItem(
                     icon: Icons.settings_outlined,
                     activeIcon: Icons.settings,
                     label: 'Pengaturan',
+                    isDark: isDark,
                     onTap: () {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Halaman Pengaturan segera hadir!'),
-                          backgroundColor: Color(0xFF2E7D32),
+                          backgroundColor: AppColors.primary,
                           duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Icons.help_outline,
-                    activeIcon: Icons.help,
-                    label: 'Pusat Bantuan',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const HelpCenterScreen(),
                         ),
                       );
                     },
@@ -107,25 +101,63 @@ class AppDrawer extends StatelessWidget {
                     icon: Icons.info_outline,
                     activeIcon: Icons.info,
                     label: 'Tentang Aplikasi',
+                    isDark: isDark,
                     onTap: () {
                       Navigator.pop(context);
-                      _showAboutDialog(context);
+                      _showAboutDialog(context, isDark);
                     },
+                  ),
+                  
+                  _DrawerDivider(isDark: isDark),
+                  
+                  // Theme Toggle Switch
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              isDark ? Icons.dark_mode : Icons.light_mode,
+                              color: isDark ? Colors.white70 : AppColors.lightTextMuted,
+                              size: 22,
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              isDark ? 'Mode Gelap' : 'Mode Terang',
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : AppColors.lightText,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Switch(
+                          value: isDark,
+                          onChanged: (value) {
+                            themeProvider.toggleTheme(value);
+                          },
+                          activeColor: AppColors.primary,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const _DrawerDivider(),
+            _DrawerDivider(isDark: isDark),
             _DrawerItem(
               icon: Icons.logout,
               activeIcon: Icons.logout,
               label: 'Keluar',
               isDestructive: true,
+              isDark: isDark,
               onTap: () => showLogoutDialog(context, closeDrawer: true),
             ),
 
-            const _DrawerBranding(),
+            _DrawerBranding(isDark: isDark),
             const SizedBox(height: 12),
           ],
         ),
@@ -133,11 +165,11 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  void _showAboutDialog(BuildContext context) {
+  void _showAboutDialog(BuildContext context, bool isDark) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A3B1A),
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         title: Row(
           children: [
             Container(
@@ -149,21 +181,27 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            const Text('EcoCycle', style: TextStyle(color: Colors.white)),
+            Text(
+              'EcoCycle',
+              style: TextStyle(color: isDark ? Colors.white : AppColors.lightText),
+            ),
           ],
         ),
-        content: const Text(
+        content: Text(
           'EcoCycle adalah aplikasi pengelolaan sampah berbasis komunitas '
           'yang membantu kamu mendaur ulang dan menjual limbah dengan mudah.\n\n'
           'Versi 1.0.0',
-          style: TextStyle(color: Colors.white70, height: 1.5),
+          style: TextStyle(
+            color: isDark ? Colors.white70 : AppColors.lightTextMuted,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text(
               'Tutup',
-              style: TextStyle(color: Color(0xFF66BB6A)),
+              style: TextStyle(color: AppColors.primary),
             ),
           ),
         ],
@@ -176,15 +214,15 @@ class _DrawerHeader extends StatelessWidget {
   final String initials;
   final String displayName;
   final String displayEmail;
-  final bool isPremium;
   final String userType;
+  final bool isDark;
 
   const _DrawerHeader({
     required this.initials,
     required this.displayName,
     required this.displayEmail,
-    required this.isPremium,
     required this.userType,
+    required this.isDark,
   });
 
   @override
@@ -192,9 +230,14 @@ class _DrawerHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A3B1A),
-        border: Border(bottom: BorderSide(color: Color(0xFF2E5C2E), width: 1)),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? AppColors.darkDivider : AppColors.lightDivider,
+            width: 1,
+          ),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,10 +248,10 @@ class _DrawerHeader extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2E7D32),
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: const Color(0xFF66BB6A),
+                    color: isDark ? AppColors.primary : AppColors.secondary,
                     width: 2.5,
                   ),
                 ),
@@ -230,10 +273,10 @@ class _DrawerHeader extends StatelessWidget {
                   width: 22,
                   height: 22,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2E7D32),
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF0D1F0F),
+                      color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
                       width: 2,
                     ),
                   ),
@@ -249,8 +292,8 @@ class _DrawerHeader extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             displayName,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: isDark ? Colors.white : AppColors.lightText,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -259,22 +302,21 @@ class _DrawerHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32).withOpacity(0.4),
+              color: AppColors.primary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              isPremium
-                  ? 'Anggota Premium'
-                  : userType.isNotEmpty
-                  ? userType
-                  : 'Penjaga Alam',
-              style: const TextStyle(color: Color(0xFF66BB6A), fontSize: 12),
+              userType.isNotEmpty ? userType : 'Penjaga Alam',
+              style: const TextStyle(color: AppColors.primary, fontSize: 12),
             ),
           ),
           const SizedBox(height: 6),
           Text(
             displayEmail,
-            style: const TextStyle(color: Colors.white54, fontSize: 12),
+            style: TextStyle(
+              color: isDark ? Colors.white54 : AppColors.lightTextMuted,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -288,6 +330,7 @@ class _DrawerItem extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isDestructive;
+  final bool isDark;
 
   const _DrawerItem({
     required this.icon,
@@ -295,16 +338,19 @@ class _DrawerItem extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.isDestructive = false,
+    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? const Color(0xFFE53935) : Colors.white70;
+    final color = isDestructive
+        ? AppColors.danger
+        : (isDark ? Colors.white70 : AppColors.lightText);
 
     return InkWell(
       onTap: onTap,
-      highlightColor: const Color(0xFF2E7D32).withOpacity(0.15),
-      splashColor: const Color(0xFF2E7D32).withOpacity(0.1),
+      highlightColor: AppColors.primary.withOpacity(0.15),
+      splashColor: AppColors.primary.withOpacity(0.1),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Row(
@@ -328,7 +374,9 @@ class _DrawerItem extends StatelessWidget {
 
 class _DrawerSectionLabel extends StatelessWidget {
   final String label;
-  const _DrawerSectionLabel({required this.label});
+  final bool isDark;
+
+  const _DrawerSectionLabel({required this.label, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -336,8 +384,8 @@ class _DrawerSectionLabel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Text(
         label.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white30,
+        style: TextStyle(
+          color: isDark ? Colors.white30 : AppColors.lightTextMuted.withOpacity(0.5),
           fontSize: 11,
           letterSpacing: 1.2,
           fontWeight: FontWeight.w600,
@@ -348,12 +396,14 @@ class _DrawerSectionLabel extends StatelessWidget {
 }
 
 class _DrawerDivider extends StatelessWidget {
-  const _DrawerDivider();
+  final bool isDark;
+
+  const _DrawerDivider({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(
-      color: Color(0xFF1A3B1A),
+    return Divider(
+      color: isDark ? AppColors.darkDivider : AppColors.lightDivider,
       thickness: 1,
       height: 16,
       indent: 20,
@@ -363,7 +413,9 @@ class _DrawerDivider extends StatelessWidget {
 }
 
 class _DrawerBranding extends StatelessWidget {
-  const _DrawerBranding();
+  final bool isDark;
+
+  const _DrawerBranding({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -380,10 +432,10 @@ class _DrawerBranding extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          const Text(
+          Text(
             'EcoCycle',
             style: TextStyle(
-              color: Colors.white70,
+              color: isDark ? Colors.white70 : AppColors.lightTextMuted,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),

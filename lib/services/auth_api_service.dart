@@ -19,6 +19,9 @@ class AuthResult {
 }
 
 class AuthApiService {
+  // Ganti URL ini bergantung pada cara Anda menjalankan aplikasinya:
+  // - Android Emulator: 'http://10.0.2.2:3000'
+  // - Web (Chrome) / Windows App: 'http://localhost:3000'
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://10.0.2.2:3000',
@@ -29,14 +32,14 @@ class AuthApiService {
     required String email,
     required String phoneNumber,
     required String password,
-    required String userType,
+    String userType = '',
   }) async {
     return _postAuth('/api/auth/register', {
       'full_name': fullName,
       'email': email,
       'phone_number': phoneNumber,
       'password': password,
-      'user_type': userType,
+      if (userType.isNotEmpty) 'user_type': userType,
     });
   }
 

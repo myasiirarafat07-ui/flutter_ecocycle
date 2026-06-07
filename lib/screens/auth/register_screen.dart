@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../services/auth_api_service.dart';
 import '../../widgets/app_text_field.dart';
 import '../main_wrapper.dart';
@@ -22,9 +23,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _agreeToTerms = false;
   bool _isLoading = false;
-
-  String _selectedUserType = 'Individual';
-  final List<String> _userTypes = ['Individual', 'Petani', 'Bisnis'];
 
   @override
   void dispose() {
@@ -99,7 +97,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: email,
         phoneNumber: phone,
         password: password,
-        userType: _selectedUserType,
       );
 
       if (!mounted) return;
@@ -108,6 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         token: result.token,
         user: result.user,
       );
+      context.read<CartProvider>().load(result.token);
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -144,7 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: Stack(
         children: [
           _buildHeroTop(),
@@ -156,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _buildOverlayBrand(),
                   const SizedBox(height: 200),
                   Container(
-                    color: AppColors.bgDark,
+                    color: context.bgColor,
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,11 +192,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 16),
                         LabeledField(
-                          label: 'Jenis Pengguna',
-                          child: _buildUserTypeDropdown(),
-                        ),
-                        const SizedBox(height: 16),
-                        LabeledField(
                           label: 'Kata Sandi',
                           child: AppTextField(
                             controller: _passwordController,
@@ -221,10 +214,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                              Text(
                                 'Sudah memiliki akun? ',
                                 style: TextStyle(
-                                  color: Colors.white54,
+                                  color: context.mutedColor,
                                   fontSize: 14,
                                 ),
                               ),
@@ -233,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: const Text(
                                   'Masuk',
                                   style: TextStyle(
-                                    color: AppColors.primaryLight,
+                                    color: AppColors.primary,
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -243,20 +236,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.recycling,
-                              color: Colors.white24,
+                              color: context.mutedColor,
                               size: 24,
                             ),
-                            SizedBox(width: 28),
-                            Icon(Icons.eco, color: Colors.white24, size: 24),
-                            SizedBox(width: 28),
+                            const SizedBox(width: 28),
+                            Icon(Icons.eco, color: context.mutedColor, size: 24),
+                            const SizedBox(width: 28),
                             Icon(
                               Icons.park_outlined,
-                              color: Colors.white24,
+                              color: context.mutedColor,
                               size: 24,
                             ),
                           ],
@@ -297,7 +290,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const Text(
           'EcoCycle',
           style: TextStyle(
-            color: AppColors.textWhite,
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -306,50 +299,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     ),
   );
 
-  Widget _buildHeading() => const Column(
+  Widget _buildHeading() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
         'Buat Akun Baru',
         style: TextStyle(
-          color: AppColors.textWhite,
+          color: context.textColor,
           fontSize: 26,
           fontWeight: FontWeight.bold,
         ),
       ),
-      SizedBox(height: 4),
+      const SizedBox(height: 4),
       Text(
         'Bergabunglah dengan kami di komunitas peduli lingkungan.',
-        style: TextStyle(color: Colors.white54, fontSize: 14),
+        style: TextStyle(color: context.mutedColor, fontSize: 14),
       ),
     ],
-  );
-
-  Widget _buildUserTypeDropdown() => Container(
-    decoration: BoxDecoration(
-      color: AppColors.bgCard,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.white12),
-    ),
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: _selectedUserType,
-        isExpanded: true,
-        dropdownColor: AppColors.bgCard,
-        icon: const Icon(
-          Icons.keyboard_arrow_down,
-          color: AppColors.primaryLight,
-        ),
-        style: const TextStyle(color: AppColors.textWhite, fontSize: 15),
-        items: _userTypes
-            .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-            .toList(),
-        onChanged: (val) {
-          if (val != null) setState(() => _selectedUserType = val);
-        },
-      ),
-    ),
   );
 
   Widget _buildTermsCheckbox() => Row(
@@ -363,7 +329,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           onChanged: (v) => setState(() => _agreeToTerms = v ?? false),
           activeColor: AppColors.primary,
           checkColor: Colors.white,
-          side: const BorderSide(color: Colors.white38),
+          side: BorderSide(color: context.mutedColor),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
@@ -371,8 +337,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Expanded(
         child: RichText(
           text: TextSpan(
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: context.mutedColor,
               fontSize: 13,
               height: 1.4,
             ),
@@ -384,7 +350,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: const Text(
                     'Syarat Layanan',
                     style: TextStyle(
-                      color: AppColors.primaryLight,
+                      color: AppColors.primary,
                       fontSize: 13,
                     ),
                   ),
@@ -397,7 +363,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: const Text(
                     'Kebijakan Privasi',
                     style: TextStyle(
-                      color: AppColors.primaryLight,
+                      color: AppColors.primary,
                       fontSize: 13,
                     ),
                   ),

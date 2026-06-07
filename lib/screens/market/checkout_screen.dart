@@ -1,48 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/cart_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../services/order_api_service.dart';
 import '../payment/payment_success_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final String productName;
-  final String productPrice;
-  final String productImageUrl;
+  final List<CartItem> items;
 
-  const CheckoutScreen({
-    super.key,
-    required this.productName,
-    required this.productPrice,
-    required this.productImageUrl,
-  });
+  /// Bila true, keranjang dikosongkan setelah pembayaran berhasil.
+  final bool fromCart;
+
+  const CheckoutScreen({super.key, required this.items, this.fromCart = false});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
+  final OrderApiService _orderApi = OrderApiService();
+  bool _processing = false;
   String _selectedShipping = 'standar';
-  bool _useEcoPoints = false;
 
   static const int _shippingStandar = 15000;
   static const int _shippingEkspres = 35000;
-  static const int _ecoPointsValue = 12500;
-  static const int _ecoPointsCount = 1250;
 
-  int get _productPriceInt {
-    final clean = widget.productPrice
-        .replaceAll('Rp', '')
-        .replaceAll('.', '')
-        .replaceAll('/kg', '')
-        .replaceAll(' ', '')
-        .trim();
-    return int.tryParse(clean) ?? 0;
-  }
+  int get _itemsSubtotal =>
+      widget.items.fold(0, (sum, item) => sum + item.subtotal);
 
   int get _shippingCost =>
       _selectedShipping == 'standar' ? _shippingStandar : _shippingEkspres;
 
-  int get _discount => _useEcoPoints ? _ecoPointsValue : 0;
-
-  int get _total => _productPriceInt + _shippingCost - _discount;
+  int get _total => _itemsSubtotal + _shippingCost;
 
   String _formatRupiah(int amount) {
     final str = amount.toString();
@@ -59,7 +49,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -97,19 +87,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back,
-              color: AppColors.textWhite,
+              color: context.textColor,
               size: 24,
             ),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Pembayaran',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -128,10 +118,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Alamat Pengiriman',
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -149,7 +139,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: const Text(
                 'Ubah',
                 style: TextStyle(
-                  color: AppColors.primaryLight,
+                  color: AppColors.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -162,7 +152,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.bgCard,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
@@ -177,37 +167,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 child: const Icon(
                   Icons.location_on_outlined,
-                  color: AppColors.primaryLight,
+                  color: AppColors.primary,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Rumah - Budi Santoso',
                       style: TextStyle(
-                        color: AppColors.textWhite,
+                        color: context.textColor,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'Jl. Hijau Lestari No. 12,\nJakarta Selatan, DKI\nJakarta, 12345',
                       style: TextStyle(
-                        color: Colors.white60,
+                        color: context.mutedColor,
                         fontSize: 13,
                         height: 1.5,
                       ),
                     ),
-                    SizedBox(height: 4),
-                    Text(
+                    const SizedBox(height: 4),
+                    const Text(
                       '(+62) 812-3456-7890',
                       style: TextStyle(
-                        color: AppColors.primaryLight,
+                        color: AppColors.primary,
                         fontSize: 13,
                       ),
                     ),
@@ -225,10 +215,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Ringkasan Pesanan',
           style: TextStyle(
-            color: AppColors.textWhite,
+            color: context.textColor,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -236,14 +226,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.bgCard,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(14),
           ),
-          child: _buildOrderItem(
-            imageUrl: widget.productImageUrl,
-            name: widget.productName,
-            qty: '1 unit',
-            price: widget.productPrice,
+          child: Column(
+            children: widget.items
+                .map(
+                  (item) => _buildOrderItem(
+                    imageUrl: item.product.imageUrl,
+                    name: item.product.name,
+                    qty: '${item.quantity} unit',
+                    price: _formatRupiah(item.subtotal),
+                  ),
+                )
+                .toList(),
           ),
         ),
       ],
@@ -270,10 +266,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               errorBuilder: (_, __, ___) => Container(
                 width: 64,
                 height: 64,
-                color: const Color(0xFF1E4D1E),
-                child: const Icon(
+                color: context.surfaceAltColor,
+                child: Icon(
                   Icons.image_not_supported,
-                  color: Colors.white24,
+                  color: context.mutedColor,
                   size: 28,
                 ),
               ),
@@ -286,8 +282,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
-                    color: AppColors.textWhite,
+                  style: TextStyle(
+                    color: context.textColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -297,13 +293,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 const SizedBox(height: 4),
                 Text(
                   qty,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: TextStyle(color: context.mutedColor, fontSize: 12),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   price,
-                  style: const TextStyle(
-                    color: AppColors.textWhite,
+                  style: TextStyle(
+                    color: context.textColor,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
@@ -320,10 +316,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Metode Pengiriman',
           style: TextStyle(
-            color: AppColors.textWhite,
+            color: context.textColor,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -364,7 +360,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withOpacity(0.2)
-              : AppColors.bgCard,
+              : context.surfaceColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.transparent,
@@ -375,7 +371,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primaryLight : Colors.white54,
+              color: isSelected ? AppColors.primary : context.mutedColor,
               size: 22,
             ),
             const SizedBox(width: 14),
@@ -386,7 +382,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Text(
                     label,
                     style: TextStyle(
-                      color: isSelected ? AppColors.textWhite : Colors.white70,
+                      color: isSelected ? context.textColor : context.mutedColor,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -394,7 +390,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(height: 2),
                   Text(
                     sublabel,
-                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    style: TextStyle(color: context.mutedColor, fontSize: 12),
                   ),
                 ],
               ),
@@ -402,7 +398,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Text(
               price,
               style: TextStyle(
-                color: isSelected ? AppColors.primaryLight : Colors.white70,
+                color: isSelected ? AppColors.primary : context.mutedColor,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -417,10 +413,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Metode Pembayaran',
           style: TextStyle(
-            color: AppColors.textWhite,
+            color: context.textColor,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -440,97 +436,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: AppColors.bgCard,
+              color: context.surfaceColor,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               children: [
                 const Icon(
                   Icons.account_balance_wallet_outlined,
-                  color: AppColors.primaryLight,
+                  color: AppColors.primary,
                   size: 22,
                 ),
                 const SizedBox(width: 14),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'E-Wallet (GoPay)',
                         style: TextStyle(
-                          color: AppColors.textWhite,
+                          color: context.textColor,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         'Saldo: Rp 250.000',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                        style: TextStyle(color: context.mutedColor, fontSize: 12),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right,
-                  color: Colors.white38,
+                  color: context.mutedColor,
                   size: 22,
                 ),
               ],
             ),
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: _useEcoPoints ? AppColors.primary : AppColors.bgCard,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.eco,
-                color: _useEcoPoints ? Colors.white : AppColors.primaryLight,
-                size: 22,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Gunakan Eco Points',
-                      style: TextStyle(
-                        color: _useEcoPoints
-                            ? Colors.white
-                            : AppColors.textWhite,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Tersedia $_ecoPointsCount poin (${_formatRupiah(_ecoPointsValue)})',
-                      style: TextStyle(
-                        color: _useEcoPoints ? Colors.white70 : Colors.white54,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Switch(
-                value: _useEcoPoints,
-                onChanged: (val) => setState(() => _useEcoPoints = val),
-                activeColor: Colors.white,
-                activeTrackColor: AppColors.primaryLight,
-                inactiveThumbColor: Colors.white54,
-                inactiveTrackColor: const Color(0xFF2E5C2E),
-              ),
-            ],
           ),
         ),
       ],
@@ -542,31 +485,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       children: [
         _buildPriceRow(
           label: 'Subtotal untuk produk',
-          value: _formatRupiah(_productPriceInt),
+          value: _formatRupiah(_itemsSubtotal),
         ),
         const SizedBox(height: 10),
         _buildPriceRow(
           label: 'Subtotal pengiriman',
           value: _formatRupiah(_shippingCost),
         ),
-        if (_useEcoPoints) ...[
-          const SizedBox(height: 10),
-          _buildPriceRow(
-            label: 'Diskon Eco Points',
-            value: '- ${_formatRupiah(_discount)}',
-            valueColor: AppColors.primaryLight,
-          ),
-        ],
         const SizedBox(height: 14),
-        const Divider(color: Color(0xFF2E5C2E), thickness: 1),
+        Divider(color: context.dividerColor, thickness: 1),
         const SizedBox(height: 14),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Total Pembayaran',
               style: TextStyle(
-                color: AppColors.textWhite,
+                color: context.textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -574,7 +509,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Text(
               _formatRupiah(_total),
               style: const TextStyle(
-                color: AppColors.primaryLight,
+                color: AppColors.primary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -595,12 +530,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.white60, fontSize: 14),
+          style: TextStyle(color: context.mutedColor, fontSize: 14),
         ),
         Text(
           value,
           style: TextStyle(
-            color: valueColor ?? AppColors.textWhite,
+            color: valueColor ?? context.textColor,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -612,9 +547,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildBottomBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-      decoration: const BoxDecoration(
-        color: AppColors.bgDark,
-        border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        border: Border(top: BorderSide(color: context.dividerColor, width: 1)),
       ),
       child: SizedBox(
         width: double.infinity,
@@ -639,50 +574,85 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  Future<void> _placeOrder() async {
+    if (_processing) return;
+    setState(() => _processing = true);
+    final token = context.read<UserProvider>().token;
+    try {
+      final order = await _orderApi.createOrder(
+        token: token,
+        shippingMethod: _selectedShipping,
+        items: widget.fromCart
+            ? null
+            : widget.items
+                .map((i) => {'product_id': i.product.id, 'quantity': i.quantity})
+                .toList(),
+      );
+      if (!mounted) return;
+      if (widget.fromCart) context.read<CartProvider>().reset();
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => PaymentSuccessScreen(
+            orderId: order.orderId,
+            orderCode: order.orderCode,
+            totalAmount: order.formattedTotal,
+            paymentMethod:
+                order.paymentMethod.isEmpty ? 'EcoWallet' : order.paymentMethod,
+          ),
+        ),
+      );
+    } on OrderApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _processing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message), backgroundColor: AppColors.danger),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _processing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tidak bisa terhubung ke server'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
   void _confirmPayment(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCard,
+        backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.eco, color: AppColors.primaryLight, size: 22),
-            SizedBox(width: 8),
+            const Icon(Icons.eco, color: AppColors.primary, size: 22),
+            const SizedBox(width: 8),
             Text(
               'Konfirmasi Pembayaran',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: context.textColor, fontSize: 16),
             ),
           ],
         ),
         content: Text(
           'Total yang akan dibayar:\n${_formatRupiah(_total)}\n\nLanjutkan pembayaran?',
-          style: const TextStyle(color: Colors.white70, height: 1.5),
+          style: TextStyle(color: context.mutedColor, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white54)),
+            child: Text('Batal', style: TextStyle(color: context.mutedColor)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => PaymentSuccessScreen(
-                    orderId: '#EC-${(88000 + _total % 1000).abs()}',
-                    totalAmount: _formatRupiah(_total),
-                    paymentMethod: _useEcoPoints
-                        ? 'EcoWallet + Eco Points'
-                        : 'EcoWallet',
-                  ),
-                ),
-              );
+              await _placeOrder();
             },
             child: const Text(
               'Bayar',
               style: TextStyle(
-                color: AppColors.primaryLight,
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
