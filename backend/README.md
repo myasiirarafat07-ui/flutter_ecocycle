@@ -34,7 +34,6 @@ npm run dev
 ## Endpoint
 
 - `GET /health`
-- `GET /api/auth/user-types`
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/me`
@@ -46,8 +45,7 @@ npm run dev
   "full_name": "Yasiir Arafat",
   "email": "yasiir@example.com",
   "phone_number": "08123456789",
-  "password": "secret123",
-  "user_type": "Individual"
+  "password": "secret123"
 }
 ```
 

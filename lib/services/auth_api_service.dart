@@ -32,14 +32,12 @@ class AuthApiService {
     required String email,
     required String phoneNumber,
     required String password,
-    String userType = '',
   }) async {
     return _postAuth('/api/auth/register', {
       'full_name': fullName,
       'email': email,
       'phone_number': phoneNumber,
       'password': password,
-      if (userType.isNotEmpty) 'user_type': userType,
     });
   }
 
@@ -48,6 +46,57 @@ class AuthApiService {
     required String password,
   }) async {
     return _postAuth('/api/auth/login', {'email': email, 'password': password});
+  }
+
+  /// Mengambil profil user dari token tersimpan (untuk restore sesi login).
+  Future<Map<String, dynamic>> me(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/auth/me'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthApiException(data['message']?.toString() ?? 'Sesi tidak valid');
+    }
+
+    return data['user'] as Map<String, dynamic>;
+  }
+
+  /// Memperbarui profil pengguna yang sedang login. Mengembalikan map user terbaru.
+  Future<Map<String, dynamic>> updateProfile({
+    required String token,
+    required String fullName,
+    required String email,
+    required String phoneNumber,
+    required String address,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/auth/me');
+    final response = await http.put(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'full_name': fullName,
+        'email': email,
+        'phone_number': phoneNumber,
+        'address': address,
+      }),
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthApiException(data['message']?.toString() ?? 'Request gagal');
+    }
+
+    return data['user'] as Map<String, dynamic>;
   }
 
   Future<AuthResult> _postAuth(String path, Map<String, dynamic> body) async {

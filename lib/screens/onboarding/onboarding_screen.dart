@@ -28,21 +28,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _pages = [
     _OnboardingData(
       imageAsset: 'assets/images/onboarding1.png',
-      title: 'Konsultasi\nPertanian Ahli',
+      title: 'Selamat Datang\ndi EcoCycle',
       description:
-          'Dapatkan saran langsung dari para ahli untuk mengoptimalkan praktik pertanian dan pengelolaan limbah Anda.',
-    ),
-    _OnboardingData(
-      imageAsset: 'assets/images/onboarding2.png',
-      title: 'Ubah Sampah\nMenjadi Kekayaan',
-      description:
-          'Kelola limbah organik Anda dan ubah menjadi kompos berharga, pakan hewan, atau biogas.',
+          'Marketplace daur ulang dari komunitas, untuk komunitas. Belanja dan jual produk ramah lingkungan dalam satu ekonomi sirkular.',
     ),
     _OnboardingData(
       imageAsset: 'assets/images/onboarding3.png',
-      title: 'Pasar\nBerkelanjutan',
+      title: 'Belanja Produk\nRamah Lingkungan',
       description:
-          'Berbelanja produk ramah lingkungan dan menukar bahan daur ulang dalam komunitas sirkular kami.',
+          'Jelajahi Pupuk & Kompos serta Karya Daur Ulang. Cari, filter, dan checkout dengan mudah dan aman.',
+    ),
+    _OnboardingData(
+      imageAsset: 'assets/images/onboarding2.png',
+      title: 'Jual Produk\nDaur Ulangmu',
+      description:
+          'Setiap akun bisa jadi penjual sekaligus pembeli. Unggah produkmu dan jangkau pembeli yang peduli lingkungan.',
     ),
   ];
 

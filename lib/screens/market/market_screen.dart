@@ -6,6 +6,7 @@ import '../../models/product_model.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/product_api_service.dart';
+import '../../widgets/product_card_bits.dart';
 import '../cart/cart_screen.dart';
 import 'product_detail_screen.dart';
 
@@ -370,20 +371,33 @@ class _ProductCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
-              child: Image.network(
-                product.imageUrl,
-                height: 130,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: 130,
-                  color: context.surfaceAltColor,
-                  child: Icon(
-                    Icons.image_not_supported,
-                    color: context.mutedColor,
-                    size: 40,
+              child: Stack(
+                children: [
+                  Opacity(
+                    opacity: product.stock <= 0 ? 0.45 : 1,
+                    child: Image.network(
+                      product.imageUrl,
+                      height: 130,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        height: 130,
+                        color: context.surfaceAltColor,
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: context.mutedColor,
+                          size: 40,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  if (product.stock <= 0)
+                    const Positioned(
+                      top: 8,
+                      left: 8,
+                      child: StokHabisBadge(),
+                    ),
+                ],
               ),
             ),
             Expanded(
@@ -415,19 +429,7 @@ class _ProductCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: AppColors.warning, size: 13),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${product.rating} (${product.sold} terjual)',
-                          style: TextStyle(
-                            color: context.mutedColor,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
+                    ProductMetaRow(product: product),
                     const Spacer(),
                     Text(
                       product.formattedPrice,

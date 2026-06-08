@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
+import '../../services/auth_api_service.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
@@ -17,6 +18,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   late TextEditingController _addressController;
 
   bool _hasChanges = false;
+  final AuthApiService _authApi = AuthApiService();
 
   @override
   void initState() {
@@ -56,7 +58,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     super.dispose();
   }
 
-  void _saveChanges() {
+  bool _saving = false;
+
+  Future<void> _saveChanges() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final phone = _phoneController.text.trim();
@@ -72,28 +76,48 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    context.read<UserProvider>().updatePersonalInfo(
-      name: name,
-      email: email,
-      phone: phone,
-      address: address,
-    );
+    final userProvider = context.read<UserProvider>();
+    setState(() => _saving = true);
 
-    setState(() => _hasChanges = false);
+    try {
+      final updated = await _authApi.updateProfile(
+        token: userProvider.token,
+        fullName: name,
+        email: email,
+        phoneNumber: phone,
+        address: address,
+      );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white, size: 18),
-            SizedBox(width: 10),
-            Text('Informasi berhasil disimpan'),
-          ],
+      if (!mounted) return;
+      userProvider.applyUpdatedUser(updated);
+      setState(() {
+        _hasChanges = false;
+        _saving = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 18),
+              SizedBox(width: 10),
+              Text('Informasi berhasil disimpan'),
+            ],
+          ),
+          backgroundColor: AppColors.primary,
+          duration: Duration(seconds: 2),
         ),
-        backgroundColor: AppColors.primary,
-        duration: Duration(seconds: 2),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   void _showEditDialog({
@@ -349,10 +373,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
   Widget _buildBadge() {
-    final user = context.read<UserProvider>();
-    final badgeLabel = user.userType.isNotEmpty
-        ? user.userType
-        : 'Member EcoCycle';
+    const badgeLabel = 'Member EcoCycle';
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -461,7 +482,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         width: double.infinity,
         height: 56,
         child: ElevatedButton.icon(
-          onPressed: _hasChanges ? _saveChanges : null,
+          onPressed: (_hasChanges && !_saving) ? _saveChanges : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: _hasChanges ? AppColors.primary : context.surfaceColor,
             foregroundColor: Colors.white,
@@ -472,9 +493,20 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             ),
             elevation: 0,
           ),
-          icon: const Icon(Icons.save_outlined, size: 20),
+          icon: _saving
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(Icons.save_outlined, size: 20),
           label: Text(
-            _hasChanges ? 'Simpan Perubahan' : 'Tidak Ada Perubahan',
+            _saving
+                ? 'Menyimpan...'
+                : (_hasChanges ? 'Simpan Perubahan' : 'Tidak Ada Perubahan'),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),

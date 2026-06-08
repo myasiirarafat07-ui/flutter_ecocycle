@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/user_provider.dart';
+import '../../services/payment_method_api_service.dart';
 
 class PaymentSettingsScreen extends StatefulWidget {
   const PaymentSettingsScreen({super.key});
@@ -9,11 +12,8 @@ class PaymentSettingsScreen extends StatefulWidget {
 }
 
 class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
-  bool _notifTransaksi = true;
-  bool _notifPoin = true;
-  bool _konfirmasiPembayaran = true;
-  bool _autoPenukaranPoin = false;
-  bool _modePinaman = false;
+  final PaymentMethodApiService _api = PaymentMethodApiService();
+  bool _busy = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,82 +31,24 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                   children: [
                     const SizedBox(height: 8),
                     _buildSection(
-                      judul: 'Notifikasi',
-                      ikon: Icons.notifications_outlined,
+                      judul: 'Kelola Metode',
+                      ikon: Icons.credit_card_outlined,
                       anak: [
-                        _buildToggleItem(
-                          label: 'Notifikasi Transaksi',
-                          deskripsi:
-                              'Terima pemberitahuan setiap ada transaksi',
-                          nilai: _notifTransaksi,
-                          onUbah: (v) => setState(() => _notifTransaksi = v),
-                        ),
-                        _buildToggleItem(
-                          label: 'Notifikasi Poin',
-                          deskripsi:
-                              'Pemberitahuan saat poin bertambah atau berkurang',
-                          nilai: _notifPoin,
-                          onUbah: (v) => setState(() => _notifPoin = v),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    _buildSection(
-                      judul: 'Keamanan',
-                      ikon: Icons.security_outlined,
-                      anak: [
-                        _buildToggleItem(
-                          label: 'Konfirmasi Pembayaran',
-                          deskripsi:
-                              'Minta konfirmasi sebelum setiap pembayaran',
-                          nilai: _konfirmasiPembayaran,
-                          onUbah: (v) =>
-                              setState(() => _konfirmasiPembayaran = v),
-                        ),
-                        _buildToggleItem(
-                          label: 'Mode Hemat (PIN)',
-                          deskripsi:
-                              'Gunakan PIN untuk transaksi di atas Rp 50.000',
-                          nilai: _modePinaman,
-                          onUbah: (v) => setState(() => _modePinaman = v),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    _buildSection(
-                      judul: 'Eco Points',
-                      ikon: Icons.eco_outlined,
-                      anak: [
-                        _buildToggleItem(
-                          label: 'Auto Tukar Poin',
-                          deskripsi:
-                              'Tukar poin otomatis saat mencapai batas reward',
-                          nilai: _autoPenukaranPoin,
-                          onUbah: (v) => setState(() => _autoPenukaranPoin = v),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    _buildSection(
-                      judul: 'Lainnya',
-                      ikon: Icons.more_horiz,
-                      anak: [
-                        _buildTombolItem(
-                          label: 'Ubah PIN Pembayaran',
-                          ikon: Icons.lock_outline,
-                          onTap: () =>
-                              _tampilSnackbar('Fitur ubah PIN segera hadir!'),
-                        ),
-                        _buildTombolItem(
-                          label: 'Ekspor Riwayat Transaksi',
-                          ikon: Icons.download_outlined,
-                          onTap: () =>
-                              _tampilSnackbar('Mengekspor data transaksi...'),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+                          child: Text(
+                            'Hapus seluruh metode pembayaran yang tersimpan di akunmu. Tindakan ini tidak dapat dibatalkan.',
+                            style: TextStyle(
+                              color: context.mutedColor,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
                         ),
                         _buildTombolItem(
                           label: 'Hapus Semua Metode',
                           ikon: Icons.delete_sweep_outlined,
-                          onTap: () => _konfirmasiHapusSemua(),
+                          onTap: _busy ? null : _konfirmasiHapusSemua,
                           warnaMerah: true,
                         ),
                       ],
@@ -182,53 +124,10 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     );
   }
 
-  Widget _buildToggleItem({
-    required String label,
-    required String deskripsi,
-    required bool nilai,
-    required ValueChanged<bool> onUbah,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: context.textColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  deskripsi,
-                  style: TextStyle(color: context.mutedColor, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: nilai,
-            onChanged: onUbah,
-            activeColor: AppColors.primary,
-            activeTrackColor: AppColors.primary.withOpacity(0.5),
-            inactiveThumbColor: context.mutedColor,
-            inactiveTrackColor: context.dividerColor,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTombolItem({
     required String label,
     required IconData ikon,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
     bool warnaMerah = false,
   }) {
     final warna = warnaMerah ? AppColors.danger : context.textColor;
@@ -254,24 +153,31 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                 ),
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: warnaMerah
-                  ? AppColors.danger.withOpacity(0.6)
-                  : context.dividerColor,
-              size: 20,
-            ),
+            if (_busy)
+              const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Icon(
+                Icons.chevron_right,
+                color: warnaMerah
+                    ? AppColors.danger.withOpacity(0.6)
+                    : context.dividerColor,
+                size: 20,
+              ),
           ],
         ),
       ),
     );
   }
 
-  void _tampilSnackbar(String pesan) {
+  void _tampilSnackbar(String pesan, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(pesan),
-        backgroundColor: AppColors.primary,
+        backgroundColor: error ? AppColors.danger : AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -299,7 +205,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              _tampilSnackbar('Semua metode pembayaran dihapus.');
+              _hapusSemua();
             },
             child: const Text(
               'Hapus',
@@ -309,5 +215,21 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _hapusSemua() async {
+    if (_busy) return;
+    final token = context.read<UserProvider>().token;
+    setState(() => _busy = true);
+    try {
+      await _api.clearAll(token);
+      if (!mounted) return;
+      setState(() => _busy = false);
+      _tampilSnackbar('Semua metode pembayaran dihapus.');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      _tampilSnackbar('Gagal menghapus: $e', error: true);
+    }
   }
 }

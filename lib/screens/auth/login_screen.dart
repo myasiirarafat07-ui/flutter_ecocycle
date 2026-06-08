@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/wishlist_provider.dart';
 import '../../services/auth_api_service.dart';
 import '../../widgets/app_text_field.dart';
 import '../main_wrapper.dart';
@@ -64,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
         user: result.user,
       );
       context.read<CartProvider>().load(result.token);
+      context.read<WishlistProvider>().load(result.token);
 
       Navigator.pushReplacement(
         context,

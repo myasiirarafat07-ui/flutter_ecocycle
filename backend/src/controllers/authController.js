@@ -14,8 +14,6 @@ function isValidEmail(email) {
 function publicUser(row) {
   return {
     user_id: row.user_id,
-    user_type_id: row.user_type_id,
-    user_type: row.user_type,
     full_name: row.full_name,
     email: row.email,
     phone_number: row.phone_number,
@@ -30,20 +28,6 @@ function publicUser(row) {
   };
 }
 
-async function getUserTypes(req, res, next) {
-  try {
-    const [rows] = await pool.query(
-      'SELECT user_type_id, type_name, description FROM user_types ORDER BY user_type_id',
-    );
-
-    res.json({
-      data: rows,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
 async function register(req, res, next) {
   const connection = await pool.getConnection();
 
@@ -52,8 +36,6 @@ async function register(req, res, next) {
     const email = cleanText(req.body.email).toLowerCase();
     const phoneNumber = cleanText(req.body.phone_number || req.body.phone) || null;
     const password = cleanText(req.body.password);
-    const userTypeName = cleanText(req.body.user_type);
-    const userTypeId = Number(req.body.user_type_id || 0);
 
     if (!fullName || !email || !password) {
       throw new HttpError(400, 'Nama, email, dan password wajib diisi');
@@ -80,42 +62,18 @@ async function register(req, res, next) {
       throw new HttpError(409, 'Email sudah terdaftar');
     }
 
-    let selectedUserTypeId = userTypeId;
-
-    if (!selectedUserTypeId && userTypeName) {
-      const [types] = await connection.query(
-        'SELECT user_type_id FROM user_types WHERE type_name = ? LIMIT 1',
-        [userTypeName],
-      );
-      selectedUserTypeId = types[0]?.user_type_id || 0;
-    }
-
-    // Default: tiap akun adalah pembeli & penjual; pakai 'Individual'.
-    if (!selectedUserTypeId) {
-      const [defaults] = await connection.query(
-        "SELECT user_type_id FROM user_types WHERE type_name = 'Individual' LIMIT 1",
-      );
-      selectedUserTypeId = defaults[0]?.user_type_id || 0;
-    }
-
-    if (!selectedUserTypeId) {
-      throw new HttpError(400, 'Tipe pengguna tidak valid');
-    }
-
     const passwordHash = await bcrypt.hash(password, 10);
 
     const [result] = await connection.query(
       `INSERT INTO users
-        (user_type_id, full_name, email, phone_number, password_hash)
-      VALUES (?, ?, ?, ?, ?)`,
-      [selectedUserTypeId, fullName, email, phoneNumber, passwordHash],
+        (full_name, email, phone_number, password_hash)
+      VALUES (?, ?, ?, ?)`,
+      [fullName, email, phoneNumber, passwordHash],
     );
 
     const [createdRows] = await connection.query(
       `SELECT
         u.user_id,
-        u.user_type_id,
-        ut.type_name AS user_type,
         u.full_name,
         u.email,
         u.phone_number,
@@ -128,7 +86,6 @@ async function register(req, res, next) {
         u.account_status,
         u.created_at
       FROM users u
-      INNER JOIN user_types ut ON ut.user_type_id = u.user_type_id
       WHERE u.user_id = ?`,
       [result.insertId],
     );
@@ -163,8 +120,6 @@ async function login(req, res, next) {
     const [rows] = await pool.query(
       `SELECT
         u.user_id,
-        u.user_type_id,
-        ut.type_name AS user_type,
         u.full_name,
         u.email,
         u.phone_number,
@@ -178,7 +133,6 @@ async function login(req, res, next) {
         u.account_status,
         u.created_at
       FROM users u
-      INNER JOIN user_types ut ON ut.user_type_id = u.user_type_id
       WHERE u.email = ?
       LIMIT 1`,
       [email],
@@ -218,9 +172,59 @@ async function me(req, res) {
   });
 }
 
+async function updateMe(req, res, next) {
+  try {
+    const userId = req.user.user_id;
+    const fullName = cleanText(req.body.full_name || req.body.name);
+    const email = cleanText(req.body.email).toLowerCase();
+    const phoneNumber = cleanText(req.body.phone_number || req.body.phone) || null;
+    const address = cleanText(req.body.address) || null;
+
+    if (!fullName || fullName.length < 3) {
+      throw new HttpError(400, 'Nama minimal 3 karakter');
+    }
+
+    if (!isValidEmail(email)) {
+      throw new HttpError(400, 'Format email tidak valid');
+    }
+
+    const [emailOwners] = await pool.query(
+      'SELECT user_id FROM users WHERE email = ? AND user_id <> ? LIMIT 1',
+      [email, userId],
+    );
+
+    if (emailOwners.length > 0) {
+      throw new HttpError(409, 'Email sudah digunakan akun lain');
+    }
+
+    await pool.query(
+      `UPDATE users
+        SET full_name = ?, email = ?, phone_number = ?, address = ?
+      WHERE user_id = ?`,
+      [fullName, email, phoneNumber, address, userId],
+    );
+
+    const [rows] = await pool.query(
+      `SELECT
+        user_id, full_name, email, phone_number, address,
+        is_premium, eco_points, total_waste_kg, trees_planted,
+        co2_offset_kg, account_status, created_at
+      FROM users WHERE user_id = ?`,
+      [userId],
+    );
+
+    res.json({
+      message: 'Profil diperbarui',
+      user: publicUser(rows[0]),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
-  getUserTypes,
   register,
   login,
   me,
+  updateMe,
 };

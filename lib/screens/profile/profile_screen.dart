@@ -7,6 +7,7 @@ import '../notification/notification_screen.dart';
 import '../payment/payment_method_screen.dart';
 import '../seller/my_products_screen.dart';
 import '../wishlist/wishlist_screen.dart';
+import 'eco_points_screen.dart';
 import 'personal_info_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -25,7 +26,9 @@ class ProfileScreen extends StatelessWidget {
               _buildAppBar(context),
               const SizedBox(height: 20),
               _buildProfileHeader(context, user),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+              _buildEcoPointsCard(context, user),
+              const SizedBox(height: 28),
               _buildPengaturanAkun(context),
               const SizedBox(height: 32),
               _buildKeluar(context),
@@ -134,10 +137,74 @@ class ProfileScreen extends StatelessWidget {
         Text(
           user.memberSince.isEmpty
               ? ''
-              : 'Member sejak ${user.memberSince}${user.userType.isNotEmpty ? ' · ${user.userType}' : ''}',
+              : 'Member sejak ${user.memberSince}',
           style: TextStyle(color: context.mutedColor, fontSize: 13),
         ),
       ],
+    );
+  }
+
+  Widget _buildEcoPointsCard(BuildContext context, UserProvider user) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const EcoPointsScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.eco, color: Colors.white, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Eco Points',
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${user.ecoPoints} poin',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Row(
+                children: [
+                  Text(
+                    'Lihat Riwayat',
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_ios,
+                      color: Colors.white, size: 14),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

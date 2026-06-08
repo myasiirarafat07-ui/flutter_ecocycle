@@ -5,6 +5,7 @@ import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/order_api_service.dart';
 import '../payment/payment_success_screen.dart';
+import '../profile/personal_info_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartItem> items;
@@ -112,6 +113,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildAlamatPengiriman() {
+    final user = context.watch<UserProvider>();
+    final hasAddress = user.address.trim().isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -128,17 +131,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fitur ubah alamat segera hadir!'),
-                    backgroundColor: AppColors.primary,
-                    duration: Duration(seconds: 1),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PersonalInfoScreen(),
                   ),
                 );
               },
-              child: const Text(
-                'Ubah',
-                style: TextStyle(
+              child: Text(
+                hasAddress ? 'Ubah' : 'Lengkapi',
+                style: const TextStyle(
                   color: AppColors.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -177,7 +179,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rumah - Budi Santoso',
+                      user.name.isEmpty ? 'Penerima' : user.name,
                       style: TextStyle(
                         color: context.textColor,
                         fontSize: 14,
@@ -186,21 +188,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Jl. Hijau Lestari No. 12,\nJakarta Selatan, DKI\nJakarta, 12345',
+                      hasAddress
+                          ? user.address
+                          : 'Alamat belum diatur. Tekan "Lengkapi" untuk menambah alamat pengiriman.',
                       style: TextStyle(
                         color: context.mutedColor,
                         fontSize: 13,
                         height: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      '(+62) 812-3456-7890',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 13,
+                    if (user.phone.trim().isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        user.phone,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

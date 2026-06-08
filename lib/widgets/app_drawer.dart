@@ -20,7 +20,6 @@ class AppDrawer extends StatelessWidget {
     final displayName = user.name.isEmpty ? 'Pengguna' : user.name;
     final displayEmail = user.email.isEmpty ? 'email@contoh.com' : user.email;
     final initials = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
-    final userType = user.userType;
 
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -35,7 +34,6 @@ class AppDrawer extends StatelessWidget {
                     initials: initials,
                     displayName: displayName,
                     displayEmail: displayEmail,
-                    userType: userType,
                     isDark: isDark,
                   ),
 
@@ -81,22 +79,6 @@ class AppDrawer extends StatelessWidget {
                   _DrawerDivider(isDark: isDark),
 
                   _DrawerSectionLabel(label: 'Lainnya', isDark: isDark),
-                  _DrawerItem(
-                    icon: Icons.settings_outlined,
-                    activeIcon: Icons.settings,
-                    label: 'Pengaturan',
-                    isDark: isDark,
-                    onTap: () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Halaman Pengaturan segera hadir!'),
-                          backgroundColor: AppColors.primary,
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                  ),
                   _DrawerItem(
                     icon: Icons.info_outline,
                     activeIcon: Icons.info,
@@ -214,14 +196,12 @@ class _DrawerHeader extends StatelessWidget {
   final String initials;
   final String displayName;
   final String displayEmail;
-  final String userType;
   final bool isDark;
 
   const _DrawerHeader({
     required this.initials,
     required this.displayName,
     required this.displayEmail,
-    required this.userType,
     required this.isDark,
   });
 
@@ -305,9 +285,9 @@ class _DrawerHeader extends StatelessWidget {
               color: AppColors.primary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              userType.isNotEmpty ? userType : 'Penjaga Alam',
-              style: const TextStyle(color: AppColors.primary, fontSize: 12),
+            child: const Text(
+              'Penjaga Alam',
+              style: TextStyle(color: AppColors.primary, fontSize: 12),
             ),
           ),
           const SizedBox(height: 6),

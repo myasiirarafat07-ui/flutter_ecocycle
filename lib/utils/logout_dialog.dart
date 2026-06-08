@@ -4,12 +4,14 @@ import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
 import '../providers/user_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
 import '../screens/auth/login_screen.dart';
 
 void showLogoutDialog(BuildContext context, {bool closeDrawer = false}) {
   final navigator = Navigator.of(context);
   final userProvider = context.read<UserProvider>();
   final cartProvider = context.read<CartProvider>();
+  final wishlistProvider = context.read<WishlistProvider>();
 
   showDialog(
     context: context,
@@ -30,6 +32,7 @@ void showLogoutDialog(BuildContext context, {bool closeDrawer = false}) {
           onPressed: () {
             userProvider.logout();
             cartProvider.reset();
+            wishlistProvider.reset();
             Navigator.pop(ctx);
             if (closeDrawer) {
               navigator.pop();

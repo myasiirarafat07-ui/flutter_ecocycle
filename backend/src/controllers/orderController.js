@@ -153,7 +153,21 @@ async function createOrder(req, res, next) {
       );
     }
 
-    // 7) Kosongkan keranjang.
+    // 7) Eco-points: hadiahkan poin dari pembelian (1 poin / Rp1.000).
+    const earnedPoints = Math.floor(total / 1000);
+    if (earnedPoints > 0) {
+      await connection.query(
+        `INSERT INTO point_transactions (user_id, transaction_type, points, description)
+        VALUES (?, 'EARN', ?, ?)`,
+        [req.user.user_id, earnedPoints, `Pembelian ${orderCode}`],
+      );
+      await connection.query(
+        'UPDATE users SET eco_points = eco_points + ? WHERE user_id = ?',
+        [earnedPoints, req.user.user_id],
+      );
+    }
+
+    // 8) Kosongkan keranjang.
     if (cartId) {
       await connection.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
     }

@@ -1,25 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/user_provider.dart';
+import '../../services/payment_method_api_service.dart';
 import 'transaction_history_screen.dart';
 import 'payment_settings_screen.dart';
-
-enum PaymentType { kartuKredit, kartuDebit, eWallet }
-
-class PaymentMethod {
-  final String id;
-  final String nama;
-  final String detail;
-  final PaymentType tipe;
-  bool isPrimary;
-
-  PaymentMethod({
-    required this.id,
-    required this.nama,
-    required this.detail,
-    required this.tipe,
-    this.isPrimary = false,
-  });
-}
 
 class PaymentMethodScreen extends StatefulWidget {
   const PaymentMethodScreen({super.key});
@@ -29,39 +14,56 @@ class PaymentMethodScreen extends StatefulWidget {
 }
 
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
-  final List<PaymentMethod> _methods = [
-    PaymentMethod(
-      id: '1',
-      nama: 'Visa Classic',
-      detail: '•••• •••• •••• 4242',
-      tipe: PaymentType.kartuKredit,
-      isPrimary: true,
-    ),
-    PaymentMethod(
-      id: '2',
-      nama: 'Mastercard Gold',
-      detail: '•••• •••• •••• 8890',
-      tipe: PaymentType.kartuDebit,
-      isPrimary: false,
-    ),
-    PaymentMethod(
-      id: '3',
-      nama: 'GoPay E-Wallet',
-      detail: 'Terhubung: +62 812 •••• 44',
-      tipe: PaymentType.eWallet,
-      isPrimary: false,
-    ),
-  ];
+  final PaymentMethodApiService _api = PaymentMethodApiService();
+  List<PaymentMethod> _methods = [];
+  bool _loading = true;
+  bool _busy = false;
 
-  void _setPrimary(String id) {
-    setState(() {
-      for (final m in _methods) {
-        m.isPrimary = m.id == id;
-      }
-    });
+  String get _token => context.read<UserProvider>().token;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
-  void _hapusMetode(String id) {
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final list = await _api.getMethods(_token);
+      if (!mounted) return;
+      setState(() {
+        _methods = list;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      _showError(e);
+    }
+  }
+
+  void _showError(Object e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$e'), backgroundColor: AppColors.danger),
+    );
+  }
+
+  Future<void> _setPrimary(int id) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final list = await _api.setDefault(_token, id);
+      if (!mounted) return;
+      setState(() => _methods = list);
+    } catch (e) {
+      if (mounted) _showError(e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _hapusMetode(int id) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -81,9 +83,9 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             child: Text('Batal', style: TextStyle(color: context.mutedColor)),
           ),
           TextButton(
-            onPressed: () {
-              setState(() => _methods.removeWhere((m) => m.id == id));
+            onPressed: () async {
               Navigator.pop(ctx);
+              await _deleteMethod(id);
             },
             child: const Text(
               'Hapus',
@@ -95,6 +97,20 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
+  Future<void> _deleteMethod(int id) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final list = await _api.remove(_token, id);
+      if (!mounted) return;
+      setState(() => _methods = list);
+    } catch (e) {
+      if (mounted) _showError(e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   void _tambahMetode() {
     showModalBottomSheet(
       context: context,
@@ -104,11 +120,32 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => _TambahMetodeSheet(
-        onTambah: (method) {
-          setState(() => _methods.add(method));
+        onTambah: (methodType, label, detail) async {
+          Navigator.pop(context);
+          await _addMethod(methodType, label, detail);
         },
       ),
     );
+  }
+
+  Future<void> _addMethod(
+      String methodType, String label, String detail) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final list = await _api.add(
+        _token,
+        methodType: methodType,
+        label: label,
+        detail: detail,
+      );
+      if (!mounted) return;
+      setState(() => _methods = list);
+    } catch (e) {
+      if (mounted) _showError(e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
@@ -120,19 +157,21 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           children: [
             _buildAppBar(context),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    _buildSavedMethodsSection(),
-                    const SizedBox(height: 28),
-                    _buildQuickActions(context),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          _buildSavedMethodsSection(),
+                          const SizedBox(height: 28),
+                          _buildQuickActions(context),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
             ),
           ],
         ),
@@ -219,7 +258,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
-        border: method.isPrimary
+        border: method.isDefault
             ? Border.all(color: AppColors.primary.withOpacity(0.6), width: 1)
             : null,
       ),
@@ -233,7 +272,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-              _getPaymentIcon(method.tipe),
+              _getPaymentIcon(method.methodType),
               color: AppColors.primary,
               size: 22,
             ),
@@ -244,11 +283,11 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  method.nama,
+                  method.label,
                   style: TextStyle(
                     color: context.textColor,
                     fontSize: 15,
-                    fontWeight: method.isPrimary
+                    fontWeight: method.isDefault
                         ? FontWeight.bold
                         : FontWeight.w500,
                   ),
@@ -261,7 +300,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               ],
             ),
           ),
-          if (method.isPrimary)
+          if (method.isDefault)
             const Icon(
               Icons.check_circle,
               color: AppColors.primary,
@@ -288,7 +327,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   child: Row(
                     children: [
                       Icon(Icons.star_outline, color: context.mutedColor, size: 18),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Text(
                         'Jadikan Utama',
                         style: TextStyle(color: context.textColor, fontSize: 14),
@@ -403,7 +442,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   MaterialPageRoute(
                     builder: (_) => const PaymentSettingsScreen(),
                   ),
-                ),
+                ).then((_) => _load()),
               ),
             ),
           ],
@@ -445,21 +484,24 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  IconData _getPaymentIcon(PaymentType tipe) {
-    switch (tipe) {
-      case PaymentType.kartuKredit:
+  IconData _getPaymentIcon(String methodType) {
+    switch (methodType) {
+      case 'KARTU_KREDIT':
         return Icons.credit_card;
-      case PaymentType.kartuDebit:
+      case 'KARTU_DEBIT':
         return Icons.payment;
-      case PaymentType.eWallet:
+      case 'EWALLET':
         return Icons.account_balance_wallet_outlined;
+      default:
+        return Icons.credit_card;
     }
   }
-
 }
 
 class _TambahMetodeSheet extends StatefulWidget {
-  final Function(PaymentMethod) onTambah;
+  /// Callback: (methodType, label, detail).
+  final Future<void> Function(String methodType, String label, String detail)
+      onTambah;
   const _TambahMetodeSheet({required this.onTambah});
 
   @override
@@ -469,20 +511,16 @@ class _TambahMetodeSheet extends StatefulWidget {
 class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
   String? _terpilih; // id opsi yang dipilih
 
-  final List<Map<String, dynamic>> _opsiKartu = [
-    {'id': 'visa', 'nama': 'Kartu Visa', 'tipe': PaymentType.kartuKredit},
-    {
-      'id': 'mastercard',
-      'nama': 'Kartu Mastercard',
-      'tipe': PaymentType.kartuDebit,
-    },
+  final List<Map<String, String>> _opsiKartu = [
+    {'id': 'visa', 'nama': 'Kartu Visa', 'tipe': 'KARTU_KREDIT'},
+    {'id': 'mastercard', 'nama': 'Kartu Mastercard', 'tipe': 'KARTU_DEBIT'},
   ];
 
-  final List<Map<String, dynamic>> _opsiEwallet = [
-    {'id': 'gopay', 'nama': 'GoPay', 'tipe': PaymentType.eWallet},
-    {'id': 'shopeepay', 'nama': 'ShopeePay', 'tipe': PaymentType.eWallet},
-    {'id': 'dana', 'nama': 'DANA', 'tipe': PaymentType.eWallet},
-    {'id': 'ovo', 'nama': 'OVO', 'tipe': PaymentType.eWallet},
+  final List<Map<String, String>> _opsiEwallet = [
+    {'id': 'gopay', 'nama': 'GoPay', 'tipe': 'EWALLET'},
+    {'id': 'shopeepay', 'nama': 'ShopeePay', 'tipe': 'EWALLET'},
+    {'id': 'dana', 'nama': 'DANA', 'tipe': 'EWALLET'},
+    {'id': 'ovo', 'nama': 'OVO', 'tipe': 'EWALLET'},
   ];
 
   @override
@@ -582,7 +620,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
     );
   }
 
-  Widget _buildOpsi(Map<String, dynamic> opsi) {
+  Widget _buildOpsi(Map<String, String> opsi) {
     final bool dipilih = _terpilih == opsi['id'];
     return GestureDetector(
       onTap: () => setState(() => _terpilih = opsi['id']),
@@ -602,7 +640,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
         child: Row(
           children: [
             Icon(
-              opsi['tipe'] == PaymentType.eWallet
+              opsi['tipe'] == 'EWALLET'
                   ? Icons.account_balance_wallet_outlined
                   : Icons.credit_card,
               color: dipilih ? AppColors.primary : context.mutedColor,
@@ -610,7 +648,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
             ),
             const SizedBox(width: 12),
             Text(
-              opsi['nama'],
+              opsi['nama']!,
               style: TextStyle(
                 color: dipilih ? Colors.white : context.mutedColor,
                 fontSize: 14,
@@ -633,15 +671,9 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
   void _konfirmasi() {
     final semua = [..._opsiKartu, ..._opsiEwallet];
     final opsi = semua.firstWhere((o) => o['id'] == _terpilih);
-    final newMethod = PaymentMethod(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      nama: opsi['nama'] as String,
-      detail: opsi['tipe'] == PaymentType.eWallet
-          ? 'Terhubung: Nomor baru'
-          : '•••• •••• •••• ????',
-      tipe: opsi['tipe'] as PaymentType,
-    );
-    widget.onTambah(newMethod);
-    Navigator.pop(context);
+    final tipe = opsi['tipe']!;
+    final detail =
+        tipe == 'EWALLET' ? 'Terhubung' : '•••• •••• •••• ????';
+    widget.onTambah(tipe, opsi['nama']!, detail);
   }
 }

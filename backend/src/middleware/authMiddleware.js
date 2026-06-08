@@ -15,8 +15,6 @@ async function authenticate(req, res, next) {
     const [rows] = await pool.query(
       `SELECT
         u.user_id,
-        u.user_type_id,
-        ut.type_name AS user_type,
         u.full_name,
         u.email,
         u.phone_number,
@@ -29,7 +27,6 @@ async function authenticate(req, res, next) {
         u.account_status,
         u.created_at
       FROM users u
-      INNER JOIN user_types ut ON ut.user_type_id = u.user_type_id
       WHERE u.user_id = ?`,
       [payload.user_id],
     );
