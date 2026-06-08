@@ -22,6 +22,7 @@ const BASE_SELECT = `
     p.price,
     p.stock,
     p.image_url,
+    p.waste_kg,
     p.sold_count AS sold,
     p.rating,
     (s.user_id = ?) AS is_mine,
@@ -45,6 +46,7 @@ function publicProduct(row) {
     price: Number(row.price),
     stock: Number(row.stock),
     image_url: row.image_url,
+    waste_kg: Number(row.waste_kg),
     sold: Number(row.sold),
     rating: Number(row.rating),
     review_count: Number(row.review_count),
@@ -138,6 +140,7 @@ function validateProductBody(body) {
   const imageUrl = cleanText(body.image_url || body.imageUrl);
   const price = Number(body.price);
   const stock = Number(body.stock);
+  const wasteKg = Number(body.waste_kg ?? body.wasteKg ?? 0);
 
   if (!name || name.length < 3) {
     throw new HttpError(400, 'Nama produk minimal 3 karakter');
@@ -151,12 +154,15 @@ function validateProductBody(body) {
   if (!Number.isFinite(stock) || stock < 0) {
     throw new HttpError(400, 'Stok tidak valid');
   }
-  return { name, category, description, imageUrl, price, stock };
+  if (!Number.isFinite(wasteKg) || wasteKg < 0) {
+    throw new HttpError(400, 'Berat limbah tidak valid');
+  }
+  return { name, category, description, imageUrl, price, stock, wasteKg };
 }
 
 async function createProduct(req, res, next) {
   try {
-    const { name, category, description, imageUrl, price, stock } =
+    const { name, category, description, imageUrl, price, stock, wasteKg } =
       validateProductBody(req.body);
 
     const categoryId = await categoryIdByName(category);
@@ -166,9 +172,9 @@ async function createProduct(req, res, next) {
 
     const [result] = await pool.query(
       `INSERT INTO products
-        (seller_id, product_category_id, product_name, description, price, unit_name, stock, image_url, rating, sold_count, product_status, created_at)
-      VALUES (?, ?, ?, ?, ?, 'unit', ?, ?, 0, 0, 'ACTIVE', NOW())`,
-      [sellerId, categoryId, name, description, price, stock, imageUrl],
+        (seller_id, product_category_id, product_name, description, price, unit_name, stock, waste_kg, image_url, rating, sold_count, product_status, created_at)
+      VALUES (?, ?, ?, ?, ?, 'unit', ?, ?, ?, 0, 0, 'ACTIVE', NOW())`,
+      [sellerId, categoryId, name, description, price, stock, wasteKg, imageUrl],
     );
 
     const [rows] = await pool.query(
@@ -207,16 +213,16 @@ async function assertOwnership(productId, userId) {
 async function updateProduct(req, res, next) {
   try {
     await assertOwnership(Number(req.params.id), req.user.user_id);
-    const { name, category, description, imageUrl, price, stock } =
+    const { name, category, description, imageUrl, price, stock, wasteKg } =
       validateProductBody(req.body);
     const categoryId = await categoryIdByName(category);
     if (!categoryId) throw new HttpError(400, 'Kategori tidak ditemukan');
 
     await pool.query(
       `UPDATE products
-        SET product_category_id = ?, product_name = ?, description = ?, price = ?, stock = ?, image_url = ?
+        SET product_category_id = ?, product_name = ?, description = ?, price = ?, stock = ?, waste_kg = ?, image_url = ?
       WHERE product_id = ?`,
-      [categoryId, name, description, price, stock, imageUrl, req.params.id],
+      [categoryId, name, description, price, stock, wasteKg, imageUrl, req.params.id],
     );
 
     const [rows] = await pool.query(

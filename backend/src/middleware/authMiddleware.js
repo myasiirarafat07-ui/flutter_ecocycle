@@ -22,7 +22,7 @@ async function authenticate(req, res, next) {
         u.is_premium,
         u.eco_points,
         u.total_waste_kg,
-        u.trees_planted,
+        u.green_transactions,
         u.co2_offset_kg,
         u.account_status,
         u.created_at

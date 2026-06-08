@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
 const HttpError = require('../utils/httpError');
+const { CO2E_PER_WASTE_KG } = require('../utils/impact');
 
 const SHIPPING = { standar: 15000, ekspres: 35000 };
 
@@ -62,8 +63,10 @@ async function createOrder(req, res, next) {
 
     // 2) Validasi & hitung dari harga server (lock baris produk).
     let subtotal = 0;
+    let buyerWaste = 0;
     const lines = [];
     const sellerUserIds = new Set();
+    const sellerWaste = new Map(); // seller_user_id -> total limbah (kg)
 
     for (const item of requested) {
       const productId = Number(item.product_id);
@@ -71,7 +74,7 @@ async function createOrder(req, res, next) {
       if (qty <= 0) continue;
 
       const [rows] = await connection.query(
-        `SELECT p.product_id, p.product_name, p.price, p.stock, s.user_id AS seller_user_id
+        `SELECT p.product_id, p.product_name, p.price, p.stock, p.waste_kg, s.user_id AS seller_user_id
          FROM products p
          INNER JOIN sellers s ON s.seller_id = p.seller_id
          WHERE p.product_id = ? FOR UPDATE`,
@@ -89,6 +92,12 @@ async function createOrder(req, res, next) {
       }
       const lineSubtotal = Number(p.price) * qty;
       subtotal += lineSubtotal;
+      const lineWaste = Number(p.waste_kg) * qty;
+      buyerWaste += lineWaste;
+      sellerWaste.set(
+        p.seller_user_id,
+        (sellerWaste.get(p.seller_user_id) || 0) + lineWaste,
+      );
       lines.push({
         product_id: p.product_id,
         product_name: p.product_name,
@@ -167,7 +176,26 @@ async function createOrder(req, res, next) {
       );
     }
 
-    // 8) Kosongkan keranjang.
+    // 8) Dampak lingkungan: akumulasi ke pembeli & tiap penjual yang terlibat.
+    //    Menambah limbah + 1 transaksi hijau, dan menghitung ulang CO2e dari total.
+    // Catatan: MySQL mengevaluasi SET kiri-ke-kanan, sehingga saat menghitung
+    // co2_offset_kg, total_waste_kg SUDAH bertambah → langsung kali faktor.
+    const applyImpact = (userId, addedWaste) =>
+      connection.query(
+        `UPDATE users
+          SET total_waste_kg = total_waste_kg + ?,
+              green_transactions = green_transactions + 1,
+              co2_offset_kg = total_waste_kg * ?
+        WHERE user_id = ?`,
+        [addedWaste, CO2E_PER_WASTE_KG, userId],
+      );
+
+    await applyImpact(req.user.user_id, buyerWaste);
+    for (const [sellerUserId, waste] of sellerWaste) {
+      await applyImpact(sellerUserId, waste);
+    }
+
+    // 9) Kosongkan keranjang.
     if (cartId) {
       await connection.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
     }

@@ -48,7 +48,7 @@ class _MainWrapperState extends State<MainWrapper> {
       key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
-      drawer: AppDrawer(onNavigateToTab: _onNavTap),
+      drawer: const AppDrawer(),
 
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: AppBottomNavBar(

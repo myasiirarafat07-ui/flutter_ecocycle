@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/app_colors.dart';
+import '../../constants/eco_tier.dart';
 import '../../providers/user_provider.dart';
 import '../../services/point_api_service.dart';
 
@@ -129,8 +130,21 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
           _buildBalanceCard(context, summary),
+          const SizedBox(height: 16),
+          _buildTierCard(context, summary.balance),
           const SizedBox(height: 20),
           _buildImpactRow(context, summary),
+          const SizedBox(height: 24),
+          Text(
+            'Semua Peringkat',
+            style: TextStyle(
+              color: context.textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildTierList(context, summary.balance),
           const SizedBox(height: 24),
           Text(
             'Riwayat Poin',
@@ -189,16 +203,199 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
     );
   }
 
+  Widget _buildTierCard(BuildContext context, int balance) {
+    final tier = EcoTier.currentFor(balance);
+    final next = EcoTier.nextFor(balance);
+    final progress = EcoTier.progressFor(balance);
+    final pointsToNext = EcoTier.pointsToNextFor(balance);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: tier.color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(tier.icon, color: tier.color, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pangkat Kamu',
+                      style: TextStyle(color: context.mutedColor, fontSize: 12),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      tier.name,
+                      style: TextStyle(
+                        color: tier.color,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              backgroundColor: context.dividerColor,
+              valueColor: AlwaysStoppedAnimation<Color>(tier.color),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            next == null
+                ? 'Kamu telah mencapai pangkat tertinggi 🎉'
+                : '$pointsToNext poin lagi menuju ${next.name}',
+            style: TextStyle(color: context.mutedColor, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTierList(BuildContext context, int balance) {
+    final current = EcoTier.currentFor(balance);
+    return Container(
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        children: [
+          for (var i = 0; i < EcoTier.tiers.length; i++)
+            _buildTierRow(
+              context,
+              EcoTier.tiers[i],
+              balance: balance,
+              isCurrent: EcoTier.tiers[i].name == current.name,
+              showDivider: i != EcoTier.tiers.length - 1,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTierRow(
+    BuildContext context,
+    EcoTier tier, {
+    required int balance,
+    required bool isCurrent,
+    required bool showDivider,
+  }) {
+    final achieved = balance >= tier.minPoints;
+    return Container(
+      decoration: BoxDecoration(
+        color: isCurrent ? tier.color.withOpacity(0.08) : null,
+        border: showDivider
+            ? Border(bottom: BorderSide(color: context.dividerColor))
+            : null,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: achieved
+                  ? tier.color.withOpacity(0.15)
+                  : context.dividerColor.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              tier.icon,
+              color: achieved ? tier.color : context.mutedColor,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      tier.name,
+                      style: TextStyle(
+                        color: achieved ? context.textColor : context.mutedColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (isCurrent) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: tier.color,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Saat ini',
+                          style: TextStyle(color: Colors.white, fontSize: 10),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  tier.minPoints == 0
+                      ? '0 poin'
+                      : 'Mulai ${tier.minPoints} poin',
+                  style: TextStyle(color: context.mutedColor, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            achieved ? Icons.check_circle : Icons.lock_outline,
+            color: achieved ? tier.color : context.mutedColor,
+            size: 20,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildImpactRow(BuildContext context, PointsSummary s) {
     return Row(
       children: [
-        _impactCard(context, Icons.delete_sweep_outlined,
-            '${s.totalWasteKg.toStringAsFixed(1)} kg', 'Sampah'),
-        const SizedBox(width: 12),
-        _impactCard(context, Icons.park_outlined, '${s.treesPlanted}', 'Pohon'),
+        _impactCard(context, Icons.recycling,
+            '${s.totalWasteKg.toStringAsFixed(1)} kg', 'Limbah'),
         const SizedBox(width: 12),
         _impactCard(context, Icons.cloud_outlined,
-            '${s.co2OffsetKg.toStringAsFixed(1)} kg', 'CO₂'),
+            '${s.co2OffsetKg.toStringAsFixed(1)} kg', 'CO₂e'),
+        const SizedBox(width: 12),
+        _impactCard(
+            context, Icons.swap_horiz, '${s.greenTransactions}', 'Transaksi'),
       ],
     );
   }

@@ -3,13 +3,16 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/payment/payment_method_screen.dart';
+import '../screens/profile/personal_info_screen.dart';
+import '../screens/seller/my_products_screen.dart';
+import '../screens/wishlist/wishlist_screen.dart';
+import '../screens/notification/notification_screen.dart';
 import '../utils/logout_dialog.dart';
 import '../constants/app_colors.dart';
+import '../constants/eco_tier.dart';
 
 class AppDrawer extends StatelessWidget {
-  final void Function(int index)? onNavigateToTab;
-
-  const AppDrawer({super.key, this.onNavigateToTab});
+  const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +23,7 @@ class AppDrawer extends StatelessWidget {
     final displayName = user.name.isEmpty ? 'Pengguna' : user.name;
     final displayEmail = user.email.isEmpty ? 'email@contoh.com' : user.email;
     final initials = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
+    final tier = EcoTier.currentFor(user.ecoPoints);
 
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -34,30 +38,56 @@ class AppDrawer extends StatelessWidget {
                     initials: initials,
                     displayName: displayName,
                     displayEmail: displayEmail,
+                    tier: tier,
                     isDark: isDark,
                   ),
 
                   const SizedBox(height: 8),
 
-                  _DrawerSectionLabel(label: 'Menu', isDark: isDark),
-                  _DrawerItem(
-                    icon: Icons.home_outlined,
-                    activeIcon: Icons.home,
-                    label: 'Beranda',
-                    isDark: isDark,
-                    onTap: () {
-                      Navigator.pop(context);
-                      onNavigateToTab?.call(0);
-                    },
-                  ),
+                  _DrawerSectionLabel(label: 'Akun', isDark: isDark),
                   _DrawerItem(
                     icon: Icons.person_outline,
                     activeIcon: Icons.person,
-                    label: 'Profil Saya',
+                    label: 'Informasi Pribadi',
                     isDark: isDark,
                     onTap: () {
                       Navigator.pop(context);
-                      onNavigateToTab?.call(4);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PersonalInfoScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.storefront_outlined,
+                    activeIcon: Icons.storefront,
+                    label: 'Produk Saya',
+                    isDark: isDark,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MyProductsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.favorite_border,
+                    activeIcon: Icons.favorite,
+                    label: 'Favorit',
+                    isDark: isDark,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WishlistScreen(),
+                        ),
+                      );
                     },
                   ),
                   _DrawerItem(
@@ -71,6 +101,21 @@ class AppDrawer extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const PaymentMethodScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.notifications_outlined,
+                    activeIcon: Icons.notifications,
+                    label: 'Notifikasi',
+                    isDark: isDark,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationScreen(),
                         ),
                       );
                     },
@@ -196,12 +241,14 @@ class _DrawerHeader extends StatelessWidget {
   final String initials;
   final String displayName;
   final String displayEmail;
+  final EcoTier tier;
   final bool isDark;
 
   const _DrawerHeader({
     required this.initials,
     required this.displayName,
     required this.displayEmail,
+    required this.tier,
     required this.isDark,
   });
 
@@ -282,12 +329,19 @@ class _DrawerHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.15),
+              color: tier.color.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
-              'Penjaga Alam',
-              style: TextStyle(color: AppColors.primary, fontSize: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(tier.icon, color: tier.color, size: 13),
+                const SizedBox(width: 4),
+                Text(
+                  tier.name,
+                  style: TextStyle(color: tier.color, fontSize: 12),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 6),

@@ -94,6 +94,7 @@ class ProductApiService {
     required int price,
     required int stock,
     required String imageUrl,
+    double wasteKg = 0,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/products'),
@@ -105,6 +106,7 @@ class ProductApiService {
         'price': price,
         'stock': stock,
         'image_url': imageUrl,
+        'waste_kg': wasteKg,
       }),
     );
     if (response.statusCode != 201) _fail(response);
@@ -121,6 +123,7 @@ class ProductApiService {
     required int price,
     required int stock,
     required String imageUrl,
+    double wasteKg = 0,
   }) async {
     final response = await http.put(
       Uri.parse('$baseUrl/api/products/$id'),
@@ -132,6 +135,7 @@ class ProductApiService {
         'price': price,
         'stock': stock,
         'image_url': imageUrl,
+        'waste_kg': wasteKg,
       }),
     );
     if (response.statusCode != 200) _fail(response);

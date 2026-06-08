@@ -38,14 +38,14 @@ class PointTransaction {
 class PointsSummary {
   final int balance;
   final double totalWasteKg;
-  final int treesPlanted;
+  final int greenTransactions;
   final double co2OffsetKg;
   final List<PointTransaction> transactions;
 
   const PointsSummary({
     required this.balance,
     required this.totalWasteKg,
-    required this.treesPlanted,
+    required this.greenTransactions,
     required this.co2OffsetKg,
     required this.transactions,
   });
@@ -75,7 +75,7 @@ class PointApiService {
     return PointsSummary(
       balance: (body['balance'] as num?)?.toInt() ?? 0,
       totalWasteKg: (body['total_waste_kg'] as num?)?.toDouble() ?? 0,
-      treesPlanted: (body['trees_planted'] as num?)?.toInt() ?? 0,
+      greenTransactions: (body['green_transactions'] as num?)?.toInt() ?? 0,
       co2OffsetKg: (body['co2_offset_kg'] as num?)?.toDouble() ?? 0,
       transactions: data
           .map((e) => PointTransaction.fromJson(e as Map<String, dynamic>))

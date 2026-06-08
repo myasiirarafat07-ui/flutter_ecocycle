@@ -8,6 +8,7 @@ class Product {
   final int price;
   final int stock;
   final String imageUrl;
+  final double wasteKg;
   final int sold;
   final double rating;
   final int reviewCount;
@@ -23,6 +24,7 @@ class Product {
     required this.price,
     required this.stock,
     required this.imageUrl,
+    this.wasteKg = 0,
     required this.sold,
     required this.rating,
     required this.reviewCount,
@@ -40,6 +42,7 @@ class Product {
       price: _toInt(json['price']),
       stock: _toInt(json['stock']),
       imageUrl: json['image_url']?.toString() ?? '',
+      wasteKg: _toDouble(json['waste_kg']),
       sold: _toInt(json['sold']),
       rating: _toDouble(json['rating']),
       reviewCount: _toInt(json['review_count']),

@@ -16,7 +16,7 @@ class UserProvider extends ChangeNotifier {
 
   int _ecoPoints = 0;
   double _totalWasteKg = 0;
-  int _treesPlanted = 0;
+  int _greenTransactions = 0;
   double _co2OffsetKg = 0;
 
   String get token => _token;
@@ -28,7 +28,7 @@ class UserProvider extends ChangeNotifier {
 
   int get ecoPoints => _ecoPoints;
   double get totalWasteKg => _totalWasteKg;
-  int get treesPlanted => _treesPlanted;
+  int get greenTransactions => _greenTransactions;
   double get co2OffsetKg => _co2OffsetKg;
 
   bool get isLoggedIn => _token.isNotEmpty && _email.isNotEmpty;
@@ -46,7 +46,7 @@ class UserProvider extends ChangeNotifier {
         DateTime.now().year.toString();
     _ecoPoints = _toInt(user['eco_points']);
     _totalWasteKg = _toDouble(user['total_waste_kg']);
-    _treesPlanted = _toInt(user['trees_planted']);
+    _greenTransactions = _toInt(user['green_transactions']);
     _co2OffsetKg = _toDouble(user['co2_offset_kg']);
   }
 
@@ -122,7 +122,7 @@ class UserProvider extends ChangeNotifier {
     _memberSince = '';
     _ecoPoints = 0;
     _totalWasteKg = 0;
-    _treesPlanted = 0;
+    _greenTransactions = 0;
     _co2OffsetKg = 0;
     _clearToken();
     notifyListeners();

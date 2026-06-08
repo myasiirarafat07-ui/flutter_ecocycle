@@ -7,6 +7,7 @@ import '../../providers/wishlist_provider.dart';
 import '../../services/auth_api_service.dart';
 import '../../widgets/app_text_field.dart';
 import '../main_wrapper.dart';
+import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -101,8 +102,13 @@ class _LoginScreenState extends State<LoginScreen> {
     MaterialPageRoute(builder: (_) => const RegisterScreen()),
   );
 
-  void _handleForgotPassword() => ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Fitur lupa password segera hadir')),
+  void _handleForgotPassword() => Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ForgotPasswordScreen(
+        initialEmail: _emailController.text.trim().toLowerCase(),
+      ),
+    ),
   );
 
   @override

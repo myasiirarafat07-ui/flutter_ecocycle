@@ -200,6 +200,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           'Stok tersedia: ${product.stock}',
           style: TextStyle(color: context.mutedColor, fontSize: 13),
         ),
+        if (product.wasteKg > 0) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.recycling, color: AppColors.primary, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                'Menyelamatkan ${product.wasteKg.toStringAsFixed(1)} kg limbah per unit',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }

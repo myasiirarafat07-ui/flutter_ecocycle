@@ -1,7 +1,9 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { pool } = require('../config/db');
 const HttpError = require('../utils/httpError');
-const { createToken } = require('../utils/jwt');
+const { createToken, createResetToken, verifyToken } = require('../utils/jwt');
+const { sendOtpEmail } = require('../utils/mailer');
 
 function cleanText(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -21,7 +23,7 @@ function publicUser(row) {
     is_premium: Boolean(row.is_premium),
     eco_points: row.eco_points,
     total_waste_kg: Number(row.total_waste_kg),
-    trees_planted: row.trees_planted,
+    green_transactions: row.green_transactions,
     co2_offset_kg: Number(row.co2_offset_kg),
     account_status: row.account_status,
     created_at: row.created_at,
@@ -81,7 +83,7 @@ async function register(req, res, next) {
         u.is_premium,
         u.eco_points,
         u.total_waste_kg,
-        u.trees_planted,
+        u.green_transactions,
         u.co2_offset_kg,
         u.account_status,
         u.created_at
@@ -128,7 +130,7 @@ async function login(req, res, next) {
         u.is_premium,
         u.eco_points,
         u.total_waste_kg,
-        u.trees_planted,
+        u.green_transactions,
         u.co2_offset_kg,
         u.account_status,
         u.created_at
@@ -207,7 +209,7 @@ async function updateMe(req, res, next) {
     const [rows] = await pool.query(
       `SELECT
         user_id, full_name, email, phone_number, address,
-        is_premium, eco_points, total_waste_kg, trees_planted,
+        is_premium, eco_points, total_waste_kg, green_transactions,
         co2_offset_kg, account_status, created_at
       FROM users WHERE user_id = ?`,
       [userId],
@@ -222,9 +224,157 @@ async function updateMe(req, res, next) {
   }
 }
 
+// Langkah 1: verifikasi email + nomor HP, kirim OTP ke email.
+async function forgotPassword(req, res, next) {
+  try {
+    const email = cleanText(req.body.email).toLowerCase();
+    const phoneNumber = cleanText(req.body.phone_number || req.body.phone);
+
+    if (!email || !phoneNumber) {
+      throw new HttpError(400, 'Email dan nomor HP wajib diisi');
+    }
+
+    if (!isValidEmail(email)) {
+      throw new HttpError(400, 'Format email tidak valid');
+    }
+
+    const [rows] = await pool.query(
+      'SELECT user_id, full_name, email, phone_number FROM users WHERE email = ? LIMIT 1',
+      [email],
+    );
+
+    const user = rows[0];
+
+    if (!user || cleanText(user.phone_number) !== phoneNumber) {
+      throw new HttpError(404, 'Email atau nomor HP tidak cocok dengan akun mana pun');
+    }
+
+    const otp = String(crypto.randomInt(100000, 1000000));
+    const otpHash = await bcrypt.hash(otp, 10);
+    const minutes = Number(process.env.OTP_EXPIRES_MINUTES || 10);
+
+    // Batalkan OTP lama yang belum dipakai, lalu simpan yang baru.
+    await pool.query(
+      'UPDATE password_resets SET consumed = TRUE WHERE user_id = ? AND consumed = FALSE',
+      [user.user_id],
+    );
+
+    await pool.query(
+      `INSERT INTO password_resets (user_id, otp_hash, expires_at)
+       VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))`,
+      [user.user_id, otpHash, minutes],
+    );
+
+    const emailSent = await sendOtpEmail(user.email, otp, user.full_name);
+
+    if (emailSent) {
+      res.json({ message: 'Kode OTP telah dikirim ke email Anda' });
+    } else {
+      // Mode dev: SMTP belum dikonfigurasi, kirim OTP langsung agar tetap bisa diuji.
+      res.json({
+        message: 'Email belum dikonfigurasi — kode OTP ditampilkan untuk pengujian',
+        dev_otp: otp,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Langkah 2: verifikasi OTP, balas reset token bila valid.
+async function verifyOtp(req, res, next) {
+  try {
+    const email = cleanText(req.body.email).toLowerCase();
+    const otp = cleanText(req.body.otp);
+
+    if (!email || !otp) {
+      throw new HttpError(400, 'Email dan kode OTP wajib diisi');
+    }
+
+    const [rows] = await pool.query(
+      `SELECT pr.reset_id, pr.otp_hash, u.user_id, u.email
+         FROM password_resets pr
+         JOIN users u ON u.user_id = pr.user_id
+        WHERE u.email = ? AND pr.consumed = FALSE AND pr.expires_at > NOW()
+        ORDER BY pr.reset_id DESC
+        LIMIT 1`,
+      [email],
+    );
+
+    const resetRow = rows[0];
+
+    if (!resetRow) {
+      throw new HttpError(400, 'Kode OTP salah atau sudah kedaluwarsa');
+    }
+
+    const otpMatches = await bcrypt.compare(otp, resetRow.otp_hash);
+
+    if (!otpMatches) {
+      throw new HttpError(400, 'Kode OTP salah atau sudah kedaluwarsa');
+    }
+
+    res.json({
+      message: 'Kode OTP terverifikasi',
+      resetToken: createResetToken({
+        user_id: resetRow.user_id,
+        email: resetRow.email,
+      }),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Langkah 3: verifikasi reset token, perbarui kata sandi.
+async function resetPassword(req, res, next) {
+  try {
+    const resetToken = cleanText(req.body.resetToken || req.body.reset_token);
+    const newPassword = cleanText(req.body.new_password || req.body.password);
+
+    if (!resetToken || !newPassword) {
+      throw new HttpError(400, 'Token dan kata sandi baru wajib diisi');
+    }
+
+    if (newPassword.length < 6) {
+      throw new HttpError(400, 'Password minimal 6 karakter');
+    }
+
+    let payload;
+    try {
+      payload = verifyToken(resetToken);
+    } catch (_) {
+      throw new HttpError(401, 'Sesi reset tidak valid atau sudah kedaluwarsa');
+    }
+
+    if (payload.purpose !== 'password_reset') {
+      throw new HttpError(401, 'Token reset tidak valid');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query('UPDATE users SET password_hash = ? WHERE user_id = ?', [
+      passwordHash,
+      payload.user_id,
+    ]);
+
+    // Pastikan semua OTP user dianggap terpakai setelah reset berhasil.
+    await pool.query(
+      'UPDATE password_resets SET consumed = TRUE WHERE user_id = ?',
+      [payload.user_id],
+    );
+
+    res.json({ message: 'Kata sandi berhasil diperbarui' });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
   me,
   updateMe,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
 };

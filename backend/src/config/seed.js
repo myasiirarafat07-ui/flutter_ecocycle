@@ -69,6 +69,50 @@ async function ensurePointTransactionsTable() {
   );
 }
 
+// Kode OTP reset kata sandi (fitur Lupa Kata Sandi). otp_hash di-hash bcrypt.
+async function ensurePasswordResetsTable() {
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS password_resets (
+      reset_id   BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      user_id    BIGINT UNSIGNED NOT NULL,
+      otp_hash   VARCHAR(255) NOT NULL,
+      expires_at DATETIME NOT NULL,
+      consumed   BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT fk_password_resets_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    )`,
+  );
+}
+
+// Pastikan sebuah kolom ada (idempotent, portabel MySQL/MariaDB) — cek dulu ke
+// information_schema lalu ALTER bila belum ada.
+async function ensureColumn(table, column, definition) {
+  const [rows] = await pool.query(
+    `SELECT 1 FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
+      LIMIT 1`,
+    [table, column],
+  );
+  if (rows.length === 0) {
+    await pool.query(`ALTER TABLE \`${table}\` ADD COLUMN ${definition}`);
+  }
+}
+
+// Kolom dampak lingkungan: berat limbah per produk + jumlah transaksi hijau user.
+async function ensureImpactColumns() {
+  await ensureColumn(
+    'products',
+    'waste_kg',
+    'waste_kg DECIMAL(10,2) NOT NULL DEFAULT 0',
+  );
+  await ensureColumn(
+    'users',
+    'green_transactions',
+    'green_transactions INT NOT NULL DEFAULT 0',
+  );
+}
+
 async function seedCategories() {
   await pool.query(
     `INSERT IGNORE INTO product_categories (category_name, description) VALUES
@@ -82,6 +126,8 @@ async function seedRequiredData() {
   await ensureWishlistsTable();
   await ensurePaymentMethodsTable();
   await ensurePointTransactionsTable();
+  await ensurePasswordResetsTable();
+  await ensureImpactColumns();
   await seedCategories();
 }
 

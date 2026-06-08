@@ -13,7 +13,7 @@ function publicTransaction(row) {
 async function getPoints(req, res, next) {
   try {
     const [userRows] = await pool.query(
-      `SELECT eco_points, total_waste_kg, trees_planted, co2_offset_kg
+      `SELECT eco_points, total_waste_kg, green_transactions, co2_offset_kg
        FROM users WHERE user_id = ? LIMIT 1`,
       [req.user.user_id],
     );
@@ -29,7 +29,7 @@ async function getPoints(req, res, next) {
     res.json({
       balance: Number(u.eco_points || 0),
       total_waste_kg: Number(u.total_waste_kg || 0),
-      trees_planted: Number(u.trees_planted || 0),
+      green_transactions: Number(u.green_transactions || 0),
       co2_offset_kg: Number(u.co2_offset_kg || 0),
       data: txRows.map(publicTransaction),
     });

@@ -22,6 +22,7 @@ class _SellProductScreenState extends State<SellProductScreen> {
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
+  final _wasteController = TextEditingController();
   final _imageController = TextEditingController();
   final _descController = TextEditingController();
 
@@ -39,6 +40,7 @@ class _SellProductScreenState extends State<SellProductScreen> {
       _nameController.text = p.name;
       _priceController.text = p.price.toString();
       _stockController.text = p.stock.toString();
+      _wasteController.text = p.wasteKg > 0 ? p.wasteKg.toString() : '';
       _imageController.text = p.imageUrl;
       _descController.text = p.description;
       _category = _categories.contains(p.category) ? p.category : _categories.first;
@@ -50,6 +52,7 @@ class _SellProductScreenState extends State<SellProductScreen> {
     _nameController.dispose();
     _priceController.dispose();
     _stockController.dispose();
+    _wasteController.dispose();
     _imageController.dispose();
     _descController.dispose();
     super.dispose();
@@ -71,6 +74,7 @@ class _SellProductScreenState extends State<SellProductScreen> {
     final name = _nameController.text.trim();
     final price = int.tryParse(_priceController.text.trim()) ?? -1;
     final stock = int.tryParse(_stockController.text.trim()) ?? -1;
+    final wasteKg = double.tryParse(_wasteController.text.trim().replaceAll(',', '.')) ?? 0;
 
     if (name.length < 3) {
       _snack('Nama produk minimal 3 karakter');
@@ -82,6 +86,10 @@ class _SellProductScreenState extends State<SellProductScreen> {
     }
     if (stock < 0) {
       _snack('Stok tidak valid');
+      return;
+    }
+    if (wasteKg < 0) {
+      _snack('Berat limbah tidak valid');
       return;
     }
 
@@ -97,6 +105,7 @@ class _SellProductScreenState extends State<SellProductScreen> {
           price: price,
           stock: stock,
           imageUrl: _imageController.text.trim(),
+          wasteKg: wasteKg,
         );
       } else {
         await _api.createProduct(
@@ -107,6 +116,7 @@ class _SellProductScreenState extends State<SellProductScreen> {
           price: price,
           stock: stock,
           imageUrl: _imageController.text.trim(),
+          wasteKg: wasteKg,
         );
       }
       if (!mounted) return;
@@ -190,6 +200,22 @@ class _SellProductScreenState extends State<SellProductScreen> {
                   hint: 'mis. 100',
                   keyboardType: TextInputType.number,
                 ),
+              ),
+              const SizedBox(height: 16),
+              LabeledField(
+                label: 'Berat Limbah Terselamatkan (kg/unit)',
+                child: AppTextField(
+                  controller: _wasteController,
+                  hint: 'mis. 2.5 — berat limbah yang didaur ulang per unit',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Dipakai menghitung dampak lingkungan pembeli & kamu. Kosongkan jika tidak relevan.',
+                style: TextStyle(color: context.mutedColor, fontSize: 12),
               ),
               const SizedBox(height: 16),
               LabeledField(
