@@ -77,6 +77,8 @@ class OrderStatusBadge extends StatelessWidget {
       ),
       child: Text(
         orderStatusLabel(status),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: color,
           fontSize: 11,
@@ -103,6 +105,8 @@ class PaymentStatusBadge extends StatelessWidget {
       ),
       child: Text(
         paymentStatusLabel(status),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: color,
           fontSize: 11,

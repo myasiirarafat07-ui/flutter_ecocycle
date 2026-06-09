@@ -34,6 +34,19 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     _sales = _api.mySales(token);
   }
 
+  Future<void> _refresh(bool isSales) async {
+    final token = context.read<UserProvider>().token;
+    final next = isSales ? _api.mySales(token) : _api.myOrders(token);
+    setState(() {
+      if (isSales) {
+        _sales = next;
+      } else {
+        _purchases = next;
+      }
+    });
+    await next;
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -64,13 +77,13 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
-  Widget _buildList(Future<List<Order>> future, String emptyMsg,
-      {required bool isSales}) {
+  Widget _buildList(
+    Future<List<Order>> future,
+    String emptyMsg, {
+    required bool isSales,
+  }) {
     return RefreshIndicator(
-      onRefresh: () async {
-        setState(_reload);
-        await future;
-      },
+      onRefresh: () => _refresh(isSales),
       child: FutureBuilder<List<Order>>(
         future: future,
         builder: (context, snapshot) {
@@ -80,30 +93,41 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             );
           }
           if (snapshot.hasError) {
-            return ListView(children: [
-              const SizedBox(height: 120),
-              Center(
-                child: Text('Gagal memuat.\n${snapshot.error}',
+            return ListView(
+              children: [
+                const SizedBox(height: 120),
+                Center(
+                  child: Text(
+                    'Gagal memuat.\n${snapshot.error}',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: context.mutedColor)),
-              ),
-            ]);
+                    style: TextStyle(color: context.mutedColor),
+                  ),
+                ),
+              ],
+            );
           }
           final orders = snapshot.data ?? [];
           if (orders.isEmpty) {
-            return ListView(children: [
-              const SizedBox(height: 120),
-              Icon(Icons.receipt_long_outlined,
-                  color: context.mutedColor, size: 56),
-              const SizedBox(height: 12),
-              Center(
-                child: Text(emptyMsg,
-                    style: TextStyle(color: context.mutedColor, fontSize: 15)),
-              ),
-            ]);
+            return ListView(
+              children: [
+                const SizedBox(height: 120),
+                Icon(
+                  Icons.receipt_long_outlined,
+                  color: context.mutedColor,
+                  size: 56,
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    emptyMsg,
+                    style: TextStyle(color: context.mutedColor, fontSize: 15),
+                  ),
+                ),
+              ],
+            );
           }
           return ListView.separated(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
             itemCount: orders.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (_, i) => _buildCard(orders[i], isSales),
@@ -134,40 +158,55 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(order.orderCode,
+                Expanded(
+                  child: Text(
+                    order.orderCode,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        color: context.textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14)),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (order.paymentStatus.toUpperCase() == 'PENDING') ...[
-                      PaymentStatusBadge(order.paymentStatus),
-                      const SizedBox(width: 6),
+                      color: context.textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    alignment: WrapAlignment.end,
+                    children: [
+                      if (order.paymentStatus.toUpperCase() == 'PENDING')
+                        PaymentStatusBadge(order.paymentStatus),
+                      OrderStatusBadge(order.orderStatus),
                     ],
-                    OrderStatusBadge(order.orderStatus),
-                  ],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            Text(subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: context.mutedColor, fontSize: 13)),
+            Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: context.mutedColor, fontSize: 13),
+            ),
             if (isSales && order.buyerName.isNotEmpty) ...[
               const SizedBox(height: 2),
-              Text('Pembeli: ${order.buyerName}',
-                  style: TextStyle(color: context.mutedColor, fontSize: 12)),
+              Text(
+                'Pembeli: ${order.buyerName}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: context.mutedColor, fontSize: 12),
+              ),
             ],
             if (!isSales && order.needsReview) ...[
               const SizedBox(height: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
@@ -175,29 +214,46 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.star_outline,
-                        size: 13, color: AppColors.warning),
+                    Icon(
+                      Icons.star_outline,
+                      size: 13,
+                      color: AppColors.warning,
+                    ),
                     SizedBox(width: 4),
-                    Text('Belum diulas',
-                        style: TextStyle(
-                            color: AppColors.warning,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold)),
+                    Text(
+                      'Belum diulas',
+                      style: TextStyle(
+                        color: AppColors.warning,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
             const SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(order.createdAt,
-                    style: TextStyle(color: context.mutedColor, fontSize: 11)),
-                Text(order.formattedTotal,
-                    style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14)),
+                Expanded(
+                  child: Text(
+                    order.createdAt,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: context.mutedColor, fontSize: 11),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  order.formattedTotal,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
               ],
             ),
           ],

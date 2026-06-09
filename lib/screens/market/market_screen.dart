@@ -70,7 +70,9 @@ class _MarketScreenState extends State<MarketScreen> {
   }
 
   void _reload() {
-    setState(() => _future = _load());
+    setState(() {
+      _future = _load();
+    });
   }
 
   @override
@@ -222,7 +224,11 @@ class _MarketScreenState extends State<MarketScreen> {
             hintStyle: TextStyle(color: context.mutedColor, fontSize: 14),
             prefixIcon: Icon(Icons.search, color: context.mutedColor, size: 22),
             suffixIcon: IconButton(
-              icon: Icon(Icons.arrow_forward, color: context.mutedColor, size: 20),
+              icon: Icon(
+                Icons.arrow_forward,
+                color: context.mutedColor,
+                size: 20,
+              ),
               onPressed: _reload,
             ),
             border: InputBorder.none,
@@ -368,12 +374,8 @@ class _MarketScreenState extends State<MarketScreen> {
   }
 
   void _showFilterSheet() {
-    final minCtrl = TextEditingController(
-      text: _minPrice?.toString() ?? '',
-    );
-    final maxCtrl = TextEditingController(
-      text: _maxPrice?.toString() ?? '',
-    );
+    final minCtrl = TextEditingController(text: _minPrice?.toString() ?? '');
+    final maxCtrl = TextEditingController(text: _maxPrice?.toString() ?? '');
     double rating = _minRating ?? 0;
 
     showModalBottomSheet(
@@ -525,8 +527,10 @@ class _MarketScreenState extends State<MarketScreen> {
           hintText: hint,
           hintStyle: TextStyle(color: context.mutedColor),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
         ),
       ),
     );
@@ -567,11 +571,7 @@ class _ProductCard extends StatelessWidget {
                     ),
                   ),
                   if (product.stock <= 0)
-                    const Positioned(
-                      top: 8,
-                      left: 8,
-                      child: StokHabisBadge(),
-                    ),
+                    const Positioned(top: 8, left: 8, child: StokHabisBadge()),
                 ],
               ),
             ),

@@ -28,12 +28,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _reload();
+    _future = _fetchOrder();
+  }
+
+  Future<Order> _fetchOrder() {
+    final token = context.read<UserProvider>().token;
+    return _api.getOrder(token, widget.orderId);
   }
 
   void _reload() {
-    final token = context.read<UserProvider>().token;
-    setState(() => _future = _api.getOrder(token, widget.orderId));
+    setState(() {
+      _future = _fetchOrder();
+    });
   }
 
   void _snack(String message) {
@@ -45,7 +51,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   Future<void> _shipOrder() async {
     if (_busy) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     final token = context.read<UserProvider>().token;
     try {
       await _api.shipOrder(token, widget.orderId);
@@ -58,13 +66,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     } catch (_) {
       _snack('Tidak bisa terhubung ke server');
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _busy = false;
+        });
+      }
     }
   }
 
   Future<void> _confirmPayment() async {
     if (_busy) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     final token = context.read<UserProvider>().token;
     try {
       await _api.confirmPayment(token, widget.orderId);
@@ -77,27 +91,39 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     } catch (_) {
       _snack('Tidak bisa terhubung ke server');
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _busy = false;
+        });
+      }
     }
   }
 
   Future<void> _completeOrder(Order order) async {
     if (_busy) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     final token = context.read<UserProvider>().token;
     try {
       await _api.completeOrder(token, widget.orderId);
       if (!mounted) return;
       _snack('Pesanan selesai. Yuk beri ulasan!');
       context.read<NotificationProvider>().refresh(token);
-      _reload();
+      setState(() {
+        _busy = false;
+      });
       await _promptReviews(order);
     } on OrderApiException catch (e) {
       _snack(e.message);
     } catch (_) {
       _snack('Tidak bisa terhubung ke server');
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _busy = false;
+        });
+      }
     }
   }
 
@@ -110,78 +136,131 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       await _showReviewDialog(item);
     }
     if (!mounted) return;
-    context.read<NotificationProvider>().refresh(context.read<UserProvider>().token);
+    context.read<NotificationProvider>().refresh(
+      context.read<UserProvider>().token,
+    );
     _reload();
   }
 
-  Future<void> _showReviewDialog(OrderItem item) async {
+  Future<bool> _showReviewDialog(OrderItem item) async {
     int rating = 5;
+    bool submitting = false;
+    String? errorText;
     final commentController = TextEditingController();
 
-    final submit = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setStateDialog) => AlertDialog(
-          backgroundColor: ctx.surfaceColor,
-          title: Text('Ulasan: ${item.productName}',
-              style: TextStyle(color: ctx.textColor, fontSize: 16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  5,
-                  (i) => IconButton(
-                    onPressed: () => setStateDialog(() => rating = i + 1),
-                    icon: Icon(
-                      i < rating ? Icons.star : Icons.star_border,
-                      color: AppColors.warning,
+    try {
+      final submit = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setStateDialog) => AlertDialog(
+            backgroundColor: ctx.surfaceColor,
+            title: Text(
+              'Ulasan: ${item.productName}',
+              style: TextStyle(color: ctx.textColor, fontSize: 16),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    5,
+                    (i) => IconButton(
+                      onPressed: submitting
+                          ? null
+                          : () => setStateDialog(() => rating = i + 1),
+                      icon: Icon(
+                        i < rating ? Icons.star : Icons.star_border,
+                        color: AppColors.warning,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              TextField(
-                controller: commentController,
-                maxLines: 3,
-                style: TextStyle(color: ctx.textColor),
-                decoration: InputDecoration(
-                  hintText: 'Tulis komentarmu...',
-                  hintStyle: TextStyle(color: ctx.mutedColor),
+                TextField(
+                  controller: commentController,
+                  enabled: !submitting,
+                  maxLines: 3,
+                  style: TextStyle(color: ctx.textColor),
+                  decoration: InputDecoration(
+                    hintText: 'Tulis komentarmu...',
+                    hintStyle: TextStyle(color: ctx.mutedColor),
+                  ),
                 ),
+                if (errorText != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    errorText!,
+                    style: const TextStyle(
+                      color: AppColors.danger,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: submitting ? null : () => Navigator.pop(ctx, false),
+                child: Text('Lewati', style: TextStyle(color: ctx.mutedColor)),
+              ),
+              TextButton(
+                onPressed: submitting
+                    ? null
+                    : () async {
+                        if (!mounted) return;
+                        setStateDialog(() {
+                          submitting = true;
+                          errorText = null;
+                        });
+                        try {
+                          await _productApi.createReview(
+                            token: context.read<UserProvider>().token,
+                            productId: item.productId,
+                            orderId: widget.orderId,
+                            rating: rating,
+                            comment: commentController.text.trim(),
+                          );
+                          if (ctx.mounted) Navigator.pop(ctx, true);
+                        } on ProductApiException catch (e) {
+                          if (!ctx.mounted) return;
+                          setStateDialog(() {
+                            submitting = false;
+                            errorText = e.message;
+                          });
+                        } catch (_) {
+                          if (!ctx.mounted) return;
+                          setStateDialog(() {
+                            submitting = false;
+                            errorText = 'Tidak bisa terhubung ke server';
+                          });
+                        }
+                      },
+                child: submitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : const Text(
+                        'Kirim',
+                        style: TextStyle(color: AppColors.primary),
+                      ),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text('Lewati', style: TextStyle(color: ctx.mutedColor)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Kirim',
-                  style: TextStyle(color: AppColors.primary)),
-            ),
-          ],
         ),
-      ),
-    );
-
-    if (submit != true || !mounted) return;
-    final token = context.read<UserProvider>().token;
-    try {
-      await _productApi.createReview(
-        token: token,
-        productId: item.productId,
-        orderId: widget.orderId,
-        rating: rating,
-        comment: commentController.text.trim(),
       );
-      _snack('Ulasan "${item.productName}" terkirim');
-    } on ProductApiException catch (e) {
-      _snack(e.message);
-    } catch (_) {
-      _snack('Tidak bisa terhubung ke server');
+
+      if (submit == true && mounted) {
+        _snack('Ulasan "${item.productName}" terkirim');
+      }
+      return submit == true;
+    } finally {
+      commentController.dispose();
     }
   }
 
@@ -201,8 +280,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             }
             if (snapshot.hasError) {
               return Center(
-                child: Text('${snapshot.error}',
-                    style: TextStyle(color: context.mutedColor)),
+                child: Text(
+                  '${snapshot.error}',
+                  style: TextStyle(color: context.mutedColor),
+                ),
               );
             }
             final order = snapshot.data!;
@@ -232,28 +313,32 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(order.orderCode,
-                    style: TextStyle(
-                        color: context.textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16)),
-                const SizedBox(height: 4),
-                Text(order.createdAt,
-                    style: TextStyle(color: context.mutedColor, fontSize: 12)),
-              ],
+          Text(
+            order.orderCode,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: context.textColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          const SizedBox(height: 4),
+          Text(
+            order.createdAt,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: context.mutedColor, fontSize: 12),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
             children: [
               OrderStatusBadge(order.orderStatus),
-              const SizedBox(height: 6),
               PaymentStatusBadge(order.paymentStatus),
             ],
           ),
@@ -285,17 +370,23 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2),
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
                   )
                 : Icon(icon, size: 20),
-            label: Text(label,
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            label: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
+                borderRadius: BorderRadius.circular(14),
+              ),
               elevation: 0,
             ),
           ),
@@ -307,26 +398,46 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     if (order.isSeller) {
       if (status == 'DIPROSES') {
-        actions.add(button('Kirim / Serahkan Barang',
-            Icons.local_shipping_outlined, _shipOrder));
+        actions.add(
+          button(
+            'Kirim / Serahkan Barang',
+            Icons.local_shipping_outlined,
+            _shipOrder,
+          ),
+        );
       }
       if (pay == 'PENDING') {
-        actions.add(button(
-            'Terima Pembayaran', Icons.payments_outlined, _confirmPayment));
+        actions.add(
+          button('Terima Pembayaran', Icons.payments_outlined, _confirmPayment),
+        );
       }
     }
 
     if (order.isBuyer) {
       if (status == 'DIKIRIM' && pay == 'PAID') {
-        actions.add(button('Pesanan Diterima', Icons.check_circle_outline,
-            () => _completeOrder(order)));
+        actions.add(
+          button(
+            'Pesanan Diterima',
+            Icons.check_circle_outline,
+            () => _completeOrder(order),
+          ),
+        );
       } else if (status == 'DIKIRIM' && pay == 'PENDING') {
-        actions.add(_infoNote(context,
-            'Bayar tunai ke penjual saat barang diterima. Tombol "Pesanan Diterima" aktif setelah penjual mengonfirmasi pembayaran.'));
+        actions.add(
+          _infoNote(
+            context,
+            'Bayar tunai ke penjual saat barang diterima. Tombol "Pesanan Diterima" aktif setelah penjual mengonfirmasi pembayaran.',
+          ),
+        );
       }
       if (status == 'SELESAI' && order.needsReview) {
-        actions.add(button(
-            'Beri Ulasan', Icons.star_outline, () => _promptReviews(order)));
+        actions.add(
+          button(
+            'Beri Ulasan',
+            Icons.star_outline,
+            () => _promptReviews(order),
+          ),
+        );
       }
     }
 
@@ -352,8 +463,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             const Icon(Icons.info_outline, color: AppColors.warning, size: 18),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(text,
-                  style: TextStyle(color: context.textColor, fontSize: 13)),
+              child: Text(
+                text,
+                style: TextStyle(color: context.textColor, fontSize: 13),
+              ),
             ),
           ],
         ),
@@ -372,11 +485,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: TextStyle(
-                  color: context.textColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: TextStyle(
+              color: context.textColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 6),
           Text(value, style: TextStyle(color: context.mutedColor, height: 1.5)),
         ],
@@ -394,50 +510,73 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Item Pesanan',
-              style: TextStyle(
-                  color: context.textColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold)),
+          Text(
+            'Item Pesanan',
+            style: TextStyle(
+              color: context.textColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 12),
-          ...order.items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: ProductImage(
-                        imageUrl: item.imageUrl,
-                        width: 50,
-                        height: 50,
-                        iconSize: 20,
+          ...order.items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: ProductImage(
+                      imageUrl: item.imageUrl,
+                      width: 50,
+                      height: 50,
+                      iconSize: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.productName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: context.textColor,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${item.quantity} x ${rupiah(item.unitPrice)}',
+                          style: TextStyle(
+                            color: context.mutedColor,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 110),
+                    child: Text(
+                      rupiah(item.subtotal),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(item.productName,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: context.textColor, fontSize: 13)),
-                          const SizedBox(height: 2),
-                          Text('${item.quantity} x ${rupiah(item.unitPrice)}',
-                              style: TextStyle(
-                                  color: context.mutedColor, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                    Text(rupiah(item.subtotal),
-                        style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13)),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -445,21 +584,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   Widget _summaryCard(BuildContext context, Order order) {
     Widget row(String label, String value, {bool bold = false}) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label,
-                  style: TextStyle(
-                      color: bold ? context.textColor : context.mutedColor,
-                      fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
-              Text(value,
-                  style: TextStyle(
-                      color: bold ? AppColors.primary : context.textColor,
-                      fontWeight: bold ? FontWeight.bold : FontWeight.w500)),
-            ],
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: bold ? context.textColor : context.mutedColor,
+                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ),
-        );
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: bold ? AppColors.primary : context.textColor,
+                fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -470,11 +624,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         children: [
           row('Subtotal', rupiah(order.subtotal)),
-          row('Ongkos Kirim (${order.shippingMethod})', rupiah(order.shippingCost)),
+          row(
+            'Ongkos Kirim (${order.shippingMethod})',
+            rupiah(order.shippingCost),
+          ),
           Divider(color: context.dividerColor, height: 20),
           row('Total', rupiah(order.totalAmount), bold: true),
           const SizedBox(height: 6),
-          row('Pembayaran', '${order.paymentMethod} · ${order.paymentStatus}'),
+          row('Pembayaran', '${order.paymentMethod} - ${order.paymentStatus}'),
         ],
       ),
     );

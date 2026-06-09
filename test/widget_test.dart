@@ -3,18 +3,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:ecocycle/main.dart';
+import 'package:ecocycle/providers/cart_provider.dart';
+import 'package:ecocycle/providers/notification_provider.dart';
+import 'package:ecocycle/providers/theme_provider.dart';
 import 'package:ecocycle/providers/user_provider.dart';
+import 'package:ecocycle/providers/wishlist_provider.dart';
 import 'package:ecocycle/screens/auth/login_screen.dart';
 import 'package:ecocycle/widgets/app_drawer.dart';
 
+Widget _withProviders(Widget child, {UserProvider? userProvider}) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider<UserProvider>.value(
+        value: userProvider ?? UserProvider(),
+      ),
+      ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ChangeNotifierProvider(create: (_) => CartProvider()),
+      ChangeNotifierProvider(create: (_) => WishlistProvider()),
+      ChangeNotifierProvider(create: (_) => NotificationProvider()),
+    ],
+    child: child,
+  );
+}
+
 void main() {
   testWidgets('EcoCycle app smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => UserProvider(),
-        child: const MyApp(),
-      ),
-    );
+    await tester.pumpWidget(_withProviders(const MyApp()));
 
     expect(find.byType(MaterialApp), findsOneWidget);
   });
@@ -39,9 +53,8 @@ void main() {
       );
 
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: userProvider,
-        child: MaterialApp(
+      _withProviders(
+        MaterialApp(
           home: Scaffold(
             drawer: const AppDrawer(),
             body: Builder(
@@ -52,6 +65,7 @@ void main() {
             ),
           ),
         ),
+        userProvider: userProvider,
       ),
     );
 

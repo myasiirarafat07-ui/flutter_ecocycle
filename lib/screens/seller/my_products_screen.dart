@@ -33,7 +33,11 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     return _api.fetchMyProducts(token);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() {
+    setState(() {
+      _future = _load();
+    });
+  }
 
   Future<void> _openForm([Product? product]) async {
     final changed = await Navigator.push<bool>(
@@ -61,7 +65,10 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Hapus', style: TextStyle(color: AppColors.danger)),
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: AppColors.danger),
+            ),
           ),
         ],
       ),
@@ -122,8 +129,11 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.storefront_outlined,
-                        color: context.mutedColor, size: 56),
+                    Icon(
+                      Icons.storefront_outlined,
+                      color: context.mutedColor,
+                      size: 56,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Belum ada produk.\nTekan "Jual Produk" untuk menambah.',

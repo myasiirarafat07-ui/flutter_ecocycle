@@ -28,7 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _future = _api.fetchProducts(sort: 'terlaris', token: context.read<UserProvider>().token);
+    _future = _loadProducts();
+  }
+
+  Future<List<Product>> _loadProducts() {
+    return _api.fetchProducts(
+      sort: 'terlaris',
+      token: context.read<UserProvider>().token,
+    );
   }
 
   void _goToMarket() => widget.onNavigateToTab?.call(1);
@@ -42,7 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            setState(() => _future = _api.fetchProducts(sort: 'terlaris', token: context.read<UserProvider>().token));
+            setState(() {
+              _future = _loadProducts();
+            });
             await _future;
           },
           child: ListView(
@@ -104,9 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (_) => const NotificationScreen()),
             );
             if (!context.mounted) return;
-            context
-                .read<NotificationProvider>()
-                .refresh(context.read<UserProvider>().token);
+            context.read<NotificationProvider>().refresh(
+              context.read<UserProvider>().token,
+            );
           },
           child: Badge.count(
             count: context.watch<NotificationProvider>().unreadCount,
@@ -292,7 +301,9 @@ class _HomeProductCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: product),
+        ),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -318,11 +329,7 @@ class _HomeProductCard extends StatelessWidget {
                     ),
                   ),
                   if (product.stock <= 0)
-                    const Positioned(
-                      top: 8,
-                      left: 8,
-                      child: StokHabisBadge(),
-                    ),
+                    const Positioned(top: 8, left: 8, child: StokHabisBadge()),
                 ],
               ),
             ),

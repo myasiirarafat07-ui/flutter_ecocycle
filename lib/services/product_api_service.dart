@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -106,13 +107,16 @@ class ProductApiService {
     required List<XFile> files,
   }) async {
     if (files.isEmpty) return const [];
-    final request =
-        http.MultipartRequest('POST', Uri.parse('$baseUrl/api/products/images'));
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/api/products/images'),
+    );
     request.headers['Authorization'] = 'Bearer $token';
     for (final f in files) {
       final bytes = await f.readAsBytes();
-      request.files
-          .add(http.MultipartFile.fromBytes('images', bytes, filename: f.name));
+      request.files.add(
+        http.MultipartFile.fromBytes('images', bytes, filename: f.name),
+      );
     }
     final streamed = await request.send();
     final response = await http.Response.fromStream(streamed);
@@ -188,10 +192,7 @@ class ProductApiService {
     return Product.fromJson(data['product'] as Map<String, dynamic>);
   }
 
-  Future<void> deleteProduct({
-    required String token,
-    required int id,
-  }) async {
+  Future<void> deleteProduct({required String token, required int id}) async {
     final response = await http.delete(
       Uri.parse('$baseUrl/api/products/$id'),
       headers: _headers(token),
@@ -217,15 +218,22 @@ class ProductApiService {
     required int rating,
     required String comment,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/products/$productId/reviews'),
-      headers: _headers(token),
-      body: jsonEncode({
-        'order_id': orderId,
-        'rating': rating,
-        'comment': comment,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/api/products/$productId/reviews'),
+          headers: _headers(token),
+          body: jsonEncode({
+            'order_id': orderId,
+            'rating': rating,
+            'comment': comment,
+          }),
+        )
+        .timeout(
+          const Duration(seconds: 15),
+          onTimeout: () => throw const ProductApiException(
+            'Koneksi terlalu lama saat mengirim ulasan. Coba lagi sebentar.',
+          ),
+        );
     if (response.statusCode != 201) _fail(response);
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     return Review.fromJson(data['review'] as Map<String, dynamic>);
