@@ -22,19 +22,17 @@ async function authenticate(req, res, next) {
         u.latitude,
         u.longitude,
         u.profile_photo,
-        u.is_premium,
         u.eco_points,
         u.total_waste_kg,
         u.green_transactions,
         u.co2_offset_kg,
-        u.account_status,
         u.created_at
       FROM users u
       WHERE u.user_id = ?`,
       [payload.user_id],
     );
 
-    if (rows.length === 0 || rows[0].account_status !== 'ACTIVE') {
+    if (rows.length === 0) {
       throw new HttpError(401, 'Akun tidak valid');
     }
 

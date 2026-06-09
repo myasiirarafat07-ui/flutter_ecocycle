@@ -15,12 +15,10 @@ CREATE TABLE users (
   latitude DECIMAL(10,7) NULL,
   longitude DECIMAL(10,7) NULL,
   profile_photo LONGTEXT NULL,
-  is_premium BOOLEAN NOT NULL DEFAULT FALSE,
   eco_points INT NOT NULL DEFAULT 0,
   total_waste_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
   co2_offset_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
   green_transactions INT NOT NULL DEFAULT 0,
-  account_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id),
@@ -31,7 +29,6 @@ CREATE TABLE users (
 CREATE TABLE product_categories (
   product_category_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   category_name VARCHAR(80) NOT NULL,
-  description VARCHAR(255) NULL,
   PRIMARY KEY (product_category_id),
   UNIQUE KEY uq_product_categories_name (category_name)
 ) ENGINE=InnoDB;
@@ -40,7 +37,6 @@ CREATE TABLE sellers (
   seller_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NULL,
   seller_name VARCHAR(120) NOT NULL,
-  is_verified BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (seller_id),
   KEY idx_sellers_user_id (user_id),
   CONSTRAINT fk_sellers_user
@@ -56,14 +52,12 @@ CREATE TABLE products (
   product_name VARCHAR(160) NOT NULL,
   description TEXT NULL,
   price DECIMAL(12,2) NOT NULL,
-  unit_name VARCHAR(30) NOT NULL DEFAULT 'unit',
   stock DECIMAL(10,2) NOT NULL DEFAULT 0,
   waste_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
   weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
   image_url MEDIUMTEXT NULL,
   rating DECIMAL(3,2) NOT NULL DEFAULT 0,
   sold_count INT NOT NULL DEFAULT 0,
-  product_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (product_id),
   KEY idx_products_seller_id (seller_id),

@@ -23,12 +23,10 @@ function publicUser(row) {
     latitude: row.latitude != null ? Number(row.latitude) : null,
     longitude: row.longitude != null ? Number(row.longitude) : null,
     profile_photo: row.profile_photo || null,
-    is_premium: Boolean(row.is_premium),
     eco_points: row.eco_points,
     total_waste_kg: Number(row.total_waste_kg),
     green_transactions: row.green_transactions,
     co2_offset_kg: Number(row.co2_offset_kg),
-    account_status: row.account_status,
     created_at: row.created_at,
   };
 }
@@ -86,12 +84,10 @@ async function register(req, res, next) {
         u.latitude,
         u.longitude,
         u.profile_photo,
-        u.is_premium,
         u.eco_points,
         u.total_waste_kg,
         u.green_transactions,
         u.co2_offset_kg,
-        u.account_status,
         u.created_at
       FROM users u
       WHERE u.user_id = ?`,
@@ -136,12 +132,10 @@ async function login(req, res, next) {
         u.latitude,
         u.longitude,
         u.profile_photo,
-        u.is_premium,
         u.eco_points,
         u.total_waste_kg,
         u.green_transactions,
         u.co2_offset_kg,
-        u.account_status,
         u.created_at
       FROM users u
       WHERE u.email = ?
@@ -154,10 +148,6 @@ async function login(req, res, next) {
     }
 
     const userRow = rows[0];
-
-    if (userRow.account_status !== 'ACTIVE') {
-      throw new HttpError(403, 'Akun tidak aktif');
-    }
 
     const passwordMatches = await bcrypt.compare(password, userRow.password_hash);
 
@@ -248,8 +238,8 @@ async function updateMe(req, res, next) {
     const [rows] = await pool.query(
       `SELECT
         user_id, full_name, email, phone_number, address, latitude, longitude,
-        profile_photo, is_premium, eco_points, total_waste_kg, green_transactions,
-        co2_offset_kg, account_status, created_at
+        profile_photo, eco_points, total_waste_kg, green_transactions,
+        co2_offset_kg, created_at
       FROM users WHERE user_id = ?`,
       [userId],
     );
@@ -291,8 +281,8 @@ async function updatePhoto(req, res, next) {
     const [rows] = await pool.query(
       `SELECT
         user_id, full_name, email, phone_number, address, latitude, longitude,
-        profile_photo, is_premium, eco_points, total_waste_kg, green_transactions,
-        co2_offset_kg, account_status, created_at
+        profile_photo, eco_points, total_waste_kg, green_transactions,
+        co2_offset_kg, created_at
       FROM users WHERE user_id = ?`,
       [userId],
     );

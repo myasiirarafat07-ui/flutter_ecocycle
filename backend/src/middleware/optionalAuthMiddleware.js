@@ -11,11 +11,11 @@ async function optionalAuthenticate(req, res, next) {
     if (scheme === 'Bearer' && token) {
       const payload = verifyToken(token);
       const [rows] = await pool.query(
-        `SELECT u.user_id, u.full_name, u.email, u.account_status
+        `SELECT u.user_id, u.full_name, u.email
          FROM users u WHERE u.user_id = ?`,
         [payload.user_id],
       );
-      if (rows.length > 0 && rows[0].account_status === 'ACTIVE') {
+      if (rows.length > 0) {
         req.user = rows[0];
       }
     }

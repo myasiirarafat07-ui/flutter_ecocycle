@@ -112,7 +112,7 @@ async function getOrCreateSellerId(user) {
   if (rows.length > 0) return rows[0].seller_id;
 
   const [result] = await pool.query(
-    `INSERT INTO sellers (user_id, seller_name, is_verified) VALUES (?, ?, 0)`,
+    `INSERT INTO sellers (user_id, seller_name) VALUES (?, ?)`,
     [user.user_id, user.full_name || 'Penjual EcoCycle'],
   );
   return result.insertId;
@@ -253,8 +253,8 @@ async function createProduct(req, res, next) {
 
     const [result] = await pool.query(
       `INSERT INTO products
-        (seller_id, product_category_id, product_name, description, price, unit_name, stock, waste_kg, weight_kg, image_url, rating, sold_count, product_status, created_at)
-      VALUES (?, ?, ?, ?, ?, 'unit', ?, ?, ?, ?, 0, 0, 'ACTIVE', NOW())`,
+        (seller_id, product_category_id, product_name, description, price, stock, waste_kg, weight_kg, image_url, rating, sold_count, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, NOW())`,
       [sellerId, categoryId, name, description, price, stock, wasteKg, weightKg, imageUrl],
     );
 

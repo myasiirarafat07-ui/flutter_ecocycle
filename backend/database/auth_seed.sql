@@ -1,1 +1,0 @@
-USE ecocycle_db;

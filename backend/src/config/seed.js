@@ -262,9 +262,9 @@ async function ensureLocationColumns() {
 
 async function seedCategories() {
   await pool.query(
-    `INSERT IGNORE INTO product_categories (category_name, description) VALUES
-      ('Pupuk & Kompos', 'Pupuk organik, kompos, dan media tanam'),
-      ('Karya Daur Ulang', 'Produk hasil daur ulang limbah')`,
+    `INSERT IGNORE INTO product_categories (category_name) VALUES
+      ('Pupuk & Kompos'),
+      ('Karya Daur Ulang')`,
   );
 }
 
