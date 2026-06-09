@@ -7,6 +7,7 @@ function mapNotification(row) {
     title: row.title,
     body: row.body,
     is_read: Boolean(row.is_read),
+    related_order_id: row.related_order_id != null ? Number(row.related_order_id) : null,
     created_at: row.created_at,
   };
 }
@@ -14,7 +15,7 @@ function mapNotification(row) {
 async function listNotifications(req, res, next) {
   try {
     const [rows] = await pool.query(
-      `SELECT notification_id, notification_type, title, body, is_read, created_at
+      `SELECT notification_id, notification_type, title, body, is_read, related_order_id, created_at
        FROM notifications
        WHERE user_id = ?
        ORDER BY created_at DESC`,

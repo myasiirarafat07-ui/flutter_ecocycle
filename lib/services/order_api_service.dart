@@ -35,7 +35,9 @@ class OrderApiService {
   Future<Order> createOrder({
     required String token,
     required String shippingMethod,
-    String paymentMethod = 'EcoWallet',
+    String paymentMethod = 'COD',
+    double? buyerLat,
+    double? buyerLng,
     List<Map<String, dynamic>>? items,
   }) async {
     final r = await http.post(
@@ -44,6 +46,10 @@ class OrderApiService {
       body: jsonEncode({
         'shipping_method': shippingMethod,
         'payment_method': paymentMethod,
+        if (buyerLat != null && buyerLng != null) ...{
+          'buyer_lat': buyerLat,
+          'buyer_lng': buyerLng,
+        },
         if (items != null) 'items': items,
       }),
     );
@@ -73,5 +79,27 @@ class OrderApiService {
     if (r.statusCode != 200) _fail(r);
     return Order.fromJson(
         (jsonDecode(r.body) as Map)['order'] as Map<String, dynamic>);
+  }
+
+  /// Penjual mengirim/menyerahkan barang: DIPROSES -> DIKIRIM.
+  Future<void> shipOrder(String token, int orderId) async {
+    final r = await http.put(Uri.parse('$baseUrl/api/orders/$orderId/ship'),
+        headers: _headers(token));
+    if (r.statusCode != 200) _fail(r);
+  }
+
+  /// Penjual mengonfirmasi sudah menerima uang (COD): payment PENDING -> PAID.
+  Future<void> confirmPayment(String token, int orderId) async {
+    final r = await http.put(
+        Uri.parse('$baseUrl/api/orders/$orderId/confirm-payment'),
+        headers: _headers(token));
+    if (r.statusCode != 200) _fail(r);
+  }
+
+  /// Pembeli mengonfirmasi pesanan sudah diterima: DIKIRIM -> SELESAI.
+  Future<void> completeOrder(String token, int orderId) async {
+    final r = await http.put(Uri.parse('$baseUrl/api/orders/$orderId/complete'),
+        headers: _headers(token));
+    if (r.statusCode != 200) _fail(r);
   }
 }

@@ -44,11 +44,15 @@ async function createReview(req, res, next) {
   const connection = await pool.getConnection();
   try {
     const productId = Number(req.params.id);
+    const orderId = Number(req.body.order_id);
     const rating = Number(req.body.rating);
     const comment = cleanText(req.body.comment);
 
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       throw new HttpError(400, 'Rating harus antara 1 sampai 5');
+    }
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      throw new HttpError(400, 'Ulasan hanya untuk pesanan yang sudah selesai');
     }
 
     const [products] = await connection.query(
@@ -59,10 +63,37 @@ async function createReview(req, res, next) {
       throw new HttpError(404, 'Produk tidak ditemukan');
     }
 
+    // Pesanan harus milik user ini & berstatus SELESAI, serta memuat produk ini.
+    const [orders] = await connection.query(
+      'SELECT user_id, order_status FROM orders WHERE order_id = ? LIMIT 1',
+      [orderId],
+    );
+    if (orders.length === 0) throw new HttpError(404, 'Pesanan tidak ditemukan');
+    if (orders[0].user_id !== req.user.user_id) {
+      throw new HttpError(403, 'Tidak ada akses ke pesanan ini');
+    }
+    if (orders[0].order_status !== 'SELESAI') {
+      throw new HttpError(400, 'Pesanan belum selesai, ulasan belum bisa dikirim');
+    }
+    const [inOrder] = await connection.query(
+      'SELECT 1 FROM order_items WHERE order_id = ? AND product_id = ? LIMIT 1',
+      [orderId, productId],
+    );
+    if (inOrder.length === 0) {
+      throw new HttpError(400, 'Produk ini tidak ada di pesanan tersebut');
+    }
+    const [dup] = await connection.query(
+      'SELECT 1 FROM product_reviews WHERE order_id = ? AND product_id = ? AND user_id = ? LIMIT 1',
+      [orderId, productId, req.user.user_id],
+    );
+    if (dup.length > 0) {
+      throw new HttpError(400, 'Produk ini sudah kamu ulas untuk pesanan ini');
+    }
+
     await connection.query(
-      `INSERT INTO product_reviews (product_id, user_id, rating, comment)
-      VALUES (?, ?, ?, ?)`,
-      [productId, req.user.user_id, rating, comment],
+      `INSERT INTO product_reviews (product_id, user_id, order_id, rating, comment)
+      VALUES (?, ?, ?, ?, ?)`,
+      [productId, req.user.user_id, orderId, rating, comment],
     );
 
     // Perbarui cache rating rata-rata pada produk.

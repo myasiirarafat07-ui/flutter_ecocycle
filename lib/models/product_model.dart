@@ -8,7 +8,11 @@ class Product {
   final int price;
   final int stock;
   final String imageUrl;
+  final List<String> images;
   final double wasteKg;
+  final double weightKg;
+  final double? sellerLat;
+  final double? sellerLng;
   final int sold;
   final double rating;
   final int reviewCount;
@@ -24,7 +28,11 @@ class Product {
     required this.price,
     required this.stock,
     required this.imageUrl,
+    this.images = const [],
     this.wasteKg = 0,
+    this.weightKg = 0,
+    this.sellerLat,
+    this.sellerLng,
     required this.sold,
     required this.rating,
     required this.reviewCount,
@@ -42,7 +50,11 @@ class Product {
       price: _toInt(json['price']),
       stock: _toInt(json['stock']),
       imageUrl: json['image_url']?.toString() ?? '',
+      images: _toStringList(json['images'], json['image_url']?.toString() ?? ''),
       wasteKg: _toDouble(json['waste_kg']),
+      weightKg: _toDouble(json['weight_kg']),
+      sellerLat: _toNullableDouble(json['seller_lat']),
+      sellerLng: _toNullableDouble(json['seller_lng']),
       sold: _toInt(json['sold']),
       rating: _toDouble(json['rating']),
       reviewCount: _toInt(json['review_count']),
@@ -106,4 +118,24 @@ double _toDouble(dynamic value) {
   if (value is double) return value;
   if (value is num) return value.toDouble();
   return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+double? _toNullableDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
+/// Daftar URL gambar dari field `images`; fallback ke [fallbackUrl] tunggal
+/// agar produk lama (hanya image_url) tetap punya galeri 1 foto.
+List<String> _toStringList(dynamic value, String fallbackUrl) {
+  if (value is List) {
+    final list = value
+        .map((e) => e?.toString() ?? '')
+        .where((e) => e.isNotEmpty)
+        .toList();
+    if (list.isNotEmpty) return list;
+  }
+  return fallbackUrl.isNotEmpty ? [fallbackUrl] : const [];
 }

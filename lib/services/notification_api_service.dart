@@ -27,6 +27,15 @@ class NotificationApiService {
         .toList();
   }
 
+  /// Jumlah notifikasi belum dibaca (untuk badge), dari field `unread_count`.
+  Future<int> unreadCount(String token) async {
+    final r = await http.get(Uri.parse('$baseUrl/api/notifications'),
+        headers: _headers(token));
+    if (r.statusCode != 200) return 0;
+    final body = jsonDecode(r.body) as Map;
+    return (body['unread_count'] as num?)?.toInt() ?? 0;
+  }
+
   Future<void> markRead(String token, int id) async {
     await http.put(Uri.parse('$baseUrl/api/notifications/$id/read'),
         headers: _headers(token));

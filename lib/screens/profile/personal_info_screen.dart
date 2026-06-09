@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../services/auth_api_service.dart';
+import '../../widgets/profile_avatar.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
@@ -143,7 +144,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         ),
         content: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0D2A0D),
+            color: context.surfaceAltColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: context.dividerColor),
           ),
@@ -304,60 +305,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
   Widget _buildAvatar(UserProvider user) {
-    return Stack(
-      children: [
-        Container(
-          width: 110,
-          height: 110,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.primary, width: 3),
-            color: context.surfaceColor,
-          ),
-          child: ClipOval(
-            child: user.name.isNotEmpty
-                ? Center(
-                    child: Text(
-                      user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                : Icon(Icons.person, color: context.mutedColor, size: 60),
-          ),
-        ),
-        Positioned(
-          right: 0,
-          bottom: 4,
-          child: GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fitur ganti foto segera hadir'),
-                  backgroundColor: AppColors.primary,
-                ),
-              );
-            },
-            child: Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-                border: Border.all(color: context.bgColor, width: 2),
-              ),
-              child: const Icon(
-                Icons.camera_alt_outlined,
-                color: Colors.white,
-                size: 17,
-              ),
-            ),
-          ),
-        ),
-      ],
+    return ProfileAvatar(
+      user: user,
+      size: 110,
+      showCameraBadge: true,
+      onTap: () => pickAndUploadProfilePhoto(context, user),
     );
   }
 

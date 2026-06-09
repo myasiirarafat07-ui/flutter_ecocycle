@@ -20,6 +20,9 @@ function publicUser(row) {
     email: row.email,
     phone_number: row.phone_number,
     address: row.address,
+    latitude: row.latitude != null ? Number(row.latitude) : null,
+    longitude: row.longitude != null ? Number(row.longitude) : null,
+    profile_photo: row.profile_photo || null,
     is_premium: Boolean(row.is_premium),
     eco_points: row.eco_points,
     total_waste_kg: Number(row.total_waste_kg),
@@ -80,6 +83,9 @@ async function register(req, res, next) {
         u.email,
         u.phone_number,
         u.address,
+        u.latitude,
+        u.longitude,
+        u.profile_photo,
         u.is_premium,
         u.eco_points,
         u.total_waste_kg,
@@ -127,6 +133,9 @@ async function login(req, res, next) {
         u.phone_number,
         u.password_hash,
         u.address,
+        u.latitude,
+        u.longitude,
+        u.profile_photo,
         u.is_premium,
         u.eco_points,
         u.total_waste_kg,
@@ -182,6 +191,26 @@ async function updateMe(req, res, next) {
     const phoneNumber = cleanText(req.body.phone_number || req.body.phone) || null;
     const address = cleanText(req.body.address) || null;
 
+    // Lokasi (opsional) — dipakai menghitung ongkir berbasis jarak.
+    const hasLatitude = req.body.latitude !== undefined && req.body.latitude !== null;
+    const hasLongitude = req.body.longitude !== undefined && req.body.longitude !== null;
+    let latitude = null;
+    let longitude = null;
+    if (hasLatitude || hasLongitude) {
+      latitude = Number(req.body.latitude);
+      longitude = Number(req.body.longitude);
+      if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180
+      ) {
+        throw new HttpError(400, 'Koordinat lokasi tidak valid');
+      }
+    }
+
     if (!fullName || fullName.length < 3) {
       throw new HttpError(400, 'Nama minimal 3 karakter');
     }
@@ -199,17 +228,27 @@ async function updateMe(req, res, next) {
       throw new HttpError(409, 'Email sudah digunakan akun lain');
     }
 
-    await pool.query(
-      `UPDATE users
-        SET full_name = ?, email = ?, phone_number = ?, address = ?
-      WHERE user_id = ?`,
-      [fullName, email, phoneNumber, address, userId],
-    );
+    // Update lokasi hanya bila dikirim, agar update profil biasa tidak menghapusnya.
+    if (hasLatitude || hasLongitude) {
+      await pool.query(
+        `UPDATE users
+          SET full_name = ?, email = ?, phone_number = ?, address = ?, latitude = ?, longitude = ?
+        WHERE user_id = ?`,
+        [fullName, email, phoneNumber, address, latitude, longitude, userId],
+      );
+    } else {
+      await pool.query(
+        `UPDATE users
+          SET full_name = ?, email = ?, phone_number = ?, address = ?
+        WHERE user_id = ?`,
+        [fullName, email, phoneNumber, address, userId],
+      );
+    }
 
     const [rows] = await pool.query(
       `SELECT
-        user_id, full_name, email, phone_number, address,
-        is_premium, eco_points, total_waste_kg, green_transactions,
+        user_id, full_name, email, phone_number, address, latitude, longitude,
+        profile_photo, is_premium, eco_points, total_waste_kg, green_transactions,
         co2_offset_kg, account_status, created_at
       FROM users WHERE user_id = ?`,
       [userId],
@@ -217,6 +256,49 @@ async function updateMe(req, res, next) {
 
     res.json({
       message: 'Profil diperbarui',
+      user: publicUser(rows[0]),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Memperbarui hanya foto profil (base64 / data-URL). Kirim string kosong/null
+// untuk menghapus foto. Endpoint terpisah agar update teks tidak ikut membawa
+// payload base64 besar.
+async function updatePhoto(req, res, next) {
+  try {
+    const userId = req.user.user_id;
+    const raw = req.body.profile_photo;
+
+    let photo = null;
+    if (raw !== undefined && raw !== null && raw !== '') {
+      if (typeof raw !== 'string') {
+        throw new HttpError(400, 'Format foto tidak valid');
+      }
+      // ~4MB batas aman (base64 lebih besar ~33% dari biner asli).
+      if (raw.length > 4 * 1024 * 1024) {
+        throw new HttpError(400, 'Ukuran foto terlalu besar');
+      }
+      photo = raw;
+    }
+
+    await pool.query('UPDATE users SET profile_photo = ? WHERE user_id = ?', [
+      photo,
+      userId,
+    ]);
+
+    const [rows] = await pool.query(
+      `SELECT
+        user_id, full_name, email, phone_number, address, latitude, longitude,
+        profile_photo, is_premium, eco_points, total_waste_kg, green_transactions,
+        co2_offset_kg, account_status, created_at
+      FROM users WHERE user_id = ?`,
+      [userId],
+    );
+
+    res.json({
+      message: photo ? 'Foto profil diperbarui' : 'Foto profil dihapus',
       user: publicUser(rows[0]),
     });
   } catch (error) {
@@ -374,6 +456,7 @@ module.exports = {
   login,
   me,
   updateMe,
+  updatePhoto,
   forgotPassword,
   verifyOtp,
   resetPassword,

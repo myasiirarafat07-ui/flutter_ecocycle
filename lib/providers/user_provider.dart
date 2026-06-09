@@ -12,6 +12,9 @@ class UserProvider extends ChangeNotifier {
   String _email = '';
   String _phone = '';
   String _address = '';
+  double? _latitude;
+  double? _longitude;
+  String _photo = '';
   String _memberSince = '';
 
   int _ecoPoints = 0;
@@ -24,6 +27,10 @@ class UserProvider extends ChangeNotifier {
   String get email => _email;
   String get phone => _phone;
   String get address => _address;
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
+  bool get hasLocation => _latitude != null && _longitude != null;
+  String get photo => _photo;
   String get memberSince => _memberSince;
 
   int get ecoPoints => _ecoPoints;
@@ -39,6 +46,9 @@ class UserProvider extends ChangeNotifier {
     _email = user['email']?.toString() ?? '';
     _phone = user['phone_number']?.toString() ?? '';
     _address = user['address']?.toString() ?? '';
+    _latitude = _toNullableDouble(user['latitude']);
+    _longitude = _toNullableDouble(user['longitude']);
+    _photo = user['profile_photo']?.toString() ?? '';
     _memberSince =
         DateTime.tryParse(
           user['created_at']?.toString() ?? '',
@@ -108,9 +118,36 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Ganti foto profil ke server lalu sinkron state lokal.
+  /// Kirim `null`/kosong untuk menghapus foto.
+  Future<void> changePhoto(String? base64Photo) async {
+    final updated = await _authApi.updatePhoto(
+      token: _token,
+      base64Photo: base64Photo,
+    );
+    applyUpdatedUser(updated);
+  }
+
   void setEcoPoints(int points) {
     _ecoPoints = points;
     notifyListeners();
+  }
+
+  /// Simpan lokasi penjual (koordinat GPS) ke server lalu sinkron state lokal.
+  Future<void> updateLocation({
+    required double latitude,
+    required double longitude,
+  }) async {
+    final updated = await _authApi.updateProfile(
+      token: _token,
+      fullName: _name,
+      email: _email,
+      phoneNumber: _phone,
+      address: _address,
+      latitude: latitude,
+      longitude: longitude,
+    );
+    applyUpdatedUser(updated);
   }
 
   void logout() {
@@ -119,6 +156,9 @@ class UserProvider extends ChangeNotifier {
     _email = '';
     _phone = '';
     _address = '';
+    _latitude = null;
+    _longitude = null;
+    _photo = '';
     _memberSince = '';
     _ecoPoints = 0;
     _totalWasteKg = 0;
@@ -136,5 +176,11 @@ class UserProvider extends ChangeNotifier {
   static double _toDouble(dynamic v) {
     if (v is num) return v.toDouble();
     return double.tryParse(v?.toString() ?? '') ?? 0;
+  }
+
+  static double? _toNullableDouble(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString());
   }
 }

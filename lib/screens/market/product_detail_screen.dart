@@ -7,6 +7,7 @@ import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../services/product_api_service.dart';
+import '../../widgets/product_image.dart';
 import '../seller/sell_product_screen.dart';
 import 'checkout_screen.dart';
 
@@ -22,6 +23,7 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final _api = ProductApiService();
   late Future<List<Review>> _reviewsFuture;
+  int _currentImage = 0;
 
   Product get product => widget.product;
 
@@ -127,19 +129,56 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
       centerTitle: true,
       flexibleSpace: FlexibleSpaceBar(
-        background: Image.network(
-          product.imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
-            color: context.surfaceAltColor,
-            child: Icon(
-              Icons.image_not_supported,
-              color: context.mutedColor,
-              size: 60,
+        background: _buildGallery(context),
+      ),
+    );
+  }
+
+  Widget _buildGallery(BuildContext context) {
+    final imgs = product.images.isNotEmpty ? product.images : [product.imageUrl];
+    if (imgs.length <= 1) {
+      return ProductImage(
+        imageUrl: imgs.isNotEmpty ? imgs.first : '',
+        width: double.infinity,
+        height: double.infinity,
+        iconSize: 60,
+      );
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        PageView.builder(
+          itemCount: imgs.length,
+          onPageChanged: (i) => setState(() => _currentImage = i),
+          itemBuilder: (_, i) => ProductImage(
+            imageUrl: imgs[i],
+            width: double.infinity,
+            height: double.infinity,
+            iconSize: 60,
+          ),
+        ),
+        Positioned(
+          bottom: 8,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              imgs.length,
+              (i) => AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == _currentImage ? 10 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: i == _currentImage ? AppColors.primary : Colors.white70,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -296,27 +335,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Ulasan',
-              style: TextStyle(
-                color: context.textColor,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            TextButton.icon(
-              onPressed: _openReviewDialog,
-              icon: const Icon(Icons.edit_outlined,
-                  size: 16, color: AppColors.primary),
-              label: const Text(
-                'Tulis Ulasan',
-                style: TextStyle(color: AppColors.primary),
-              ),
-            ),
-          ],
+        Text(
+          'Ulasan',
+          style: TextStyle(
+            color: context.textColor,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         FutureBuilder<List<Review>>(
@@ -392,87 +417,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ],
       ),
     );
-  }
-
-  void _openReviewDialog() {
-    final token = context.read<UserProvider>().token;
-    if (token.isEmpty) {
-      _snack('Kamu harus login untuk menulis ulasan');
-      return;
-    }
-
-    int rating = 5;
-    final commentController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setStateDialog) => AlertDialog(
-          backgroundColor: ctx.surfaceColor,
-          title: Text('Tulis Ulasan', style: TextStyle(color: ctx.textColor)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  5,
-                  (i) => IconButton(
-                    onPressed: () => setStateDialog(() => rating = i + 1),
-                    icon: Icon(
-                      i < rating ? Icons.star : Icons.star_border,
-                      color: AppColors.warning,
-                    ),
-                  ),
-                ),
-              ),
-              TextField(
-                controller: commentController,
-                maxLines: 3,
-                style: TextStyle(color: ctx.textColor),
-                decoration: InputDecoration(
-                  hintText: 'Tulis komentarmu...',
-                  hintStyle: TextStyle(color: ctx.mutedColor),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text('Batal', style: TextStyle(color: ctx.mutedColor)),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                await _submitReview(rating, commentController.text.trim());
-              },
-              child: const Text('Kirim',
-                  style: TextStyle(color: AppColors.primary)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _submitReview(int rating, String comment) async {
-    final token = context.read<UserProvider>().token;
-    try {
-      await _api.createReview(
-        token: token,
-        productId: product.id,
-        rating: rating,
-        comment: comment,
-      );
-      if (!mounted) return;
-      _snack('Ulasan terkirim');
-      setState(() => _reviewsFuture = _api.fetchReviews(product.id));
-    } on ProductApiException catch (e) {
-      if (mounted) _snack(e.message);
-    } catch (_) {
-      if (mounted) _snack('Tidak bisa terhubung ke server');
-    }
   }
 
   Widget _buildBottomBar(BuildContext context) {

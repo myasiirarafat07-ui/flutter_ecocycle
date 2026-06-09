@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../models/product_model.dart';
 import '../../providers/user_provider.dart';
 import '../../services/product_api_service.dart';
+import '../../widgets/product_image.dart';
 import 'sell_product_screen.dart';
 
 class MyProductsScreen extends StatefulWidget {
@@ -156,18 +157,10 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              product.imageUrl,
+            child: ProductImage(
+              imageUrl: product.imageUrl,
               width: 60,
               height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 60,
-                height: 60,
-                color: context.surfaceAltColor,
-                child: Icon(Icons.image_not_supported,
-                    color: context.mutedColor, size: 24),
-              ),
             ),
           ),
           const SizedBox(width: 12),

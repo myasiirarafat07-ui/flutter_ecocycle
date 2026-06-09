@@ -7,6 +7,7 @@ import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/product_api_service.dart';
 import '../../widgets/product_card_bits.dart';
+import '../../widgets/product_image.dart';
 import '../cart/cart_screen.dart';
 import 'product_detail_screen.dart';
 
@@ -36,7 +37,13 @@ class _MarketScreenState extends State<MarketScreen> {
 
   String _selectedCategory = 'Semua';
   String _sort = 'terbaru';
+  int? _minPrice;
+  int? _maxPrice;
+  double? _minRating;
   late Future<List<Product>> _future;
+
+  bool get _hasActiveFilter =>
+      _minPrice != null || _maxPrice != null || _minRating != null;
 
   @override
   void initState() {
@@ -56,6 +63,9 @@ class _MarketScreenState extends State<MarketScreen> {
       search: _searchController.text.trim(),
       sort: _sort,
       token: context.read<UserProvider>().token,
+      minPrice: _minPrice,
+      maxPrice: _maxPrice,
+      minRating: _minRating,
     );
   }
 
@@ -134,6 +144,15 @@ class _MarketScreenState extends State<MarketScreen> {
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Filter',
+            onPressed: _showFilterSheet,
+            icon: Icon(
+              _hasActiveFilter ? Icons.filter_alt : Icons.filter_alt_outlined,
+              color: _hasActiveFilter ? AppColors.primary : context.textColor,
+              size: 24,
             ),
           ),
           IconButton(
@@ -347,6 +366,171 @@ class _MarketScreenState extends State<MarketScreen> {
       ),
     );
   }
+
+  void _showFilterSheet() {
+    final minCtrl = TextEditingController(
+      text: _minPrice?.toString() ?? '',
+    );
+    final maxCtrl = TextEditingController(
+      text: _maxPrice?.toString() ?? '',
+    );
+    double rating = _minRating ?? 0;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                16,
+                20,
+                MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: context.dividerColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Filter Produk',
+                    style: TextStyle(
+                      color: context.textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Rentang Harga (Rp)',
+                    style: TextStyle(color: context.textColor, fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: _buildPriceField(minCtrl, 'Min')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildPriceField(maxCtrl, 'Maks')),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    rating > 0
+                        ? 'Rating Minimum: ${rating.toStringAsFixed(1)} ★'
+                        : 'Rating Minimum: Semua',
+                    style: TextStyle(color: context.textColor, fontSize: 14),
+                  ),
+                  Slider(
+                    value: rating,
+                    min: 0,
+                    max: 5,
+                    divisions: 10,
+                    activeColor: AppColors.primary,
+                    label: rating.toStringAsFixed(1),
+                    onChanged: (v) => setSheetState(() => rating = v),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              _minPrice = null;
+                              _maxPrice = null;
+                              _minRating = null;
+                            });
+                            Navigator.pop(sheetContext);
+                            _reload();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: context.dividerColor),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Reset',
+                            style: TextStyle(color: context.textColor),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _minPrice = int.tryParse(minCtrl.text.trim());
+                              _maxPrice = int.tryParse(maxCtrl.text.trim());
+                              _minRating = rating > 0 ? rating : null;
+                            });
+                            Navigator.pop(sheetContext);
+                            _reload();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Terapkan',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPriceField(TextEditingController controller, String hint) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.dividerColor),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        style: TextStyle(color: context.textColor, fontSize: 14),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: context.mutedColor),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        ),
+      ),
+    );
+  }
 }
 
 class _ProductCard extends StatelessWidget {
@@ -375,20 +559,11 @@ class _ProductCard extends StatelessWidget {
                 children: [
                   Opacity(
                     opacity: product.stock <= 0 ? 0.45 : 1,
-                    child: Image.network(
-                      product.imageUrl,
+                    child: ProductImage(
+                      imageUrl: product.imageUrl,
                       height: 130,
                       width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        height: 130,
-                        color: context.surfaceAltColor,
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: context.mutedColor,
-                          size: 40,
-                        ),
-                      ),
+                      iconSize: 40,
                     ),
                   ),
                   if (product.stock <= 0)

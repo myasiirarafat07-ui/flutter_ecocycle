@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 import '../models/product_model.dart';
 
@@ -41,6 +42,9 @@ class ProductApiService {
     String? search,
     String? sort,
     String? token,
+    int? minPrice,
+    int? maxPrice,
+    double? minRating,
   }) async {
     final query = <String, String>{};
     if (category != null && category.isNotEmpty && category != 'Semua') {
@@ -48,6 +52,15 @@ class ProductApiService {
     }
     if (search != null && search.isNotEmpty) query['search'] = search;
     if (sort != null && sort.isNotEmpty) query['sort'] = sort;
+    if (minPrice != null && minPrice > 0) {
+      query['min_price'] = minPrice.toString();
+    }
+    if (maxPrice != null && maxPrice > 0) {
+      query['max_price'] = maxPrice.toString();
+    }
+    if (minRating != null && minRating > 0) {
+      query['min_rating'] = minRating.toString();
+    }
 
     final uri = Uri.parse(
       '$baseUrl/api/products',
@@ -86,6 +99,30 @@ class ProductApiService {
         .toList();
   }
 
+  /// Unggah file gambar (multipart) → daftar URL relatif tersaji server
+  /// (mis. `/uploads/products/x.jpg`). Dipakai sebelum create/update produk.
+  Future<List<String>> uploadImages({
+    required String token,
+    required List<XFile> files,
+  }) async {
+    if (files.isEmpty) return const [];
+    final request =
+        http.MultipartRequest('POST', Uri.parse('$baseUrl/api/products/images'));
+    request.headers['Authorization'] = 'Bearer $token';
+    for (final f in files) {
+      final bytes = await f.readAsBytes();
+      request.files
+          .add(http.MultipartFile.fromBytes('images', bytes, filename: f.name));
+    }
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+    if (response.statusCode != 201) _fail(response);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return (data['urls'] as List<dynamic>? ?? [])
+        .map((e) => e.toString())
+        .toList();
+  }
+
   Future<Product> createProduct({
     required String token,
     required String name,
@@ -94,7 +131,9 @@ class ProductApiService {
     required int price,
     required int stock,
     required String imageUrl,
+    List<String> images = const [],
     double wasteKg = 0,
+    double weightKg = 0,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/products'),
@@ -106,7 +145,9 @@ class ProductApiService {
         'price': price,
         'stock': stock,
         'image_url': imageUrl,
+        'images': images,
         'waste_kg': wasteKg,
+        'weight_kg': weightKg,
       }),
     );
     if (response.statusCode != 201) _fail(response);
@@ -123,7 +164,9 @@ class ProductApiService {
     required int price,
     required int stock,
     required String imageUrl,
+    List<String> images = const [],
     double wasteKg = 0,
+    double weightKg = 0,
   }) async {
     final response = await http.put(
       Uri.parse('$baseUrl/api/products/$id'),
@@ -135,7 +178,9 @@ class ProductApiService {
         'price': price,
         'stock': stock,
         'image_url': imageUrl,
+        'images': images,
         'waste_kg': wasteKg,
+        'weight_kg': weightKg,
       }),
     );
     if (response.statusCode != 200) _fail(response);
@@ -168,13 +213,18 @@ class ProductApiService {
   Future<Review> createReview({
     required String token,
     required int productId,
+    required int orderId,
     required int rating,
     required String comment,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/products/$productId/reviews'),
       headers: _headers(token),
-      body: jsonEncode({'rating': rating, 'comment': comment}),
+      body: jsonEncode({
+        'order_id': orderId,
+        'rating': rating,
+        'comment': comment,
+      }),
     );
     if (response.statusCode != 201) _fail(response);
     final data = jsonDecode(response.body) as Map<String, dynamic>;

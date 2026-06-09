@@ -511,11 +511,6 @@ class _TambahMetodeSheet extends StatefulWidget {
 class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
   String? _terpilih; // id opsi yang dipilih
 
-  final List<Map<String, String>> _opsiKartu = [
-    {'id': 'visa', 'nama': 'Kartu Visa', 'tipe': 'KARTU_KREDIT'},
-    {'id': 'mastercard', 'nama': 'Kartu Mastercard', 'tipe': 'KARTU_DEBIT'},
-  ];
-
   final List<Map<String, String>> _opsiEwallet = [
     {'id': 'gopay', 'nama': 'GoPay', 'tipe': 'EWALLET'},
     {'id': 'shopeepay', 'nama': 'ShopeePay', 'tipe': 'EWALLET'},
@@ -565,18 +560,6 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Kartu',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ..._opsiKartu.map((o) => _buildOpsi(o)),
-                  const SizedBox(height: 14),
                   const Text(
                     'E-Wallet',
                     style: TextStyle(
@@ -669,11 +652,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
   }
 
   void _konfirmasi() {
-    final semua = [..._opsiKartu, ..._opsiEwallet];
-    final opsi = semua.firstWhere((o) => o['id'] == _terpilih);
-    final tipe = opsi['tipe']!;
-    final detail =
-        tipe == 'EWALLET' ? 'Terhubung' : '•••• •••• •••• ????';
-    widget.onTambah(tipe, opsi['nama']!, detail);
+    final opsi = _opsiEwallet.firstWhere((o) => o['id'] == _terpilih);
+    widget.onTambah(opsi['tipe']!, opsi['nama']!, 'Terhubung');
   }
 }

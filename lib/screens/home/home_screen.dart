@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../models/product_model.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../services/product_api_service.dart';
 import '../../widgets/product_card_bits.dart';
+import '../../widgets/product_image.dart';
 import '../market/product_detail_screen.dart';
 import '../notification/notification_screen.dart';
 
@@ -96,14 +98,25 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const NotificationScreen()),
-          ),
-          child: Icon(
-            Icons.notifications_outlined,
-            color: context.mutedColor,
-            size: 26,
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationScreen()),
+            );
+            if (!context.mounted) return;
+            context
+                .read<NotificationProvider>()
+                .refresh(context.read<UserProvider>().token);
+          },
+          child: Badge.count(
+            count: context.watch<NotificationProvider>().unreadCount,
+            isLabelVisible:
+                context.watch<NotificationProvider>().unreadCount > 0,
+            child: Icon(
+              Icons.notifications_outlined,
+              color: context.mutedColor,
+              size: 26,
+            ),
           ),
         ),
       ],
@@ -297,20 +310,11 @@ class _HomeProductCard extends StatelessWidget {
                 children: [
                   Opacity(
                     opacity: product.stock <= 0 ? 0.45 : 1,
-                    child: Image.network(
-                      product.imageUrl,
+                    child: ProductImage(
+                      imageUrl: product.imageUrl,
                       height: 110,
                       width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        height: 110,
-                        color: context.surfaceAltColor,
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: context.mutedColor,
-                          size: 36,
-                        ),
-                      ),
+                      iconSize: 36,
                     ),
                   ),
                   if (product.stock <= 0)

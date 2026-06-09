@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../utils/logout_dialog.dart';
+import '../../widgets/profile_avatar.dart';
 import '../notification/notification_screen.dart';
 import '../payment/payment_method_screen.dart';
 import '../seller/my_products_screen.dart';
@@ -41,23 +42,16 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    final canPop = Navigator.canPop(context);
+    // ProfileScreen selalu berupa tab di MainWrapper (bukan route yang di-push),
+    // jadi tidak boleh ada tombol back. Menggunakan Navigator.canPop di sini
+    // keliru karena bernilai true saat ada route lain (mis. EcoPoints) di atas
+    // stack, sehingga back nyangkut & menutup seluruh MainWrapper → layar hitam.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (canPop)
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Icon(
-                Icons.arrow_back_ios_new,
-                color: context.mutedColor,
-                size: 22,
-              ),
-            )
-          else
-            const SizedBox(width: 26),
+          const SizedBox(width: 26),
           Text(
             'Profil Saya',
             style: TextStyle(
@@ -75,46 +69,11 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildProfileHeader(BuildContext context, UserProvider user) {
     return Column(
       children: [
-        Stack(
-          children: [
-            Container(
-              width: 110,
-              height: 110,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primary, width: 3),
-                color: context.surfaceColor,
-              ),
-              child: ClipOval(
-                child: user.name.isNotEmpty
-                    ? Center(
-                        child: Text(
-                          user.name[0].toUpperCase(),
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
-                    : Icon(Icons.person, color: context.mutedColor, size: 60),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              bottom: 4,
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.bgColor, width: 2),
-                ),
-                child: const Icon(Icons.edit, color: Colors.white, size: 14),
-              ),
-            ),
-          ],
+        ProfileAvatar(
+          user: user,
+          size: 110,
+          showCameraBadge: true,
+          onTap: () => pickAndUploadProfilePhoto(context, user),
         ),
         const SizedBox(height: 14),
         Text(

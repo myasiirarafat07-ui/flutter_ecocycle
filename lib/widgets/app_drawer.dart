@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/notification_provider.dart';
 import '../screens/payment/payment_method_screen.dart';
 import '../screens/profile/personal_info_screen.dart';
 import '../screens/seller/my_products_screen.dart';
@@ -10,6 +11,7 @@ import '../screens/notification/notification_screen.dart';
 import '../utils/logout_dialog.dart';
 import '../constants/app_colors.dart';
 import '../constants/eco_tier.dart';
+import 'profile_avatar.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -22,7 +24,6 @@ class AppDrawer extends StatelessWidget {
     
     final displayName = user.name.isEmpty ? 'Pengguna' : user.name;
     final displayEmail = user.email.isEmpty ? 'email@contoh.com' : user.email;
-    final initials = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
     final tier = EcoTier.currentFor(user.ecoPoints);
 
     return Drawer(
@@ -35,7 +36,7 @@ class AppDrawer extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 children: [
                   _DrawerHeader(
-                    initials: initials,
+                    user: user,
                     displayName: displayName,
                     displayEmail: displayEmail,
                     tier: tier,
@@ -110,6 +111,8 @@ class AppDrawer extends StatelessWidget {
                     activeIcon: Icons.notifications,
                     label: 'Notifikasi',
                     isDark: isDark,
+                    badgeCount:
+                        context.watch<NotificationProvider>().unreadCount,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -117,7 +120,13 @@ class AppDrawer extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => const NotificationScreen(),
                         ),
-                      );
+                      ).then((_) {
+                        if (context.mounted) {
+                          context
+                              .read<NotificationProvider>()
+                              .refresh(context.read<UserProvider>().token);
+                        }
+                      });
                     },
                   ),
 
@@ -238,14 +247,14 @@ class AppDrawer extends StatelessWidget {
 }
 
 class _DrawerHeader extends StatelessWidget {
-  final String initials;
+  final UserProvider user;
   final String displayName;
   final String displayEmail;
   final EcoTier tier;
   final bool isDark;
 
   const _DrawerHeader({
-    required this.initials,
+    required this.user,
     required this.displayName,
     required this.displayEmail,
     required this.tier,
@@ -271,27 +280,13 @@ class _DrawerHeader extends StatelessWidget {
         children: [
           Stack(
             children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isDark ? AppColors.primary : AppColors.secondary,
-                    width: 2.5,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              ProfileAvatar(
+                user: user,
+                size: 72,
+                borderWidth: 2.5,
+                borderColor: isDark ? AppColors.primary : AppColors.secondary,
+                backgroundColor: AppColors.primary,
+                initialColor: Colors.white,
               ),
               Positioned(
                 right: 0,
@@ -365,6 +360,7 @@ class _DrawerItem extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDestructive;
   final bool isDark;
+  final int badgeCount;
 
   const _DrawerItem({
     required this.icon,
@@ -373,6 +369,7 @@ class _DrawerItem extends StatelessWidget {
     required this.onTap,
     this.isDestructive = false,
     required this.isDark,
+    this.badgeCount = 0,
   });
 
   @override
@@ -399,6 +396,23 @@ class _DrawerItem extends StatelessWidget {
                 style: TextStyle(color: color, fontSize: 15),
               ),
             ),
+            if (badgeCount > 0)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.danger,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  badgeCount > 99 ? '99+' : '$badgeCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

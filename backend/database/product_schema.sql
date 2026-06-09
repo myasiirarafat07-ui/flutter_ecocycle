@@ -10,9 +10,11 @@ CREATE TABLE IF NOT EXISTS product_reviews (
   review_id  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   product_id BIGINT UNSIGNED NOT NULL,
   user_id    BIGINT UNSIGNED NOT NULL,
+  order_id   BIGINT UNSIGNED NULL,
   rating     TINYINT NOT NULL,
   comment    TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_review_order_product_user (order_id, product_id, user_id),
   CONSTRAINT fk_reviews_product
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   CONSTRAINT fk_reviews_user

@@ -6,6 +6,8 @@ import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../services/auth_api_service.dart';
 import '../../widgets/app_text_field.dart';
+import '../legal/privacy_policy_screen.dart';
+import '../legal/terms_of_service_screen.dart';
 import '../main_wrapper.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -348,7 +350,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const TextSpan(text: 'Saya setuju dengan '),
               WidgetSpan(
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TermsOfServiceScreen(),
+                    ),
+                  ),
                   child: const Text(
                     'Syarat Layanan',
                     style: TextStyle(
@@ -361,7 +368,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const TextSpan(text: ' dan '),
               WidgetSpan(
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PrivacyPolicyScreen(),
+                    ),
+                  ),
                   child: const Text(
                     'Kebijakan Privasi',
                     style: TextStyle(

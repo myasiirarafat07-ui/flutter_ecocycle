@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/app_colors.dart';
+import '../../widgets/product_image.dart';
 import '../../providers/wishlist_provider.dart';
 
 class WishlistScreen extends StatelessWidget {
@@ -46,18 +47,10 @@ class WishlistScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        product.imageUrl,
+                      child: ProductImage(
+                        imageUrl: product.imageUrl,
                         width: 60,
                         height: 60,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 60,
-                          height: 60,
-                          color: context.surfaceAltColor,
-                          child: Icon(Icons.image_not_supported,
-                              color: context.mutedColor, size: 24),
-                        ),
                       ),
                     ),
                     const SizedBox(width: 12),

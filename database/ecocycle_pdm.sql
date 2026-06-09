@@ -12,10 +12,12 @@ CREATE TABLE users (
   phone_number VARCHAR(30) NULL,
   password_hash VARCHAR(255) NOT NULL,
   address TEXT NULL,
+  latitude DECIMAL(10,7) NULL,
+  longitude DECIMAL(10,7) NULL,
+  profile_photo LONGTEXT NULL,
   is_premium BOOLEAN NOT NULL DEFAULT FALSE,
   eco_points INT NOT NULL DEFAULT 0,
   total_waste_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
-  trees_planted INT NOT NULL DEFAULT 0,
   co2_offset_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
   green_transactions INT NOT NULL DEFAULT 0,
   account_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
@@ -38,7 +40,6 @@ CREATE TABLE sellers (
   seller_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NULL,
   seller_name VARCHAR(120) NOT NULL,
-  seller_description TEXT NULL,
   is_verified BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (seller_id),
   KEY idx_sellers_user_id (user_id),
@@ -58,7 +59,8 @@ CREATE TABLE products (
   unit_name VARCHAR(30) NOT NULL DEFAULT 'unit',
   stock DECIMAL(10,2) NOT NULL DEFAULT 0,
   waste_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
-  image_url VARCHAR(500) NULL,
+  weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
+  image_url MEDIUMTEXT NULL,
   rating DECIMAL(3,2) NOT NULL DEFAULT 0,
   sold_count INT NOT NULL DEFAULT 0,
   product_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
@@ -112,12 +114,12 @@ CREATE TABLE orders (
   order_code VARCHAR(40) NOT NULL,
   shipping_address TEXT NOT NULL,
   shipping_method VARCHAR(50) NOT NULL,
-  order_status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+  order_status VARCHAR(30) NOT NULL DEFAULT 'DIPROSES',
   subtotal DECIMAL(12,2) NOT NULL DEFAULT 0,
   shipping_cost DECIMAL(12,2) NOT NULL DEFAULT 0,
-  discount DECIMAL(12,2) NOT NULL DEFAULT 0,
   total_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (order_id),
   UNIQUE KEY uq_orders_code (order_code),
   KEY idx_orders_user_id (user_id),
@@ -186,13 +188,19 @@ CREATE TABLE notifications (
   title VARCHAR(160) NOT NULL,
   body TEXT NOT NULL,
   is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  related_order_id BIGINT UNSIGNED NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (notification_id),
   KEY idx_notifications_user_id (user_id),
+  KEY idx_notifications_related_order (related_order_id),
   CONSTRAINT fk_notifications_user
     FOREIGN KEY (user_id) REFERENCES users (user_id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_notifications_order
+    FOREIGN KEY (related_order_id) REFERENCES orders (order_id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE wishlists (

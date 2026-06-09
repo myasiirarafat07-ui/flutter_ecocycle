@@ -23,6 +23,7 @@ class OrderItem {
   final int quantity;
   final int subtotal;
   final String imageUrl;
+  final bool reviewed;
 
   const OrderItem({
     required this.productId,
@@ -31,6 +32,7 @@ class OrderItem {
     required this.quantity,
     required this.subtotal,
     required this.imageUrl,
+    this.reviewed = false,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> j) => OrderItem(
@@ -40,6 +42,7 @@ class OrderItem {
         quantity: _toInt(j['quantity']),
         subtotal: _toInt(j['subtotal']),
         imageUrl: j['image_url']?.toString() ?? '',
+        reviewed: j['reviewed'] == true || j['reviewed'] == 1,
       );
 }
 
@@ -53,12 +56,14 @@ class Order {
   final String shippingAddress;
   final int subtotal;
   final int shippingCost;
-  final int discount;
   final int totalAmount;
   final int itemCount;
   final String firstItem;
   final String buyerName;
   final String createdAt;
+  final bool isBuyer;
+  final bool isSeller;
+  final bool needsReview;
   final List<OrderItem> items;
 
   const Order({
@@ -71,12 +76,14 @@ class Order {
     required this.shippingAddress,
     required this.subtotal,
     required this.shippingCost,
-    required this.discount,
     required this.totalAmount,
     required this.itemCount,
     required this.firstItem,
     required this.buyerName,
     required this.createdAt,
+    this.isBuyer = false,
+    this.isSeller = false,
+    this.needsReview = false,
     required this.items,
   });
 
@@ -90,12 +97,14 @@ class Order {
         shippingAddress: j['shipping_address']?.toString() ?? '',
         subtotal: _toInt(j['subtotal']),
         shippingCost: _toInt(j['shipping_cost']),
-        discount: _toInt(j['discount']),
         totalAmount: _toInt(j['total_amount']),
         itemCount: _toInt(j['item_count']),
         firstItem: j['first_item']?.toString() ?? '',
         buyerName: j['buyer_name']?.toString() ?? '',
         createdAt: j['created_at']?.toString() ?? '',
+        isBuyer: j['is_buyer'] == true || j['is_buyer'] == 1,
+        isSeller: j['is_seller'] == true || j['is_seller'] == 1,
+        needsReview: j['needs_review'] == true || j['needs_review'] == 1,
         items: (j['items'] as List<dynamic>? ?? [])
             .map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
             .toList(),

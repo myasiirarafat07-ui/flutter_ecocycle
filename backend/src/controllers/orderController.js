@@ -1,8 +1,10 @@
 const { pool } = require('../config/db');
 const HttpError = require('../utils/httpError');
 const { CO2E_PER_WASTE_KG } = require('../utils/impact');
+const { calcShipping } = require('../utils/shipping');
 
-const SHIPPING = { standar: 15000, ekspres: 35000 };
+// Metode pengiriman: antar-warga dalam desa, ongkir dihitung dari jarak + berat.
+const SHIPPING_METHOD = 'antar_warga';
 
 function genOrderCode() {
   const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
@@ -17,11 +19,11 @@ function mapOrderRow(row) {
     shipping_method: row.shipping_method,
     subtotal: Number(row.subtotal),
     shipping_cost: Number(row.shipping_cost),
-    discount: Number(row.discount),
     total_amount: Number(row.total_amount),
     payment_status: row.payment_status || 'PENDING',
     item_count: Number(row.item_count || 0),
     first_item: row.first_item || '',
+    needs_review: Boolean(row.needs_review),
     created_at: row.created_at,
   };
 }
@@ -29,9 +31,24 @@ function mapOrderRow(row) {
 async function createOrder(req, res, next) {
   const connection = await pool.getConnection();
   try {
-    const shippingMethod =
-      req.body.shipping_method === 'ekspres' ? 'ekspres' : 'standar';
-    const paymentMethod = (req.body.payment_method || 'EcoWallet').toString();
+    const shippingMethod = SHIPPING_METHOD;
+    const paymentMethod = (req.body.payment_method || 'COD').toString();
+    // COD: belum lunas saat checkout — penjual mengonfirmasi terima uang dulu.
+    // Non-COD (e-wallet/transfer): dianggap langsung lunas.
+    const isCod = paymentMethod.trim().toUpperCase() === 'COD';
+    // Fulfillment selalu mulai DIPROSES (penjual menyiapkan barang).
+    // Pembayaran: PENDING untuk COD (lunas saat penjual terima uang),
+    // PAID untuk non-COD (e-wallet/transfer dianggap langsung lunas).
+    const initialOrderStatus = 'DIPROSES';
+    const initialPaymentStatus = isCod ? 'PENDING' : 'PAID';
+
+    // Lokasi pembeli (opsional) untuk hitung ongkir berbasis jarak.
+    const rawBuyerLat = Number(req.body.buyer_lat);
+    const rawBuyerLng = Number(req.body.buyer_lng);
+    const buyer =
+      Number.isFinite(rawBuyerLat) && Number.isFinite(rawBuyerLng)
+        ? { lat: rawBuyerLat, lng: rawBuyerLng }
+        : null;
 
     await connection.beginTransaction();
 
@@ -67,6 +84,8 @@ async function createOrder(req, res, next) {
     const lines = [];
     const sellerUserIds = new Set();
     const sellerWaste = new Map(); // seller_user_id -> total limbah (kg)
+    const sellerShipWeight = new Map(); // seller_user_id -> total berat kirim (kg)
+    const sellerCoord = new Map(); // seller_user_id -> { lat, lng }
 
     for (const item of requested) {
       const productId = Number(item.product_id);
@@ -74,9 +93,11 @@ async function createOrder(req, res, next) {
       if (qty <= 0) continue;
 
       const [rows] = await connection.query(
-        `SELECT p.product_id, p.product_name, p.price, p.stock, p.waste_kg, s.user_id AS seller_user_id
+        `SELECT p.product_id, p.product_name, p.price, p.stock, p.waste_kg, p.weight_kg,
+                s.user_id AS seller_user_id, su.latitude AS seller_lat, su.longitude AS seller_lng
          FROM products p
          INNER JOIN sellers s ON s.seller_id = p.seller_id
+         LEFT JOIN users su ON su.user_id = s.user_id
          WHERE p.product_id = ? FOR UPDATE`,
         [productId],
       );
@@ -98,6 +119,16 @@ async function createOrder(req, res, next) {
         p.seller_user_id,
         (sellerWaste.get(p.seller_user_id) || 0) + lineWaste,
       );
+      sellerShipWeight.set(
+        p.seller_user_id,
+        (sellerShipWeight.get(p.seller_user_id) || 0) + Number(p.weight_kg) * qty,
+      );
+      if (!sellerCoord.has(p.seller_user_id)) {
+        sellerCoord.set(p.seller_user_id, {
+          lat: p.seller_lat != null ? Number(p.seller_lat) : null,
+          lng: p.seller_lng != null ? Number(p.seller_lng) : null,
+        });
+      }
       lines.push({
         product_id: p.product_id,
         product_name: p.product_name,
@@ -110,7 +141,17 @@ async function createOrder(req, res, next) {
 
     if (lines.length === 0) throw new HttpError(400, 'Item pesanan tidak valid');
 
-    const shippingCost = SHIPPING[shippingMethod];
+    // Ongkir otoritatif: hitung ulang di server dari koordinat penjual + berat,
+    // abaikan nilai apa pun yang dikirim client.
+    const shipLegs = [];
+    for (const [sellerUserId, coord] of sellerCoord) {
+      shipLegs.push({
+        lat: coord.lat,
+        lng: coord.lng,
+        weightKg: sellerShipWeight.get(sellerUserId) || 0,
+      });
+    }
+    const shippingCost = calcShipping(buyer, shipLegs).cost;
     const total = subtotal + shippingCost;
     const orderCode = genOrderCode();
     const shippingAddress =
@@ -119,9 +160,9 @@ async function createOrder(req, res, next) {
     // 3) Insert order.
     const [orderResult] = await connection.query(
       `INSERT INTO orders
-        (user_id, order_code, shipping_address, shipping_method, order_status, subtotal, shipping_cost, discount, total_amount)
-      VALUES (?, ?, ?, ?, 'PAID', ?, ?, 0, ?)`,
-      [req.user.user_id, orderCode, shippingAddress, shippingMethod, subtotal, shippingCost, total],
+        (user_id, order_code, shipping_address, shipping_method, order_status, subtotal, shipping_cost, total_amount)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.user.user_id, orderCode, shippingAddress, shippingMethod, initialOrderStatus, subtotal, shippingCost, total],
     );
     const orderId = orderResult.insertId;
 
@@ -139,26 +180,29 @@ async function createOrder(req, res, next) {
       );
     }
 
-    // 5) Payment (simulasi sukses).
+    // 5) Payment. COD belum lunas (PENDING, paid_at NULL); non-COD langsung lunas.
     await connection.query(
       `INSERT INTO payments
         (order_id, payment_method, payment_status, paid_amount, paid_at)
-      VALUES (?, ?, 'PAID', ?, NOW())`,
-      [orderId, paymentMethod, total],
+      VALUES (?, ?, ?, ?, ?)`,
+      [orderId, paymentMethod, initialPaymentStatus, total, isCod ? null : new Date()],
     );
 
-    // 6) Notifikasi: pembeli + tiap penjual.
+    // 6) Notifikasi: pembeli + tiap penjual (ditautkan ke pesanan untuk deep-link).
+    const buyerBody = isCod
+      ? `Pesanan ${orderCode} dibuat. Penjual akan memproses & mengirim pesananmu (bayar tunai saat barang diterima).`
+      : `Pesanan ${orderCode} berhasil dibuat & dibayar. Menunggu penjual mengirim.`;
     await connection.query(
-      `INSERT INTO notifications (user_id, notification_type, title, body)
-      VALUES (?, 'ORDER', 'Pesanan berhasil', ?)`,
-      [req.user.user_id, `Pesanan ${orderCode} berhasil dibuat & dibayar.`],
+      `INSERT INTO notifications (user_id, notification_type, title, body, related_order_id)
+      VALUES (?, 'ORDER', 'Pesanan berhasil', ?, ?)`,
+      [req.user.user_id, buyerBody, orderId],
     );
     for (const sellerUserId of sellerUserIds) {
       if (sellerUserId === req.user.user_id) continue;
       await connection.query(
-        `INSERT INTO notifications (user_id, notification_type, title, body)
-        VALUES (?, 'SALE', 'Pesanan baru', ?)`,
-        [sellerUserId, `Ada pesanan baru (${orderCode}) untuk produkmu.`],
+        `INSERT INTO notifications (user_id, notification_type, title, body, related_order_id)
+        VALUES (?, 'SALE', 'Pesanan baru', ?, ?)`,
+        [sellerUserId, `Ada pesanan baru (${orderCode}) untuk produkmu.`, orderId],
       );
     }
 
@@ -207,12 +251,11 @@ async function createOrder(req, res, next) {
       order: {
         order_id: orderId,
         order_code: orderCode,
-        order_status: 'PAID',
-        payment_status: 'PAID',
+        order_status: initialOrderStatus,
+        payment_status: initialPaymentStatus,
         shipping_method: shippingMethod,
         subtotal,
         shipping_cost: shippingCost,
-        discount: 0,
         total_amount: total,
         items: lines,
       },
@@ -229,10 +272,20 @@ async function listMyOrders(req, res, next) {
   try {
     const [rows] = await pool.query(
       `SELECT o.order_id, o.order_code, o.order_status, o.shipping_method,
-              o.subtotal, o.shipping_cost, o.discount, o.total_amount, o.created_at,
+              o.subtotal, o.shipping_cost, o.total_amount, o.created_at,
               pay.payment_status,
               (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.order_id) AS item_count,
-              (SELECT oi.product_name FROM order_items oi WHERE oi.order_id = o.order_id LIMIT 1) AS first_item
+              (SELECT oi.product_name FROM order_items oi WHERE oi.order_id = o.order_id LIMIT 1) AS first_item,
+              (o.order_status = 'SELESAI' AND EXISTS (
+                 SELECT 1 FROM order_items oi2
+                 WHERE oi2.order_id = o.order_id
+                   AND NOT EXISTS (
+                     SELECT 1 FROM product_reviews r
+                     WHERE r.order_id = o.order_id
+                       AND r.product_id = oi2.product_id
+                       AND r.user_id = o.user_id
+                   )
+              )) AS needs_review
        FROM orders o
        LEFT JOIN payments pay ON pay.order_id = o.order_id
        WHERE o.user_id = ?
@@ -251,16 +304,17 @@ async function listMySales(req, res, next) {
       `SELECT o.order_id, o.order_code, o.order_status, o.shipping_method, o.created_at,
               buyer.full_name AS buyer_name,
               SUM(oi.subtotal) AS subtotal,
-              0 AS shipping_cost, 0 AS discount,
+              0 AS shipping_cost,
               SUM(oi.subtotal) AS total_amount,
               COUNT(*) AS item_count,
               MIN(oi.product_name) AS first_item,
-              'PAID' AS payment_status
+              pay.payment_status
        FROM order_items oi
        INNER JOIN products p ON p.product_id = oi.product_id
        INNER JOIN sellers s ON s.seller_id = p.seller_id
        INNER JOIN orders o ON o.order_id = oi.order_id
        INNER JOIN users buyer ON buyer.user_id = o.user_id
+       LEFT JOIN payments pay ON pay.order_id = o.order_id
        WHERE s.user_id = ?
        GROUP BY o.order_id
        ORDER BY o.created_at DESC`,
@@ -279,7 +333,7 @@ async function getOrder(req, res, next) {
     const orderId = Number(req.params.id);
     const [orders] = await pool.query(
       `SELECT o.order_id, o.user_id, o.order_code, o.order_status, o.shipping_address,
-              o.shipping_method, o.subtotal, o.shipping_cost, o.discount, o.total_amount, o.created_at,
+              o.shipping_method, o.subtotal, o.shipping_cost, o.total_amount, o.created_at,
               pay.payment_status, pay.payment_method, pay.paid_at
        FROM orders o
        LEFT JOIN payments pay ON pay.order_id = o.order_id
@@ -290,26 +344,28 @@ async function getOrder(req, res, next) {
     const order = orders[0];
 
     // Akses: pembeli, atau penjual salah satu item.
-    let allowed = order.user_id === req.user.user_id;
-    if (!allowed) {
-      const [own] = await pool.query(
-        `SELECT 1 FROM order_items oi
-         INNER JOIN products p ON p.product_id = oi.product_id
-         INNER JOIN sellers s ON s.seller_id = p.seller_id
-         WHERE oi.order_id = ? AND s.user_id = ? LIMIT 1`,
-        [orderId, req.user.user_id],
-      );
-      allowed = own.length > 0;
+    const isBuyer = order.user_id === req.user.user_id;
+    const isSeller = await isSellerOfOrder(pool, orderId, req.user.user_id);
+    if (!isBuyer && !isSeller) {
+      throw new HttpError(403, 'Tidak ada akses ke pesanan ini');
     }
-    if (!allowed) throw new HttpError(403, 'Tidak ada akses ke pesanan ini');
 
     const [items] = await pool.query(
-      `SELECT oi.product_id, oi.product_name, oi.unit_price, oi.quantity, oi.subtotal, p.image_url
+      `SELECT oi.product_id, oi.product_name, oi.unit_price, oi.quantity, oi.subtotal, p.image_url,
+              (SELECT COUNT(*) FROM product_reviews r
+                WHERE r.order_id = oi.order_id
+                  AND r.product_id = oi.product_id
+                  AND r.user_id = ?) AS reviewed
        FROM order_items oi
        LEFT JOIN products p ON p.product_id = oi.product_id
        WHERE oi.order_id = ?`,
-      [orderId],
+      [order.user_id, orderId],
     );
+
+    // Pesanan butuh ulasan bila sudah SELESAI dan ada item yang belum diulas.
+    const needsReview =
+      String(order.order_status).toUpperCase() === 'SELESAI' &&
+      items.some((i) => Number(i.reviewed) === 0);
 
     res.json({
       order: {
@@ -320,12 +376,14 @@ async function getOrder(req, res, next) {
         shipping_method: order.shipping_method,
         subtotal: Number(order.subtotal),
         shipping_cost: Number(order.shipping_cost),
-        discount: Number(order.discount),
         total_amount: Number(order.total_amount),
         payment_status: order.payment_status || 'PENDING',
         payment_method: order.payment_method || '',
         paid_at: order.paid_at,
         created_at: order.created_at,
+        is_buyer: isBuyer,
+        is_seller: isSeller,
+        needs_review: needsReview,
         items: items.map((i) => ({
           product_id: i.product_id,
           product_name: i.product_name,
@@ -333,6 +391,7 @@ async function getOrder(req, res, next) {
           quantity: Number(i.quantity),
           subtotal: Number(i.subtotal),
           image_url: i.image_url || '',
+          reviewed: Number(i.reviewed) > 0,
         })),
       },
     });
@@ -341,9 +400,183 @@ async function getOrder(req, res, next) {
   }
 }
 
+// Apakah user adalah penjual salah satu item di order ini?
+async function isSellerOfOrder(connection, orderId, userId) {
+  const [rows] = await connection.query(
+    `SELECT 1 FROM order_items oi
+     INNER JOIN products p ON p.product_id = oi.product_id
+     INNER JOIN sellers s ON s.seller_id = p.seller_id
+     WHERE oi.order_id = ? AND s.user_id = ? LIMIT 1`,
+    [orderId, userId],
+  );
+  return rows.length > 0;
+}
+
+// Penjual mengirim/menyerahkan barang: DIPROSES -> DIKIRIM.
+async function shipOrder(req, res, next) {
+  const connection = await pool.getConnection();
+  try {
+    const orderId = Number(req.params.id);
+    await connection.beginTransaction();
+
+    const [orders] = await connection.query(
+      'SELECT order_id, user_id, order_code, order_status FROM orders WHERE order_id = ? LIMIT 1 FOR UPDATE',
+      [orderId],
+    );
+    if (orders.length === 0) throw new HttpError(404, 'Pesanan tidak ditemukan');
+    const order = orders[0];
+
+    if (!(await isSellerOfOrder(connection, orderId, req.user.user_id))) {
+      throw new HttpError(403, 'Hanya penjual yang bisa mengirim pesanan');
+    }
+    if (order.order_status !== 'DIPROSES') {
+      throw new HttpError(400, 'Pesanan tidak dalam status diproses');
+    }
+
+    await connection.query(
+      "UPDATE orders SET order_status = 'DIKIRIM', updated_at = NOW() WHERE order_id = ?",
+      [orderId],
+    );
+    await connection.query(
+      `INSERT INTO notifications (user_id, notification_type, title, body, related_order_id)
+      VALUES (?, 'ORDER', 'Pesanan dikirim', ?, ?)`,
+      [order.user_id, `Pesanan ${order.order_code} sedang dikirim/diserahkan penjual.`, orderId],
+    );
+
+    await connection.commit();
+    res.json({ message: 'Pesanan dikirim', order_status: 'DIKIRIM' });
+  } catch (error) {
+    await connection.rollback();
+    next(error);
+  } finally {
+    connection.release();
+  }
+}
+
+// Penjual mengonfirmasi sudah menerima uang (COD): payment PENDING -> PAID.
+// Terpisah dari fulfillment (order_status) — penjual biasanya menekan ini saat
+// serah-terima barang.
+async function confirmPayment(req, res, next) {
+  const connection = await pool.getConnection();
+  try {
+    const orderId = Number(req.params.id);
+    await connection.beginTransaction();
+
+    const [orders] = await connection.query(
+      'SELECT order_id, user_id, order_code FROM orders WHERE order_id = ? LIMIT 1 FOR UPDATE',
+      [orderId],
+    );
+    if (orders.length === 0) throw new HttpError(404, 'Pesanan tidak ditemukan');
+    const order = orders[0];
+
+    if (!(await isSellerOfOrder(connection, orderId, req.user.user_id))) {
+      throw new HttpError(403, 'Hanya penjual yang bisa mengonfirmasi pembayaran');
+    }
+
+    const [pays] = await connection.query(
+      'SELECT payment_status FROM payments WHERE order_id = ? LIMIT 1 FOR UPDATE',
+      [orderId],
+    );
+    if (pays.length === 0) throw new HttpError(404, 'Data pembayaran tidak ditemukan');
+    if (pays[0].payment_status === 'PAID') {
+      throw new HttpError(400, 'Pembayaran sudah lunas');
+    }
+
+    await connection.query(
+      "UPDATE payments SET payment_status = 'PAID', paid_at = NOW() WHERE order_id = ?",
+      [orderId],
+    );
+    await connection.query(
+      `INSERT INTO notifications (user_id, notification_type, title, body, related_order_id)
+      VALUES (?, 'ORDER', 'Pembayaran dikonfirmasi', ?, ?)`,
+      [order.user_id, `Pembayaran pesanan ${order.order_code} telah dikonfirmasi penjual.`, orderId],
+    );
+
+    await connection.commit();
+    res.json({ message: 'Pembayaran dikonfirmasi', payment_status: 'PAID' });
+  } catch (error) {
+    await connection.rollback();
+    next(error);
+  } finally {
+    connection.release();
+  }
+}
+
+// Pembeli mengonfirmasi pesanan sudah diterima: PAID -> SELESAI.
+async function completeOrder(req, res, next) {
+  const connection = await pool.getConnection();
+  try {
+    const orderId = Number(req.params.id);
+    await connection.beginTransaction();
+
+    const [orders] = await connection.query(
+      'SELECT order_id, user_id, order_code, order_status FROM orders WHERE order_id = ? LIMIT 1 FOR UPDATE',
+      [orderId],
+    );
+    if (orders.length === 0) throw new HttpError(404, 'Pesanan tidak ditemukan');
+    const order = orders[0];
+
+    if (order.user_id !== req.user.user_id) {
+      throw new HttpError(403, 'Hanya pembeli yang bisa menyelesaikan pesanan');
+    }
+    if (order.order_status !== 'DIKIRIM') {
+      throw new HttpError(400, 'Pesanan belum dikirim / tidak bisa diselesaikan');
+    }
+    // Pembayaran harus lunas (COD: penjual sudah konfirmasi terima uang).
+    const [pays] = await connection.query(
+      'SELECT payment_status FROM payments WHERE order_id = ? LIMIT 1',
+      [orderId],
+    );
+    if (pays.length === 0 || pays[0].payment_status !== 'PAID') {
+      throw new HttpError(400, 'Pembayaran belum lunas. Konfirmasi pembayaran ke penjual dulu.');
+    }
+
+    await connection.query(
+      "UPDATE orders SET order_status = 'SELESAI', updated_at = NOW() WHERE order_id = ?",
+      [orderId],
+    );
+
+    // Beri tahu tiap penjual yang terlibat.
+    const [sellers] = await connection.query(
+      `SELECT DISTINCT s.user_id
+       FROM order_items oi
+       INNER JOIN products p ON p.product_id = oi.product_id
+       INNER JOIN sellers s ON s.seller_id = p.seller_id
+       WHERE oi.order_id = ? AND s.user_id IS NOT NULL`,
+      [orderId],
+    );
+    for (const s of sellers) {
+      if (s.user_id === req.user.user_id) continue;
+      await connection.query(
+        `INSERT INTO notifications (user_id, notification_type, title, body, related_order_id)
+        VALUES (?, 'SALE', 'Pesanan selesai', ?, ?)`,
+        [s.user_id, `Pesanan ${order.order_code} telah diselesaikan pembeli.`, orderId],
+      );
+    }
+
+    // Ingatkan pembeli untuk memberi ulasan (deep-link ke detail pesanan).
+    await connection.query(
+      `INSERT INTO notifications (user_id, notification_type, title, body, related_order_id)
+      VALUES (?, 'REVIEW', 'Beri ulasan', ?, ?)`,
+      [order.user_id, `Pesanan ${order.order_code} selesai. Yuk beri ulasan produknya!`, orderId],
+    );
+
+    await connection.commit();
+    res.json({ message: 'Pesanan selesai', order_status: 'SELESAI' });
+  } catch (error) {
+    await connection.rollback();
+    next(error);
+  } finally {
+    connection.release();
+  }
+}
+
 module.exports = {
   createOrder,
   listMyOrders,
   listMySales,
   getOrder,
+  shipOrder,
+  confirmPayment,
+  completeOrder,
 };

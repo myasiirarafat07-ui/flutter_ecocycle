@@ -4,6 +4,7 @@ const {
   login,
   me,
   updateMe,
+  updatePhoto,
   forgotPassword,
   verifyOtp,
   resetPassword,
@@ -19,5 +20,6 @@ router.post('/verify-otp', verifyOtp);
 router.post('/reset-password', resetPassword);
 router.get('/me', authenticate, me);
 router.put('/me', authenticate, updateMe);
+router.put('/me/photo', authenticate, updatePhoto);
 
 module.exports = router;

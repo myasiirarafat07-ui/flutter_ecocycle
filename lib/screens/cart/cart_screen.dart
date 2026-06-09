@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/app_colors.dart';
+import '../../widgets/product_image.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../market/checkout_screen.dart';
@@ -76,18 +77,10 @@ class CartScreen extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              item.product.imageUrl,
+            child: ProductImage(
+              imageUrl: item.product.imageUrl,
               width: 60,
               height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 60,
-                height: 60,
-                color: context.surfaceAltColor,
-                child: Icon(Icons.image_not_supported,
-                    color: context.mutedColor, size: 24),
-              ),
             ),
           ),
           const SizedBox(width: 12),

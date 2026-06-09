@@ -111,6 +111,8 @@ class AuthApiService {
     required String email,
     required String phoneNumber,
     required String address,
+    double? latitude,
+    double? longitude,
   }) async {
     final uri = Uri.parse('$baseUrl/api/auth/me');
     final response = await http.put(
@@ -124,7 +126,36 @@ class AuthApiService {
         'email': email,
         'phone_number': phoneNumber,
         'address': address,
+        if (latitude != null && longitude != null) ...{
+          'latitude': latitude,
+          'longitude': longitude,
+        },
       }),
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthApiException(data['message']?.toString() ?? 'Request gagal');
+    }
+
+    return data['user'] as Map<String, dynamic>;
+  }
+
+  /// Memperbarui foto profil (base64). Kirim `null`/kosong untuk menghapus foto.
+  /// Mengembalikan map user terbaru.
+  Future<Map<String, dynamic>> updatePhoto({
+    required String token,
+    required String? base64Photo,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/auth/me/photo');
+    final response = await http.put(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'profile_photo': base64Photo ?? ''}),
     );
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;

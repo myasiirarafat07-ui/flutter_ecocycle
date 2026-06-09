@@ -13,6 +13,9 @@ const CART_SELECT = `
     p.price,
     p.stock,
     p.image_url,
+    p.weight_kg,
+    su.latitude AS seller_lat,
+    su.longitude AS seller_lng,
     p.sold_count AS sold,
     p.rating,
     (SELECT COUNT(*) FROM product_reviews r WHERE r.product_id = p.product_id) AS review_count
@@ -20,6 +23,7 @@ const CART_SELECT = `
   INNER JOIN carts ca ON ca.cart_id = ci.cart_id
   INNER JOIN products p ON p.product_id = ci.product_id
   INNER JOIN sellers s ON s.seller_id = p.seller_id
+  LEFT JOIN users su ON su.user_id = s.user_id
   INNER JOIN product_categories c ON c.product_category_id = p.product_category_id
   WHERE ca.user_id = ?
   ORDER BY ci.cart_item_id`;
@@ -37,6 +41,9 @@ function mapCartItem(row) {
       price: Number(row.price),
       stock: Number(row.stock),
       image_url: row.image_url,
+      weight_kg: Number(row.weight_kg),
+      seller_lat: row.seller_lat != null ? Number(row.seller_lat) : null,
+      seller_lng: row.seller_lng != null ? Number(row.seller_lng) : null,
       sold: Number(row.sold),
       rating: Number(row.rating),
       review_count: Number(row.review_count),

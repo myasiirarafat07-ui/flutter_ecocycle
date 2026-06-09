@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../models/order_model.dart';
 import '../../providers/user_provider.dart';
 import '../../services/order_api_service.dart';
+import '../../widgets/order_status_badge.dart';
 import 'order_detail_screen.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
@@ -140,18 +141,15 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                         color: context.textColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 14)),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(order.paymentStatus,
-                      style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold)),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (order.paymentStatus.toUpperCase() == 'PENDING') ...[
+                      PaymentStatusBadge(order.paymentStatus),
+                      const SizedBox(width: 6),
+                    ],
+                    OrderStatusBadge(order.orderStatus),
+                  ],
                 ),
               ],
             ),
@@ -164,6 +162,30 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               const SizedBox(height: 2),
               Text('Pembeli: ${order.buyerName}',
                   style: TextStyle(color: context.mutedColor, fontSize: 12)),
+            ],
+            if (!isSales && order.needsReview) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.star_outline,
+                        size: 13, color: AppColors.warning),
+                    SizedBox(width: 4),
+                    Text('Belum diulas',
+                        style: TextStyle(
+                            color: AppColors.warning,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
             ],
             const SizedBox(height: 8),
             Row(

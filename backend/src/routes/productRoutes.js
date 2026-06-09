@@ -6,10 +6,12 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
+  uploadProductImages,
 } = require('../controllers/productController');
 const { listReviews, createReview } = require('../controllers/reviewController');
 const authenticate = require('../middleware/authMiddleware');
 const optionalAuth = require('../middleware/optionalAuthMiddleware');
+const { uploadProducts } = require('../utils/upload');
 
 const router = express.Router();
 
@@ -21,6 +23,12 @@ router.get('/:id', optionalAuth, getProduct);
 router.get('/:id/reviews', listReviews);
 
 // Butuh login
+router.post(
+  '/images',
+  authenticate,
+  uploadProducts.array('images', 5),
+  uploadProductImages,
+);
 router.post('/', authenticate, createProduct);
 router.put('/:id', authenticate, updateProduct);
 router.delete('/:id', authenticate, deleteProduct);

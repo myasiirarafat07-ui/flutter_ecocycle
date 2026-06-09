@@ -4,6 +4,7 @@ class AppNotification {
   final String title;
   final String body;
   final bool isRead;
+  final int? orderId;
   final String createdAt;
 
   const AppNotification({
@@ -12,6 +13,7 @@ class AppNotification {
     required this.title,
     required this.body,
     required this.isRead,
+    required this.orderId,
     required this.createdAt,
   });
 
@@ -23,6 +25,9 @@ class AppNotification {
         title: j['title']?.toString() ?? '',
         body: j['body']?.toString() ?? '',
         isRead: j['is_read'] == true || j['is_read'] == 1,
+        orderId: j['related_order_id'] == null
+            ? null
+            : int.tryParse(j['related_order_id'].toString()),
         createdAt: j['created_at']?.toString() ?? '',
       );
 }

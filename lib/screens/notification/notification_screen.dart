@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../models/notification_model.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../services/notification_api_service.dart';
+import '../payment/order_detail_screen.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -36,6 +38,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         _items = items;
         _loading = false;
       });
+      context.read<NotificationProvider>().refresh(_token);
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
@@ -46,10 +49,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
     await _load();
   }
 
-  Future<void> _markOne(AppNotification n) async {
-    if (n.isRead) return;
-    await _api.markRead(_token, n.id);
-    await _load();
+  /// Tap notifikasi: tandai dibaca, lalu buka pesanan terkait bila ada.
+  Future<void> _onTap(AppNotification n) async {
+    if (!n.isRead) {
+      await _api.markRead(_token, n.id);
+      await _load();
+    }
+    if (!mounted || n.orderId == null) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => OrderDetailScreen(orderId: n.orderId!)),
+    );
+    if (mounted) _load();
   }
 
   IconData _iconFor(String type) {
@@ -58,6 +69,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
         return Icons.sell_outlined;
       case 'ORDER':
         return Icons.receipt_long_outlined;
+      case 'REVIEW':
+        return Icons.star_outline;
       default:
         return Icons.notifications_outlined;
     }
@@ -157,7 +170,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Widget _buildTile(AppNotification n) {
     return GestureDetector(
-      onTap: () => _markOne(n),
+      onTap: () => _onTap(n),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
