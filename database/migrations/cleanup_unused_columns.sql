@@ -1,6 +1,6 @@
--- Migration: bersihkan kolom tak terpakai + perkuat integritas (hasil audit DB).
--- Lihat docs/db-audit.md. Backend menjalankan ini idempotent saat boot
--- (src/config/seed.js > cleanupSchema). File ini untuk penerapan manual/dokumentasi.
+-- Migration: bersihkan kolom tak terpakai + perkuat integritas referensial.
+-- Backend menjalankan ini idempotent saat boot (src/config/seed.js > cleanupSchema).
+-- File ini untuk penerapan manual/dokumentasi.
 
 USE ecocycle_db;
 

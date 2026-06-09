@@ -145,8 +145,7 @@ class AppDrawer extends StatelessWidget {
                   ),
                   
                   _DrawerDivider(isDark: isDark),
-                  
-                  // Theme Toggle Switch
+
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                     child: Row(

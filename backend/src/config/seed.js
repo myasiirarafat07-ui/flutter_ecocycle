@@ -201,8 +201,7 @@ async function ensureProductImagesTable() {
   `);
 }
 
-// Bersihkan kolom yang tak terpakai + perkuat integritas (hasil audit DB).
-// Lihat docs/db-audit.md. Idempotent & aman dijalankan ulang.
+// Bersihkan kolom yang tak terpakai + perkuat integritas referensial. Idempotent & aman dijalankan ulang.
 async function cleanupSchema() {
   // Kolom mati → hapus.
   await dropColumnIfExists('users', 'trees_planted');
@@ -228,10 +227,10 @@ async function cleanupSchema() {
 // Idempotent: setelah dijalankan, tak ada lagi order_status PENDING/PAID.
 async function migrateOrderStatuses() {
   await pool.query(
-    "UPDATE orders SET order_status = 'DIPROSES' WHERE order_status = 'PENDING'",
+    `UPDATE orders SET order_status = 'DIPROSES' WHERE order_status = 'PENDING'`,
   );
   await pool.query(
-    "UPDATE orders SET order_status = 'DIKIRIM' WHERE order_status = 'PAID'",
+    `UPDATE orders SET order_status = 'DIKIRIM' WHERE order_status = 'PAID'`,
   );
 }
 

@@ -434,7 +434,7 @@ async function shipOrder(req, res, next) {
     }
 
     await connection.query(
-      "UPDATE orders SET order_status = 'DIKIRIM', updated_at = NOW() WHERE order_id = ?",
+      `UPDATE orders SET order_status = 'DIKIRIM', updated_at = NOW() WHERE order_id = ?`,
       [orderId],
     );
     await connection.query(
@@ -483,7 +483,7 @@ async function confirmPayment(req, res, next) {
     }
 
     await connection.query(
-      "UPDATE payments SET payment_status = 'PAID', paid_at = NOW() WHERE order_id = ?",
+      `UPDATE payments SET payment_status = 'PAID', paid_at = NOW() WHERE order_id = ?`,
       [orderId],
     );
     await connection.query(
@@ -532,7 +532,7 @@ async function completeOrder(req, res, next) {
     }
 
     await connection.query(
-      "UPDATE orders SET order_status = 'SELESAI', updated_at = NOW() WHERE order_id = ?",
+      `UPDATE orders SET order_status = 'SELESAI', updated_at = NOW() WHERE order_id = ?`,
       [orderId],
     );
 
