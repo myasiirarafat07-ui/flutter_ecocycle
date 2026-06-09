@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_api_service.dart';
@@ -22,6 +23,8 @@ class UserProvider extends ChangeNotifier {
   int _greenTransactions = 0;
   double _co2OffsetKg = 0;
 
+  bool _isSeller = false;
+
   String get token => _token;
   String get name => _name;
   String get email => _email;
@@ -37,6 +40,10 @@ class UserProvider extends ChangeNotifier {
   double get totalWasteKg => _totalWasteKg;
   int get greenTransactions => _greenTransactions;
   double get co2OffsetKg => _co2OffsetKg;
+
+  /// True bila user sudah menjadi penjual (punya entri di tabel `sellers`).
+  /// Dipakai untuk menampilkan badge penjual di drawer.
+  bool get isSeller => _isSeller;
 
   bool get isLoggedIn => _token.isNotEmpty && _email.isNotEmpty;
 
@@ -58,6 +65,8 @@ class UserProvider extends ChangeNotifier {
     _totalWasteKg = _toDouble(user['total_waste_kg']);
     _greenTransactions = _toInt(user['green_transactions']);
     _co2OffsetKg = _toDouble(user['co2_offset_kg']);
+    // Key mungkin tidak ada pada respons lama → default false.
+    _isSeller = user['is_seller'] == true;
   }
 
   void setAuthenticatedUser({
@@ -118,13 +127,15 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Ganti foto profil ke server lalu sinkron state lokal.
-  /// Kirim `null`/kosong untuk menghapus foto.
-  Future<void> changePhoto(String? base64Photo) async {
-    final updated = await _authApi.updatePhoto(
-      token: _token,
-      base64Photo: base64Photo,
-    );
+  /// Unggah foto profil baru (file ke disk server) lalu sinkron state lokal.
+  Future<void> uploadPhoto(XFile file) async {
+    final updated = await _authApi.uploadPhoto(token: _token, file: file);
+    applyUpdatedUser(updated);
+  }
+
+  /// Hapus foto profil di server lalu sinkron state lokal.
+  Future<void> removePhoto() async {
+    final updated = await _authApi.removePhoto(token: _token);
     applyUpdatedUser(updated);
   }
 

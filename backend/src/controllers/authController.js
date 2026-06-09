@@ -1,9 +1,12 @@
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const { pool } = require('../config/db');
 const HttpError = require('../utils/httpError');
 const { createToken, createResetToken, verifyToken } = require('../utils/jwt');
 const { sendOtpEmail } = require('../utils/mailer');
+const { avatarDir } = require('../utils/upload');
 
 function cleanText(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -29,6 +32,16 @@ function publicUser(row) {
     co2_offset_kg: Number(row.co2_offset_kg),
     created_at: row.created_at,
   };
+}
+
+// True bila user sudah memiliki entri di tabel `sellers` (dibuat otomatis saat
+// pertama kali menambah produk). Dipakai untuk badge penjual di drawer.
+async function isSeller(userId) {
+  const [rows] = await pool.query(
+    'SELECT 1 FROM sellers WHERE user_id = ? LIMIT 1',
+    [userId],
+  );
+  return rows.length > 0;
 }
 
 async function register(req, res, next) {
@@ -99,7 +112,7 @@ async function register(req, res, next) {
     res.status(201).json({
       message: 'Registrasi berhasil',
       token: createToken(user),
-      user,
+      user: { ...user, is_seller: false },
     });
   } catch (error) {
     next(error);
@@ -160,17 +173,21 @@ async function login(req, res, next) {
     res.json({
       message: 'Login berhasil',
       token: createToken(user),
-      user,
+      user: { ...user, is_seller: await isSeller(userRow.user_id) },
     });
   } catch (error) {
     next(error);
   }
 }
 
-async function me(req, res) {
-  res.json({
-    user: publicUser(req.user),
-  });
+async function me(req, res, next) {
+  try {
+    res.json({
+      user: { ...publicUser(req.user), is_seller: await isSeller(req.user.user_id) },
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function updateMe(req, res, next) {
@@ -253,24 +270,41 @@ async function updateMe(req, res, next) {
   }
 }
 
-// Memperbarui hanya foto profil (base64 / data-URL). Kirim string kosong/null
-// untuk menghapus foto. Endpoint terpisah agar update teks tidak ikut membawa
-// payload base64 besar.
+// Memperbarui foto profil. Dua jalur:
+//   1. Multipart file (field `photo`) → disimpan ke disk, kolom DB berisi URL
+//      relatif `/uploads/avatars/<file>` (jalur utama).
+//   2. Body `profile_photo` null/kosong → hapus foto (set NULL).
+// String base64 lama tetap diterima apa adanya demi kompatibilitas mundur.
 async function updatePhoto(req, res, next) {
   try {
     const userId = req.user.user_id;
-    const raw = req.body.profile_photo;
 
-    let photo = null;
-    if (raw !== undefined && raw !== null && raw !== '') {
-      if (typeof raw !== 'string') {
+    let photo;
+    if (req.file) {
+      // Unggahan file ke disk.
+      photo = `/uploads/avatars/${req.file.filename}`;
+    } else {
+      const raw = req.body.profile_photo;
+      if (raw === undefined || raw === null || raw === '') {
+        // Hapus foto.
+        photo = null;
+      } else if (typeof raw === 'string') {
+        // Kompat: base64/data-URL atau URL dikirim langsung.
+        if (raw.length > 4 * 1024 * 1024) {
+          throw new HttpError(400, 'Ukuran foto terlalu besar');
+        }
+        photo = raw;
+      } else {
         throw new HttpError(400, 'Format foto tidak valid');
       }
-      // ~4MB batas aman (base64 lebih besar ~33% dari biner asli).
-      if (raw.length > 4 * 1024 * 1024) {
-        throw new HttpError(400, 'Ukuran foto terlalu besar');
-      }
-      photo = raw;
+    }
+
+    // Bersihkan file lama di disk bila foto sebelumnya tersimpan sebagai file
+    // (mencegah file orphan menumpuk). Foto lama base64 tidak perlu dibersihkan.
+    const previous = req.user.profile_photo;
+    if (previous && previous.startsWith('/uploads/avatars/') && previous !== photo) {
+      const oldPath = path.join(avatarDir, path.basename(previous));
+      fs.promises.unlink(oldPath).catch(() => {});
     }
 
     await pool.query('UPDATE users SET profile_photo = ? WHERE user_id = ?', [

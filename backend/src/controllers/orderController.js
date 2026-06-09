@@ -316,7 +316,8 @@ async function listMySales(req, res, next) {
        INNER JOIN users buyer ON buyer.user_id = o.user_id
        LEFT JOIN payments pay ON pay.order_id = o.order_id
        WHERE s.user_id = ?
-       GROUP BY o.order_id
+       GROUP BY o.order_id, o.order_code, o.order_status, o.shipping_method,
+                o.created_at, buyer.full_name, pay.payment_status
        ORDER BY o.created_at DESC`,
       [req.user.user_id],
     );

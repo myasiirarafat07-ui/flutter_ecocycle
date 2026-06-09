@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class AuthApiException implements Exception {
   final String message;
@@ -142,12 +143,33 @@ class AuthApiService {
     return data['user'] as Map<String, dynamic>;
   }
 
-  /// Memperbarui foto profil (base64). Kirim `null`/kosong untuk menghapus foto.
-  /// Mengembalikan map user terbaru.
-  Future<Map<String, dynamic>> updatePhoto({
+  /// Memperbarui foto profil dengan mengunggah [file] (multipart) ke disk
+  /// server. Mengembalikan map user terbaru.
+  Future<Map<String, dynamic>> uploadPhoto({
     required String token,
-    required String? base64Photo,
+    required XFile file,
   }) async {
+    final request =
+        http.MultipartRequest('PUT', Uri.parse('$baseUrl/api/auth/me/photo'));
+    request.headers['Authorization'] = 'Bearer $token';
+    final bytes = await file.readAsBytes();
+    request.files
+        .add(http.MultipartFile.fromBytes('photo', bytes, filename: file.name));
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthApiException(data['message']?.toString() ?? 'Request gagal');
+    }
+
+    return data['user'] as Map<String, dynamic>;
+  }
+
+  /// Menghapus foto profil (set NULL di server).
+  /// Mengembalikan map user terbaru.
+  Future<Map<String, dynamic>> removePhoto({required String token}) async {
     final uri = Uri.parse('$baseUrl/api/auth/me/photo');
     final response = await http.put(
       uri,
@@ -155,7 +177,7 @@ class AuthApiService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({'profile_photo': base64Photo ?? ''}),
+      body: jsonEncode({'profile_photo': ''}),
     );
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;

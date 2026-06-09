@@ -10,6 +10,7 @@ const {
   resetPassword,
 } = require('../controllers/authController');
 const authenticate = require('../middleware/authMiddleware');
+const { uploadAvatars } = require('../utils/upload');
 
 const router = express.Router();
 
@@ -20,6 +21,6 @@ router.post('/verify-otp', verifyOtp);
 router.post('/reset-password', resetPassword);
 router.get('/me', authenticate, me);
 router.put('/me', authenticate, updateMe);
-router.put('/me/photo', authenticate, updatePhoto);
+router.put('/me/photo', authenticate, uploadAvatars.single('photo'), updatePhoto);
 
 module.exports = router;

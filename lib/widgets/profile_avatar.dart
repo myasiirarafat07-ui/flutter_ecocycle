@@ -53,10 +53,48 @@ class ProfileAvatar extends StatelessWidget {
     this.initialColor,
   });
 
+  /// Base URL API untuk melengkapi path foto profil terunggah (mis.
+  /// `/uploads/avatars/x.jpg`). Sama dengan yang dipakai widget gambar produk.
+  static const String _baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:3000',
+  );
+
   @override
   Widget build(BuildContext context) {
-    final bytes = decodeProfilePhoto(user.photo);
     final initial = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
+    final raw = user.photo.trim();
+
+    // Foto bisa berupa: URL terunggah (`/uploads/...` atau http/https) → dimuat
+    // via network; atau base64 lama → didekode ke memory (kompatibilitas mundur).
+    Widget photoWidget;
+    final isRemote = raw.startsWith('http://') ||
+        raw.startsWith('https://') ||
+        raw.startsWith('/');
+    if (raw.isEmpty) {
+      photoWidget = _fallback(context, initial);
+    } else if (isRemote) {
+      final src = raw.startsWith('/') ? '$_baseUrl$raw' : raw;
+      photoWidget = Image.network(
+        src,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _fallback(context, initial),
+      );
+    } else {
+      final bytes = decodeProfilePhoto(raw);
+      photoWidget = bytes != null
+          ? Image.memory(
+              bytes,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+              errorBuilder: (_, __, ___) => _fallback(context, initial),
+            )
+          : _fallback(context, initial);
+    }
 
     final circle = Container(
       width: size,
@@ -69,18 +107,7 @@ class ProfileAvatar extends StatelessWidget {
         ),
         color: backgroundColor ?? context.surfaceColor,
       ),
-      child: ClipOval(
-        child: bytes != null
-            ? Image.memory(
-                bytes,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                errorBuilder: (_, __, ___) => _fallback(context, initial),
-              )
-            : _fallback(context, initial),
-      ),
+      child: ClipOval(child: photoWidget),
     );
 
     final content = showCameraBadge
@@ -131,7 +158,8 @@ class ProfileAvatar extends StatelessWidget {
 }
 
 /// Alur ganti foto profil: tampilkan pilihan (galeri / kamera / hapus),
-/// ambil gambar, encode base64, lalu unggah lewat [UserProvider.changePhoto].
+/// ambil gambar, lalu unggah lewat [UserProvider.uploadPhoto] /
+/// [UserProvider.removePhoto].
 Future<void> pickAndUploadProfilePhoto(
   BuildContext context,
   UserProvider user,
@@ -201,7 +229,7 @@ Future<void> pickAndUploadProfilePhoto(
 
   try {
     if (action == 'remove') {
-      await user.changePhoto(null);
+      await user.removePhoto();
       messenger.showSnackBar(
         const SnackBar(
           content: Text('Foto profil dihapus'),
@@ -221,10 +249,7 @@ Future<void> pickAndUploadProfilePhoto(
     );
     if (picked == null) return; // dibatalkan pengguna
 
-    final bytes = await picked.readAsBytes();
-    final base64Photo = base64Encode(bytes);
-
-    await user.changePhoto(base64Photo);
+    await user.uploadPhoto(picked);
     messenger.showSnackBar(
       const SnackBar(
         content: Text('Foto profil diperbarui'),

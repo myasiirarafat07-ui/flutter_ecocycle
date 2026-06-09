@@ -287,27 +287,30 @@ class _DrawerHeader extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 initialColor: Colors.white,
               ),
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-                      width: 2,
+              // Badge penjual: hanya tampil bila user sudah jadi penjual
+              // (punya entri di tabel `sellers`). Default pembeli: tanpa badge.
+              if (user.isSeller)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.storefront,
+                      color: Colors.white,
+                      size: 14,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.verified,
-                    color: Colors.white,
-                    size: 14,
-                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 14),
