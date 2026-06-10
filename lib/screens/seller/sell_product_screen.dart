@@ -544,10 +544,10 @@ class _SellProductScreenState extends State<SellProductScreen> {
               ),
               const SizedBox(height: 16),
               LabeledField(
-                label: 'Stok',
+                label: 'Stok (unit)',
                 child: AppTextField(
                   controller: _stockController,
-                  hint: 'mis. 100',
+                  hint: 'mis. 100 unit yang tersedia',
                   keyboardType: TextInputType.number,
                 ),
               ),

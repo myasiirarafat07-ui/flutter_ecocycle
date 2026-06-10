@@ -2,6 +2,7 @@ const { pool } = require('../config/db');
 const HttpError = require('../utils/httpError');
 const { CO2E_PER_WASTE_KG } = require('../utils/impact');
 const { calcShipping } = require('../utils/shipping');
+const { parsePaging } = require('../utils/paging');
 
 // Metode pengiriman: antar-warga dalam desa, ongkir dihitung dari jarak + berat.
 const SHIPPING_METHOD = 'antar_warga';
@@ -270,6 +271,7 @@ async function createOrder(req, res, next) {
 
 async function listMyOrders(req, res, next) {
   try {
+    const { limit, offset, page } = parsePaging(req.query);
     const [rows] = await pool.query(
       `SELECT o.order_id, o.order_code, o.order_status, o.shipping_method,
               o.subtotal, o.shipping_cost, o.total_amount, o.created_at,
@@ -289,10 +291,12 @@ async function listMyOrders(req, res, next) {
        FROM orders o
        LEFT JOIN payments pay ON pay.order_id = o.order_id
        WHERE o.user_id = ?
-       ORDER BY o.created_at DESC`,
-      [req.user.user_id],
+       ORDER BY o.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [req.user.user_id, limit, offset],
     );
-    res.json({ data: rows.map(mapOrderRow) });
+    const data = rows.map(mapOrderRow);
+    res.json({ data, page, limit, has_more: data.length === limit });
   } catch (error) {
     next(error);
   }
@@ -300,6 +304,7 @@ async function listMyOrders(req, res, next) {
 
 async function listMySales(req, res, next) {
   try {
+    const { limit, offset, page } = parsePaging(req.query);
     const [rows] = await pool.query(
       `SELECT o.order_id, o.order_code, o.order_status, o.shipping_method, o.created_at,
               buyer.full_name AS buyer_name,
@@ -318,12 +323,12 @@ async function listMySales(req, res, next) {
        WHERE s.user_id = ?
        GROUP BY o.order_id, o.order_code, o.order_status, o.shipping_method,
                 o.created_at, buyer.full_name, pay.payment_status
-       ORDER BY o.created_at DESC`,
-      [req.user.user_id],
+       ORDER BY o.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [req.user.user_id, limit, offset],
     );
-    res.json({
-      data: rows.map((r) => ({ ...mapOrderRow(r), buyer_name: r.buyer_name })),
-    });
+    const data = rows.map((r) => ({ ...mapOrderRow(r), buyer_name: r.buyer_name }));
+    res.json({ data, page, limit, has_more: data.length === limit });
   } catch (error) {
     next(error);
   }

@@ -13,7 +13,7 @@ import '../notification/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onOpenDrawer;
-  final ValueChanged<int>? onNavigateToTab;
+  final void Function(int index, {String? category})? onNavigateToTab;
 
   const HomeScreen({super.key, this.onOpenDrawer, this.onNavigateToTab});
 
@@ -39,6 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _goToMarket() => widget.onNavigateToTab?.call(1);
+
+  void _goToCategory(String category) =>
+      widget.onNavigateToTab?.call(1, category: category);
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String label,
   }) {
     return GestureDetector(
-      onTap: _goToMarket,
+      onTap: () => _goToCategory(label),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
         decoration: BoxDecoration(

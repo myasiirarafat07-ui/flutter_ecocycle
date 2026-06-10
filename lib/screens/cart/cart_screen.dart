@@ -107,6 +107,11 @@ class CartScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: 2),
+                Text(
+                  'Stok: ${item.product.stock} unit',
+                  style: TextStyle(color: context.mutedColor, fontSize: 11),
+                ),
               ],
             ),
           ),
@@ -122,14 +127,33 @@ class CartScreen extends StatelessWidget {
               ),
             ),
           ),
-          _qtyButton(context, Icons.add,
-              () => cart.increment(token, item.product.id)),
+          // Tombol + nonaktif saat sudah mencapai batas stok.
+          _qtyButton(
+            context,
+            Icons.add,
+            item.quantity >= item.product.stock
+                ? null
+                : () => _increment(context, cart, token, item.product.id),
+          ),
         ],
       ),
     );
   }
 
-  Widget _qtyButton(BuildContext context, IconData icon, VoidCallback onTap) {
+  Future<void> _increment(BuildContext context, CartProvider cart, String token,
+      int productId) async {
+    try {
+      await cart.increment(token, productId);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e'), backgroundColor: AppColors.danger),
+      );
+    }
+  }
+
+  Widget _qtyButton(BuildContext context, IconData icon, VoidCallback? onTap) {
+    final enabled = onTap != null;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -139,7 +163,11 @@ class CartScreen extends StatelessWidget {
           color: context.surfaceAltColor,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: context.textColor, size: 18),
+        child: Icon(
+          icon,
+          color: enabled ? context.textColor : context.mutedColor,
+          size: 18,
+        ),
       ),
     );
   }

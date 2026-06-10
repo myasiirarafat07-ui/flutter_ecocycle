@@ -86,13 +86,14 @@ async function addToCart(req, res, next) {
     }
 
     const [products] = await pool.query(
-      `SELECT p.product_id, s.user_id AS seller_user_id
+      `SELECT p.product_id, p.product_name, p.stock, s.user_id AS seller_user_id
        FROM products p INNER JOIN sellers s ON s.seller_id = p.seller_id
        WHERE p.product_id = ? LIMIT 1`,
       [productId],
     );
     if (products.length === 0) throw new HttpError(404, 'Produk tidak ditemukan');
-    if (products[0].seller_user_id === req.user.user_id) {
+    const product = products[0];
+    if (product.seller_user_id === req.user.user_id) {
       throw new HttpError(400, 'Tidak bisa membeli produk sendiri');
     }
 
@@ -101,6 +102,16 @@ async function addToCart(req, res, next) {
       'SELECT cart_item_id, quantity FROM cart_items WHERE cart_id = ? AND product_id = ? LIMIT 1',
       [cartId, productId],
     );
+
+    // Jumlah keranjang tidak boleh melebihi stok tersedia.
+    const stock = Number(product.stock);
+    const finalQty = (existing.length > 0 ? Number(existing[0].quantity) : 0) + quantity;
+    if (finalQty > stock) {
+      throw new HttpError(
+        400,
+        `Stok "${product.product_name}" tidak cukup (tersisa ${stock})`,
+      );
+    }
 
     if (existing.length > 0) {
       await pool.query(
@@ -132,6 +143,19 @@ async function updateCartItem(req, res, next) {
         [cartId, productId],
       );
     } else {
+      // Jumlah baru tidak boleh melebihi stok tersedia.
+      const [products] = await pool.query(
+        'SELECT product_name, stock FROM products WHERE product_id = ? LIMIT 1',
+        [productId],
+      );
+      if (products.length === 0) throw new HttpError(404, 'Produk tidak ditemukan');
+      const stock = Number(products[0].stock);
+      if (quantity > stock) {
+        throw new HttpError(
+          400,
+          `Stok "${products[0].product_name}" tidak cukup (tersisa ${stock})`,
+        );
+      }
       await pool.query(
         'UPDATE cart_items SET quantity = ? WHERE cart_id = ? AND product_id = ?',
         [quantity, cartId, productId],

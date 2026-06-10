@@ -18,35 +18,6 @@ class TransactionHistoryScreen extends StatefulWidget {
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
-  final _api = OrderApiService();
-  late Future<List<Order>> _purchases;
-  late Future<List<Order>> _sales;
-
-  @override
-  void initState() {
-    super.initState();
-    _reload();
-  }
-
-  void _reload() {
-    final token = context.read<UserProvider>().token;
-    _purchases = _api.myOrders(token);
-    _sales = _api.mySales(token);
-  }
-
-  Future<void> _refresh(bool isSales) async {
-    final token = context.read<UserProvider>().token;
-    final next = isSales ? _api.mySales(token) : _api.myOrders(token);
-    setState(() {
-      if (isSales) {
-        _sales = next;
-      } else {
-        _purchases = next;
-      }
-    });
-    await next;
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -67,73 +38,176 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             ],
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
-            _buildList(_purchases, 'Belum ada pembelian.', isSales: false),
-            _buildList(_sales, 'Belum ada penjualan.', isSales: true),
+            _OrderListView(isSales: false, emptyMsg: 'Belum ada pembelian.'),
+            _OrderListView(isSales: true, emptyMsg: 'Belum ada penjualan.'),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildList(
-    Future<List<Order>> future,
-    String emptyMsg, {
-    required bool isSales,
-  }) {
+/// Daftar pesanan/penjualan dengan infinite scroll (paginasi server).
+class _OrderListView extends StatefulWidget {
+  final bool isSales;
+  final String emptyMsg;
+  const _OrderListView({required this.isSales, required this.emptyMsg});
+
+  @override
+  State<_OrderListView> createState() => _OrderListViewState();
+}
+
+class _OrderListViewState extends State<_OrderListView> {
+  final _api = OrderApiService();
+  final ScrollController _scrollController = ScrollController();
+  static const int _pageSize = 12;
+
+  final List<Order> _items = [];
+  int _page = 1;
+  bool _hasMore = true;
+  bool _loadingFirst = true;
+  bool _loadingMore = false;
+  Object? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _loadFirst();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
+      _loadMore();
+    }
+  }
+
+  Future<OrderPage> _fetch(int page) {
+    final token = context.read<UserProvider>().token;
+    return widget.isSales
+        ? _api.mySales(token, page: page, limit: _pageSize)
+        : _api.myOrders(token, page: page, limit: _pageSize);
+  }
+
+  Future<void> _loadFirst() async {
+    setState(() {
+      _loadingFirst = true;
+      _error = null;
+    });
+    try {
+      final result = await _fetch(1);
+      if (!mounted) return;
+      setState(() {
+        _items
+          ..clear()
+          ..addAll(result.orders);
+        _page = 1;
+        _hasMore = result.hasMore;
+        _loadingFirst = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e;
+        _loadingFirst = false;
+      });
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || _loadingFirst || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final next = _page + 1;
+      final result = await _fetch(next);
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(result.orders);
+        _page = next;
+        _hasMore = result.hasMore;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () => _refresh(isSales),
-      child: FutureBuilder<List<Order>>(
-        future: future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
-          if (snapshot.hasError) {
-            return ListView(
-              children: [
-                const SizedBox(height: 120),
-                Center(
-                  child: Text(
-                    'Gagal memuat.\n${snapshot.error}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: context.mutedColor),
-                  ),
-                ),
-              ],
-            );
-          }
-          final orders = snapshot.data ?? [];
-          if (orders.isEmpty) {
-            return ListView(
-              children: [
-                const SizedBox(height: 120),
-                Icon(
-                  Icons.receipt_long_outlined,
-                  color: context.mutedColor,
-                  size: 56,
-                ),
-                const SizedBox(height: 12),
-                Center(
-                  child: Text(
-                    emptyMsg,
-                    style: TextStyle(color: context.mutedColor, fontSize: 15),
-                  ),
-                ),
-              ],
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
-            itemCount: orders.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) => _buildCard(orders[i], isSales),
+      onRefresh: _loadFirst,
+      child: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_loadingFirst) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+    if (_error != null) {
+      return ListView(
+        children: [
+          const SizedBox(height: 120),
+          Center(
+            child: Text(
+              'Gagal memuat.\n$_error',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.mutedColor),
+            ),
+          ),
+        ],
+      );
+    }
+    if (_items.isEmpty) {
+      return ListView(
+        children: [
+          const SizedBox(height: 120),
+          Icon(
+            Icons.receipt_long_outlined,
+            color: context.mutedColor,
+            size: 56,
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: Text(
+              widget.emptyMsg,
+              style: TextStyle(color: context.mutedColor, fontSize: 15),
+            ),
+          ),
+        ],
+      );
+    }
+    return ListView.separated(
+      controller: _scrollController,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
+      itemCount: _items.length + (_loadingMore ? 1 : 0),
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (_, i) {
+        if (i >= _items.length) {
+          return const Padding(
+            padding: EdgeInsets.all(12),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 2,
+              ),
+            ),
           );
-        },
-      ),
+        }
+        return _buildCard(_items[i], widget.isSales);
+      },
     );
   }
 

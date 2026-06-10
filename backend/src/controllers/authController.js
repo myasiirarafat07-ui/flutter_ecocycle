@@ -16,6 +16,13 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// Nomor HP Indonesia: boleh diawali +62/62/0, total digit 9–15.
+// Mengabaikan spasi/strip yang umum diketik pengguna.
+function isValidPhone(phone) {
+  const normalized = phone.replace(/[\s-]/g, '');
+  return /^(\+?62|0)\d{8,13}$/.test(normalized);
+}
+
 function publicUser(row) {
   return {
     user_id: row.user_id,
@@ -63,6 +70,10 @@ async function register(req, res, next) {
 
     if (!isValidEmail(email)) {
       throw new HttpError(400, 'Format email tidak valid');
+    }
+
+    if (phoneNumber && !isValidPhone(phoneNumber)) {
+      throw new HttpError(400, 'Format nomor HP tidak valid');
     }
 
     if (password.length < 6) {
@@ -226,6 +237,10 @@ async function updateMe(req, res, next) {
       throw new HttpError(400, 'Format email tidak valid');
     }
 
+    if (phoneNumber && !isValidPhone(phoneNumber)) {
+      throw new HttpError(400, 'Format nomor HP tidak valid');
+    }
+
     const [emailOwners] = await pool.query(
       'SELECT user_id FROM users WHERE email = ? AND user_id <> ? LIMIT 1',
       [email, userId],
@@ -375,11 +390,18 @@ async function forgotPassword(req, res, next) {
 
     if (emailSent) {
       res.json({ message: 'Kode OTP telah dikirim ke email Anda' });
-    } else {
+    } else if (process.env.NODE_ENV !== 'production') {
       // Mode dev: SMTP belum dikonfigurasi, kirim OTP langsung agar tetap bisa diuji.
+      // Di produksi OTP TIDAK PERNAH dibocorkan lewat response.
       res.json({
         message: 'Email belum dikonfigurasi — kode OTP ditampilkan untuk pengujian',
         dev_otp: otp,
+      });
+    } else {
+      // Produksi tanpa SMTP yang berfungsi: jangan bocorkan OTP.
+      res.json({
+        message:
+          'Kode OTP dibuat, namun pengiriman email gagal. Hubungi admin.',
       });
     }
   } catch (error) {

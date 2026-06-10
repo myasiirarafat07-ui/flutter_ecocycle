@@ -25,7 +25,10 @@ const Map<String, String> kSortOptions = {
 };
 
 class MarketScreen extends StatefulWidget {
-  const MarketScreen({super.key});
+  /// Kategori awal saat layar dibuka (mis. dari shortcut Home). Default 'Semua'.
+  final String? initialCategory;
+
+  const MarketScreen({super.key, this.initialCategory});
 
   @override
   State<MarketScreen> createState() => _MarketScreenState();
@@ -34,13 +37,23 @@ class MarketScreen extends StatefulWidget {
 class _MarketScreenState extends State<MarketScreen> {
   final ProductApiService _api = ProductApiService();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
-  String _selectedCategory = 'Semua';
+  static const int _pageSize = 12;
+
+  late String _selectedCategory;
   String _sort = 'terbaru';
   int? _minPrice;
   int? _maxPrice;
   double? _minRating;
-  late Future<List<Product>> _future;
+
+  // Status infinite scroll.
+  final List<Product> _items = [];
+  int _page = 1;
+  bool _hasMore = true;
+  bool _loadingFirst = true; // memuat halaman pertama
+  bool _loadingMore = false; // memuat halaman berikut
+  Object? _error;
 
   bool get _hasActiveFilter =>
       _minPrice != null || _maxPrice != null || _minRating != null;
@@ -48,17 +61,29 @@ class _MarketScreenState extends State<MarketScreen> {
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    final cat = widget.initialCategory;
+    _selectedCategory =
+        (cat != null && kProductCategories.contains(cat)) ? cat : 'Semua';
+    _scrollController.addListener(_onScroll);
+    _loadFirst();
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<List<Product>> _load() {
-    return _api.fetchProducts(
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
+      _loadMore();
+    }
+  }
+
+  Future<ProductPage> _fetch(int page) {
+    return _api.fetchProductsPage(
       category: _selectedCategory,
       search: _searchController.text.trim(),
       sort: _sort,
@@ -66,14 +91,57 @@ class _MarketScreenState extends State<MarketScreen> {
       minPrice: _minPrice,
       maxPrice: _maxPrice,
       minRating: _minRating,
+      page: page,
+      limit: _pageSize,
     );
   }
 
-  void _reload() {
+  Future<void> _loadFirst() async {
     setState(() {
-      _future = _load();
+      _loadingFirst = true;
+      _error = null;
     });
+    try {
+      final result = await _fetch(1);
+      if (!mounted) return;
+      setState(() {
+        _items
+          ..clear()
+          ..addAll(result.products);
+        _page = 1;
+        _hasMore = result.hasMore;
+        _loadingFirst = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e;
+        _loadingFirst = false;
+      });
+    }
   }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || _loadingFirst || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final next = _page + 1;
+      final result = await _fetch(next);
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(result.products);
+        _page = next;
+        _hasMore = result.hasMore;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+    }
+  }
+
+  // Dipanggil saat filter/sort/kategori/search berubah → reset ke halaman 1.
+  void _reload() => _loadFirst();
 
   @override
   Widget build(BuildContext context) {
@@ -87,37 +155,8 @@ class _MarketScreenState extends State<MarketScreen> {
             _buildCategoryChips(),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () async {
-                  _reload();
-                  await _future;
-                },
-                child: FutureBuilder<List<Product>>(
-                  future: _future,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return _buildMessage(
-                        Icons.cloud_off,
-                        'Gagal memuat produk.\n${snapshot.error}',
-                        showRetry: true,
-                      );
-                    }
-                    final products = snapshot.data ?? [];
-                    if (products.isEmpty) {
-                      return _buildMessage(
-                        Icons.inventory_2_outlined,
-                        'Belum ada produk.',
-                      );
-                    }
-                    return _buildGrid(products);
-                  },
-                ),
+                onRefresh: _loadFirst,
+                child: _buildContent(),
               ),
             ),
           ],
@@ -285,8 +324,30 @@ class _MarketScreenState extends State<MarketScreen> {
     );
   }
 
-  Widget _buildGrid(List<Product> products) {
+  Widget _buildContent() {
+    if (_loadingFirst) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+    if (_error != null) {
+      return _buildMessage(
+        Icons.cloud_off,
+        'Gagal memuat produk.\n$_error',
+        showRetry: true,
+      );
+    }
+    if (_items.isEmpty) {
+      return _buildMessage(Icons.inventory_2_outlined, 'Belum ada produk.');
+    }
+    return _buildGrid();
+  }
+
+  Widget _buildGrid() {
+    // Tambah satu sel footer untuk indikator "memuat lebih banyak".
+    final showFooter = _loadingMore;
     return GridView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -294,18 +355,32 @@ class _MarketScreenState extends State<MarketScreen> {
         mainAxisSpacing: 14,
         childAspectRatio: 0.66,
       ),
-      itemCount: products.length,
-      itemBuilder: (_, i) => _ProductCard(
-        product: products[i],
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProductDetailScreen(product: products[i]),
+      itemCount: _items.length + (showFooter ? 2 : 0),
+      itemBuilder: (_, i) {
+        if (i >= _items.length) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 2,
+              ),
             ),
           );
-        },
-      ),
+        }
+        final product = _items[i];
+        return _ProductCard(
+          product: product,
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: product),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

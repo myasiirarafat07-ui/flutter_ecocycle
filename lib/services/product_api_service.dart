@@ -13,6 +13,13 @@ class ProductApiException implements Exception {
   String toString() => message;
 }
 
+/// Hasil satu halaman daftar produk (untuk infinite scroll di Market).
+class ProductPage {
+  final List<Product> products;
+  final bool hasMore;
+  const ProductPage({required this.products, required this.hasMore});
+}
+
 class ProductApiService {
   // Samakan dengan AuthApiService:
   // - Android Emulator: http://10.0.2.2:3000
@@ -38,6 +45,8 @@ class ProductApiService {
     throw ProductApiException(message);
   }
 
+  /// Versi sederhana (tanpa info paging) — dipakai Home untuk ambil sebagian
+  /// produk terlaris. Tetap mengirim page/limit ke server.
   Future<List<Product>> fetchProducts({
     String? category,
     String? search,
@@ -46,8 +55,40 @@ class ProductApiService {
     int? minPrice,
     int? maxPrice,
     double? minRating,
+    int page = 1,
+    int limit = 12,
   }) async {
-    final query = <String, String>{};
+    final result = await fetchProductsPage(
+      category: category,
+      search: search,
+      sort: sort,
+      token: token,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      minRating: minRating,
+      page: page,
+      limit: limit,
+    );
+    return result.products;
+  }
+
+  /// Versi paginasi penuh — mengembalikan produk + flag [ProductPage.hasMore]
+  /// untuk infinite scroll di Market.
+  Future<ProductPage> fetchProductsPage({
+    String? category,
+    String? search,
+    String? sort,
+    String? token,
+    int? minPrice,
+    int? maxPrice,
+    double? minRating,
+    int page = 1,
+    int limit = 12,
+  }) async {
+    final query = <String, String>{
+      'page': '$page',
+      'limit': '$limit',
+    };
     if (category != null && category.isNotEmpty && category != 'Semua') {
       query['category'] = category;
     }
@@ -63,18 +104,19 @@ class ProductApiService {
       query['min_rating'] = minRating.toString();
     }
 
-    final uri = Uri.parse(
-      '$baseUrl/api/products',
-    ).replace(queryParameters: query.isEmpty ? null : query);
+    final uri = Uri.parse('$baseUrl/api/products').replace(queryParameters: query);
 
     final response = await http.get(uri, headers: _headers(token));
     if (response.statusCode != 200) _fail(response);
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     final list = (data['data'] as List<dynamic>? ?? []);
-    return list
-        .map((e) => Product.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return ProductPage(
+      products: list
+          .map((e) => Product.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      hasMore: data['has_more'] == true || data['has_more'] == 1,
+    );
   }
 
   Future<Product> fetchProduct(int id, {String? token}) async {

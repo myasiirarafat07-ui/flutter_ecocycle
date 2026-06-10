@@ -11,6 +11,13 @@ class OrderApiException implements Exception {
   String toString() => message;
 }
 
+/// Hasil satu halaman daftar pesanan/penjualan (untuk infinite scroll).
+class OrderPage {
+  final List<Order> orders;
+  final bool hasMore;
+  const OrderPage({required this.orders, required this.hasMore});
+}
+
 class OrderApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
@@ -58,19 +65,28 @@ class OrderApiService {
         (jsonDecode(r.body) as Map)['order'] as Map<String, dynamic>);
   }
 
-  Future<List<Order>> myOrders(String token) =>
-      _list('$baseUrl/api/orders', token);
+  Future<OrderPage> myOrders(String token, {int page = 1, int limit = 12}) =>
+      _list('$baseUrl/api/orders', token, page, limit);
 
-  Future<List<Order>> mySales(String token) =>
-      _list('$baseUrl/api/orders/sales', token);
+  Future<OrderPage> mySales(String token, {int page = 1, int limit = 12}) =>
+      _list('$baseUrl/api/orders/sales', token, page, limit);
 
-  Future<List<Order>> _list(String url, String token) async {
-    final r = await http.get(Uri.parse(url), headers: _headers(token));
+  Future<OrderPage> _list(String url, String token, int page, int limit) async {
+    final uri = Uri.parse(url).replace(queryParameters: {
+      'page': '$page',
+      'limit': '$limit',
+    });
+    final r = await http.get(uri, headers: _headers(token));
     if (r.statusCode != 200) _fail(r);
-    final data = (jsonDecode(r.body) as Map)['data'] as List<dynamic>?;
-    return (data ?? [])
+    final body = jsonDecode(r.body) as Map;
+    final data = body['data'] as List<dynamic>?;
+    final orders = (data ?? [])
         .map((e) => Order.fromJson(e as Map<String, dynamic>))
         .toList();
+    return OrderPage(
+      orders: orders,
+      hasMore: body['has_more'] == true || body['has_more'] == 1,
+    );
   }
 
   Future<Order> getOrder(String token, int orderId) async {

@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
 const HttpError = require('../utils/httpError');
+const { parsePaging } = require('../utils/paging');
 
 const CATEGORIES = ['Pupuk & Kompos', 'Karya Daur Ulang'];
 
@@ -156,12 +157,19 @@ async function listProducts(req, res, next) {
     const orderBy = SORT_MAP[cleanText(req.query.sort)] || SORT_MAP.terbaru;
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
+    const { limit, offset, page } = parsePaging(req.query);
+
     const [rows] = await pool.query(
-      `${BASE_SELECT} ${whereSql} ORDER BY ${orderBy}`,
-      params,
+      `${BASE_SELECT} ${whereSql} ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
+      [...params, limit, offset],
     );
     const products = await attachImages(rows.map(publicProduct));
-    res.json({ data: products });
+    res.json({
+      data: products,
+      page,
+      limit,
+      has_more: products.length === limit,
+    });
   } catch (error) {
     next(error);
   }

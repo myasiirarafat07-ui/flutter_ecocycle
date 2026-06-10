@@ -236,7 +236,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Stok tersedia: ${product.stock}',
+          'Stok tersedia: ${product.stock} unit',
           style: TextStyle(color: context.mutedColor, fontSize: 13),
         ),
         if (product.wasteKg > 0) ...[
@@ -420,6 +420,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
+    final outOfStock = product.stock <= 0;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
       decoration: BoxDecoration(
@@ -432,19 +433,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: () async {
-                final token = context.read<UserProvider>().token;
-                if (token.isEmpty) {
-                  _snack('Login dulu untuk menambah ke keranjang');
-                  return;
-                }
-                try {
-                  await context.read<CartProvider>().add(token, product);
-                  _snack('Ditambahkan ke keranjang');
-                } catch (e) {
-                  _snack('$e');
-                }
-              },
+              onPressed: outOfStock
+                  ? null
+                  : () async {
+                      final token = context.read<UserProvider>().token;
+                      if (token.isEmpty) {
+                        _snack('Login dulu untuk menambah ke keranjang');
+                        return;
+                      }
+                      try {
+                        await context.read<CartProvider>().add(token, product);
+                        _snack('Ditambahkan ke keranjang');
+                      } catch (e) {
+                        _snack('$e');
+                      }
+                    },
               icon: const Icon(Icons.shopping_cart_outlined, size: 16),
               label: const Text(
                 'Keranjang',
@@ -463,16 +466,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CheckoutScreen(
-                      items: [CartItem(product: product)],
-                    ),
-                  ),
-                );
-              },
+              onPressed: outOfStock
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CheckoutScreen(
+                            items: [CartItem(product: product)],
+                          ),
+                        ),
+                      );
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -482,9 +487,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 elevation: 0,
               ),
-              child: const Text(
-                'Beli Sekarang',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              child: Text(
+                outOfStock ? 'Stok Habis' : 'Beli Sekarang',
+                style: const TextStyle(
+                    fontSize: 14, fontWeight: FontWeight.bold),
               ),
             ),
           ),
