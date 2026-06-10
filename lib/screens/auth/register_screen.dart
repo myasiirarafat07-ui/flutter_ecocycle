@@ -286,9 +286,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     child: Row(
       children: [
         SizedBox(
-          width: 22,
-          height: 22,
-          child: Image.asset('assets/logo/ecocycle_logo.png'),
+          width: 28,
+          height: 28,
+          child: Image.asset(
+            'assets/logo/ecocycle_logo.png',
+            fit: BoxFit.contain,
+          ),
         ),
         const SizedBox(width: 8),
         const Text(

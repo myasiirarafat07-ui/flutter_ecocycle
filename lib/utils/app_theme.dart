@@ -1,8 +1,50 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+/// Transisi halaman kustom: fade lembut + sedikit geser ke atas.
+/// Dipakai di semua platform agar perpindahan layar terasa mulus & konsisten.
+class _SmoothPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _SmoothPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.04),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      ),
+    );
+  }
+}
+
 class AppTheme {
   AppTheme._();
+
+  static const _pageTransitions = PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: _SmoothPageTransitionsBuilder(),
+      TargetPlatform.iOS: _SmoothPageTransitionsBuilder(),
+      TargetPlatform.macOS: _SmoothPageTransitionsBuilder(),
+      TargetPlatform.windows: _SmoothPageTransitionsBuilder(),
+      TargetPlatform.linux: _SmoothPageTransitionsBuilder(),
+      TargetPlatform.fuchsia: _SmoothPageTransitionsBuilder(),
+    },
+  );
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -13,7 +55,6 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.lightSurface,
-        background: AppColors.lightBackground,
         error: AppColors.danger,
       ),
       appBarTheme: const AppBarTheme(
@@ -37,6 +78,8 @@ class AppTheme {
       cardColor: AppColors.lightSurface,
       dividerColor: AppColors.lightDivider,
       iconTheme: const IconThemeData(color: AppColors.lightText),
+      pageTransitionsTheme: _pageTransitions,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 
@@ -49,7 +92,6 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.darkSurface,
-        background: AppColors.darkBackground,
         error: AppColors.danger,
       ),
       appBarTheme: const AppBarTheme(
@@ -73,6 +115,8 @@ class AppTheme {
       cardColor: AppColors.darkSurface,
       dividerColor: AppColors.darkDivider,
       iconTheme: const IconThemeData(color: AppColors.darkText),
+      pageTransitionsTheme: _pageTransitions,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 }

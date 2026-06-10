@@ -259,7 +259,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
         border: method.isDefault
-            ? Border.all(color: AppColors.primary.withOpacity(0.6), width: 1)
+            ? Border.all(color: AppColors.primary.withValues(alpha: 0.6), width: 1)
             : null,
       ),
       child: Row(
@@ -612,7 +612,7 @@ class _TambahMetodeSheetState extends State<_TambahMetodeSheet> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: dipilih
-              ? AppColors.primary.withOpacity(0.3)
+              ? AppColors.primary.withValues(alpha: 0.3)
               : context.bgColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(

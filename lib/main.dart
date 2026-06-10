@@ -39,6 +39,8 @@ class MyApp extends StatelessWidget {
           themeMode: themeProvider.themeMode,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
+          themeAnimationDuration: const Duration(milliseconds: 400),
+          themeAnimationCurve: Curves.easeInOut,
           home: const _SplashGate(),
         );
       },
@@ -89,22 +91,36 @@ class _SplashGateState extends State<_SplashGate> {
     return Scaffold(
       backgroundColor: context.bgColor,
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.eco, color: AppColors.primary, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              'EcoCycle',
-              style: TextStyle(
-                color: context.textColor,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOut,
+          builder: (context, value, child) => Opacity(
+            opacity: value,
+            child: Transform.scale(scale: 0.92 + 0.08 * value, child: child),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/logo/ecocycle_logo.png',
+                width: 80,
+                height: 80,
+                fit: BoxFit.contain,
               ),
-            ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(color: AppColors.primary),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                'EcoCycle',
+                style: TextStyle(
+                  color: context.textColor,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(color: AppColors.primary),
+            ],
+          ),
         ),
       ),
     );

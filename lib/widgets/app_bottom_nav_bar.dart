@@ -71,7 +71,7 @@ class AppBottomNavBar extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.5),
+                      color: AppColors.primary.withValues(alpha: 0.5),
                       blurRadius: 14,
                       offset: const Offset(0, 4),
                     ),

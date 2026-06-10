@@ -168,6 +168,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _pages.length,
               (i) => AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 width: i == _currentPage ? 24 : 8,
                 height: 8,

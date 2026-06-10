@@ -172,8 +172,8 @@ class _MarketScreenState extends State<MarketScreen> {
         children: [
           Image.asset(
             'assets/logo/ecocycle_logo.png',
-            width: 20,
-            height: 20,
+            width: 28,
+            height: 28,
             fit: BoxFit.contain,
           ),
           const SizedBox(width: 12),

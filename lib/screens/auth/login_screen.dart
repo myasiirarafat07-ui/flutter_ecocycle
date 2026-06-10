@@ -192,9 +192,12 @@ class _LoginScreenState extends State<LoginScreen> {
     child: Row(
       children: [
         SizedBox(
-          width: 30,
-          height: 30,
-          child: Image.asset('assets/logo/ecocycle_logo.png'),
+          width: 36,
+          height: 36,
+          child: Image.asset(
+            'assets/logo/ecocycle_logo.png',
+            fit: BoxFit.contain,
+          ),
         ),
         Expanded(
           child: Text(

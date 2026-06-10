@@ -173,7 +173,7 @@ class AppDrawer extends StatelessWidget {
                           onChanged: (value) {
                             themeProvider.toggleTheme(value);
                           },
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                         ),
                       ],
                     ),
@@ -207,13 +207,11 @@ class AppDrawer extends StatelessWidget {
         backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         title: Row(
           children: [
-            Container(
-              child: Image.asset(
-                'assets/logo/ecocycle_logo.png',
-                width: 20,
-                height: 20,
-                fit: BoxFit.contain,
-              ),
+            Image.asset(
+              'assets/logo/ecocycle_logo.png',
+              width: 28,
+              height: 28,
+              fit: BoxFit.contain,
             ),
             const SizedBox(width: 10),
             Text(
@@ -326,7 +324,7 @@ class _DrawerHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: tier.color.withOpacity(0.15),
+              color: tier.color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -382,8 +380,8 @@ class _DrawerItem extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      highlightColor: AppColors.primary.withOpacity(0.15),
-      splashColor: AppColors.primary.withOpacity(0.1),
+      highlightColor: AppColors.primary.withValues(alpha: 0.15),
+      splashColor: AppColors.primary.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Row(
@@ -435,7 +433,7 @@ class _DrawerSectionLabel extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
-          color: isDark ? Colors.white30 : AppColors.lightTextMuted.withOpacity(0.5),
+          color: isDark ? Colors.white30 : AppColors.lightTextMuted.withValues(alpha: 0.5),
           fontSize: 11,
           letterSpacing: 1.2,
           fontWeight: FontWeight.w600,
@@ -473,13 +471,11 @@ class _DrawerBranding extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
         children: [
-          Container(
-            child: Image.asset(
-              'assets/logo/ecocycle_logo.png',
-              width: 20,
-              height: 20,
-              fit: BoxFit.contain,
-            ),
+          Image.asset(
+            'assets/logo/ecocycle_logo.png',
+            width: 28,
+            height: 28,
+            fit: BoxFit.contain,
           ),
           const SizedBox(width: 10),
           Text(

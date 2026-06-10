@@ -136,7 +136,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.4),
+              color: AppColors.primary.withValues(alpha: 0.4),
               blurRadius: 24,
               spreadRadius: 4,
             ),
@@ -302,7 +302,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
             color: context.surfaceColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.primary.withOpacity(0.4),
+              color: AppColors.primary.withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -312,7 +312,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.25),
+                  color: AppColors.primary.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

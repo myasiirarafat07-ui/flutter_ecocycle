@@ -518,7 +518,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   builder: (_) => SellProductScreen(product: product),
                 ),
               );
-              if (changed == true && mounted) Navigator.pop(context);
+              if (changed == true && context.mounted) Navigator.pop(context);
             },
             icon: const Icon(Icons.edit_outlined, size: 18),
             label: const Text(

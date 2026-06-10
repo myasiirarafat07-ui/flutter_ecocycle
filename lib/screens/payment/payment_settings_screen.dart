@@ -163,7 +163,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
               Icon(
                 Icons.chevron_right,
                 color: warnaMerah
-                    ? AppColors.danger.withOpacity(0.6)
+                    ? AppColors.danger.withValues(alpha: 0.6)
                     : context.dividerColor,
                 size: 20,
               ),

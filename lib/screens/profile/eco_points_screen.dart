@@ -225,7 +225,7 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: tier.color.withOpacity(0.15),
+                  color: tier.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(tier.icon, color: tier.color, size: 24),
@@ -308,7 +308,7 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
     final achieved = balance >= tier.minPoints;
     return Container(
       decoration: BoxDecoration(
-        color: isCurrent ? tier.color.withOpacity(0.08) : null,
+        color: isCurrent ? tier.color.withValues(alpha: 0.08) : null,
         border: showDivider
             ? Border(bottom: BorderSide(color: context.dividerColor))
             : null,
@@ -321,8 +321,8 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
             height: 38,
             decoration: BoxDecoration(
               color: achieved
-                  ? tier.color.withOpacity(0.15)
-                  : context.dividerColor.withOpacity(0.5),
+                  ? tier.color.withValues(alpha: 0.15)
+                  : context.dividerColor.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -473,7 +473,7 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.15),
+              color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
