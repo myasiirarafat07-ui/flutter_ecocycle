@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   provider: ^6.1.2
   http: ^1.2.2
+  http_parser: ^4.0.2
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.3.2
   image_picker: ^1.1.2
@@ -27,7 +28,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icons/EcoCycle App Icon.png"
+  image_path: "assets/logo/ecocycle_logo.png"
   min_sdk_android: 21
   flutter_lints: ^6.0.0
 
@@ -37,7 +38,6 @@ flutter:
   assets:
     - assets/images/
     - assets/logo/
-    - assets/icons/
 
   fonts:
     - family: Poppins

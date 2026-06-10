@@ -173,7 +173,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     Center(
                       child: Text(
                         '© 2026 EcoCycle. All rights reserved.',
-                        style: TextStyle(color: context.mutedColor, fontSize: 12),
+                        style: TextStyle(
+                          color: context.mutedColor,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),

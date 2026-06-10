@@ -39,6 +39,12 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     });
   }
 
+  Future<void> _refresh() {
+    final future = _load();
+    setState(() => _future = future);
+    return future;
+  }
+
   Future<void> _openForm([Product? product]) async {
     final changed = await Navigator.push<bool>(
       context,
@@ -107,50 +113,63 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         label: const Text('Jual Produk'),
       ),
       body: SafeArea(
-        child: FutureBuilder<List<Product>>(
-          future: _future,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              );
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  '${snapshot.error}',
-                  style: TextStyle(color: context.mutedColor),
-                ),
-              );
-            }
-            final products = snapshot.data ?? [];
-            if (products.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: _refresh,
+          child: FutureBuilder<List<Product>>(
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+              if (snapshot.hasError) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   children: [
+                    const SizedBox(height: 140),
+                    Center(
+                      child: Text(
+                        '${snapshot.error}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: context.mutedColor),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              final products = snapshot.data ?? [];
+              if (products.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    const SizedBox(height: 140),
                     Icon(
                       Icons.storefront_outlined,
                       color: context.mutedColor,
                       size: 56,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'Belum ada produk.\nTekan "Jual Produk" untuk menambah.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: context.mutedColor),
+                    Center(
+                      child: Text(
+                        'Belum ada produk.\nTekan "Jual Produk" untuk menambah.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: context.mutedColor),
+                      ),
                     ),
                   ],
-                ),
+                );
+              }
+              return ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 90),
+                itemCount: products.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (_, i) => _buildItem(products[i]),
               );
-            }
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 90),
-              itemCount: products.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (_, i) => _buildItem(products[i]),
-            );
-          },
+            },
+          ),
         ),
       ),
     );

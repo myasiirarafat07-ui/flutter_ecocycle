@@ -144,10 +144,7 @@ class _OrderListViewState extends State<_OrderListView> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _loadFirst,
-      child: _buildBody(),
-    );
+    return RefreshIndicator(onRefresh: _loadFirst, child: _buildBody());
   }
 
   Widget _buildBody() {
@@ -247,17 +244,15 @@ class _OrderListViewState extends State<_OrderListView> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Flexible(
-                  child: Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    alignment: WrapAlignment.end,
-                    children: [
-                      if (order.paymentStatus.toUpperCase() == 'PENDING')
-                        PaymentStatusBadge(order.paymentStatus),
-                      OrderStatusBadge(order.orderStatus),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (order.paymentStatus.toUpperCase() == 'PENDING') ...[
+                      PaymentStatusBadge(order.paymentStatus),
+                      const SizedBox(width: 6),
                     ],
-                  ),
+                    OrderStatusBadge(order.orderStatus),
+                  ],
                 ),
               ],
             ),

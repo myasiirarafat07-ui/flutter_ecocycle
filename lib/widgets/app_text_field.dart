@@ -43,11 +43,7 @@ class AppTextField extends StatelessWidget {
           suffixIcon: suffixIcon != null
               ? GestureDetector(
                   onTap: onSuffixTap,
-                  child: Icon(
-                    suffixIcon,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
+                  child: Icon(suffixIcon, color: AppColors.primary, size: 20),
                 )
               : null,
         ),
@@ -67,10 +63,7 @@ class LabeledField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(color: context.textColor, fontSize: 14),
-        ),
+        Text(label, style: TextStyle(color: context.textColor, fontSize: 14)),
         const SizedBox(height: 8),
         child,
       ],

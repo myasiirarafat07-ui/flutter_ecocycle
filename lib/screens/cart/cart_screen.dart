@@ -31,16 +31,24 @@ class CartScreen extends StatelessWidget {
         builder: (context, cart, _) {
           final token = context.read<UserProvider>().token;
           if (cart.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            return RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () => cart.load(token),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  Icon(Icons.shopping_cart_outlined,
-                      color: context.mutedColor, size: 56),
+                  const SizedBox(height: 140),
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    color: context.mutedColor,
+                    size: 56,
+                  ),
                   const SizedBox(height: 12),
-                  Text(
-                    'Keranjang masih kosong.',
-                    style: TextStyle(color: context.mutedColor),
+                  Center(
+                    child: Text(
+                      'Keranjang masih kosong.',
+                      style: TextStyle(color: context.mutedColor),
+                    ),
                   ),
                 ],
               ),
@@ -49,12 +57,17 @@ class CartScreen extends StatelessWidget {
           return Column(
             children: [
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: cart.items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (_, i) =>
-                      _buildItem(context, cart, token, cart.items[i]),
+                child: RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: () => cart.load(token),
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
+                    itemCount: cart.items.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (_, i) =>
+                        _buildItem(context, cart, token, cart.items[i]),
+                  ),
                 ),
               ),
               _buildBottomBar(context, cart),
@@ -66,7 +79,11 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _buildItem(
-      BuildContext context, CartProvider cart, String token, CartItem item) {
+    BuildContext context,
+    CartProvider cart,
+    String token,
+    CartItem item,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -115,8 +132,11 @@ class CartScreen extends StatelessWidget {
               ],
             ),
           ),
-          _qtyButton(context, Icons.remove,
-              () => cart.decrement(token, item.product.id)),
+          _qtyButton(
+            context,
+            Icons.remove,
+            () => cart.decrement(token, item.product.id),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
@@ -140,8 +160,12 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _increment(BuildContext context, CartProvider cart, String token,
-      int productId) async {
+  Future<void> _increment(
+    BuildContext context,
+    CartProvider cart,
+    String token,
+    int productId,
+  ) async {
     try {
       await cart.increment(token, productId);
     } catch (e) {
@@ -205,10 +229,8 @@ class CartScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => CheckoutScreen(
-                    items: cart.items,
-                    fromCart: true,
-                  ),
+                  builder: (_) =>
+                      CheckoutScreen(items: cart.items, fromCart: true),
                 ),
               );
             },

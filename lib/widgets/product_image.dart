@@ -35,19 +35,20 @@ class ProductImage extends StatelessWidget {
     final url = imageUrl.trim();
 
     Widget fallback() => Container(
-          width: width,
-          height: height,
-          color: context.surfaceAltColor,
-          child: Icon(
-            Icons.image_not_supported,
-            color: context.mutedColor,
-            size: iconSize,
-          ),
-        );
+      width: width,
+      height: height,
+      color: context.surfaceAltColor,
+      child: Icon(
+        Icons.image_not_supported,
+        color: context.mutedColor,
+        size: iconSize,
+      ),
+    );
 
     if (url.isEmpty) return fallback();
 
-    final isRemote = url.startsWith('http://') ||
+    final isRemote =
+        url.startsWith('http://') ||
         url.startsWith('https://') ||
         url.startsWith('/');
     if (isRemote) {

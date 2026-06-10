@@ -62,8 +62,9 @@ class _MarketScreenState extends State<MarketScreen> {
   void initState() {
     super.initState();
     final cat = widget.initialCategory;
-    _selectedCategory =
-        (cat != null && kProductCategories.contains(cat)) ? cat : 'Semua';
+    _selectedCategory = (cat != null && kProductCategories.contains(cat))
+        ? cat
+        : 'Semua';
     _scrollController.addListener(_onScroll);
     _loadFirst();
   }

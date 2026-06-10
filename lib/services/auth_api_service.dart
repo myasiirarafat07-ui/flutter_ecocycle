@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
+import '../utils/upload_media_type.dart';
+
 class AuthApiException implements Exception {
   final String message;
 
@@ -64,10 +66,7 @@ class AuthApiService {
   }
 
   /// Langkah 2 lupa kata sandi: verifikasi OTP, kembalikan resetToken.
-  Future<String> verifyOtp({
-    required String email,
-    required String otp,
-  }) async {
+  Future<String> verifyOtp({required String email, required String otp}) async {
     final data = await _post('/api/auth/verify-otp', {
       'email': email,
       'otp': otp,
@@ -149,12 +148,20 @@ class AuthApiService {
     required String token,
     required XFile file,
   }) async {
-    final request =
-        http.MultipartRequest('PUT', Uri.parse('$baseUrl/api/auth/me/photo'));
+    final request = http.MultipartRequest(
+      'PUT',
+      Uri.parse('$baseUrl/api/auth/me/photo'),
+    );
     request.headers['Authorization'] = 'Bearer $token';
     final bytes = await file.readAsBytes();
-    request.files
-        .add(http.MultipartFile.fromBytes('photo', bytes, filename: file.name));
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'photo',
+        bytes,
+        filename: file.name,
+        contentType: imageMediaType(file),
+      ),
+    );
 
     final streamed = await request.send();
     final response = await http.Response.fromStream(streamed);
@@ -211,7 +218,10 @@ class AuthApiService {
 
   /// POST generik yang mengembalikan body JSON mentah, melempar [AuthApiException]
   /// bila status non-2xx.
-  Future<Map<String, dynamic>> _post(String path, Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> _post(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
     final uri = Uri.parse('$baseUrl$path');
     final response = await http.post(
       uri,

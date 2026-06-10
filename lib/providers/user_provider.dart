@@ -108,6 +108,14 @@ class UserProvider extends ChangeNotifier {
     await prefs.remove(_tokenKey);
   }
 
+  /// Ambil ulang profil terbaru dari server (mis. pull-to-refresh di Profil).
+  Future<void> refreshMe() async {
+    if (_token.isEmpty) return;
+    final user = await _authApi.me(_token);
+    _applyUser(user);
+    notifyListeners();
+  }
+
   /// Dipanggil setelah update profil berhasil (token tetap sama).
   void applyUpdatedUser(Map<String, dynamic> user) {
     _applyUser(user);

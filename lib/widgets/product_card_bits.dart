@@ -19,10 +19,7 @@ class ProductMetaRow extends StatelessWidget {
             '${product.rating.toStringAsFixed(1)} (${product.reviewCount})  ·  ${product.sold} terjual',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: context.mutedColor,
-              fontSize: 10,
-            ),
+            style: TextStyle(color: context.mutedColor, fontSize: 10),
           ),
         ),
       ],

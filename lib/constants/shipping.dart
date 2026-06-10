@@ -26,7 +26,8 @@ class Shipping {
     final dLng = _toRad(bLng - aLng);
     final lat1 = _toRad(aLat);
     final lat2 = _toRad(bLat);
-    final h = math.pow(math.sin(dLat / 2), 2) +
+    final h =
+        math.pow(math.sin(dLat / 2), 2) +
         math.cos(lat1) * math.cos(lat2) * math.pow(math.sin(dLng / 2), 2);
     return 2 * earthRadiusKm * math.asin(math.sqrt(h));
   }
@@ -86,7 +87,8 @@ ShippingQuote calcShipping({
   }
 
   final distanceKm = distances.reduce(math.max);
-  final raw = Shipping.baseFee +
+  final raw =
+      Shipping.baseFee +
       distanceKm * Shipping.perKm +
       totalWeightKg * Shipping.perKg;
   final rounded = (raw / Shipping.roundTo).round() * Shipping.roundTo;

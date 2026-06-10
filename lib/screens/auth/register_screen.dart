@@ -249,7 +249,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               size: 24,
                             ),
                             const SizedBox(width: 28),
-                            Icon(Icons.eco, color: context.mutedColor, size: 24),
+                            Icon(
+                              Icons.eco,
+                              color: context.mutedColor,
+                              size: 24,
+                            ),
                             const SizedBox(width: 28),
                             Icon(
                               Icons.park_outlined,
@@ -361,10 +365,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: const Text(
                     'Syarat Layanan',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: AppColors.primary, fontSize: 13),
                   ),
                 ),
               ),
@@ -379,10 +380,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: const Text(
                     'Kebijakan Privasi',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: AppColors.primary, fontSize: 13),
                   ),
                 ),
               ),

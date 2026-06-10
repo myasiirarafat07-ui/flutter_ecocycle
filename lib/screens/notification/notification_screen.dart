@@ -79,8 +79,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     final unread = _items.where((n) => !n.isRead).length;
-    final visible =
-        _showUnreadOnly ? _items.where((n) => !n.isRead).toList() : _items;
+    final visible = _showUnreadOnly
+        ? _items.where((n) => !n.isRead).toList()
+        : _items;
 
     return Scaffold(
       backgroundColor: context.bgColor,
@@ -90,8 +91,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
           if (unread > 0)
             TextButton(
               onPressed: _markAll,
-              child: const Text('Tandai semua',
-                  style: TextStyle(color: AppColors.primary)),
+              child: const Text(
+                'Tandai semua',
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
         ],
       ),
@@ -102,22 +105,30 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Expanded(
               child: _loading
                   ? const Center(
-                      child:
-                          CircularProgressIndicator(color: AppColors.primary))
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    )
                   : RefreshIndicator(
                       onRefresh: _load,
                       child: visible.isEmpty
-                          ? ListView(children: [
-                              const SizedBox(height: 120),
-                              Icon(Icons.notifications_none,
-                                  color: context.mutedColor, size: 56),
-                              const SizedBox(height: 12),
-                              Center(
-                                child: Text('Tidak ada notifikasi.',
-                                    style:
-                                        TextStyle(color: context.mutedColor)),
-                              ),
-                            ])
+                          ? ListView(
+                              children: [
+                                const SizedBox(height: 120),
+                                Icon(
+                                  Icons.notifications_none,
+                                  color: context.mutedColor,
+                                  size: 56,
+                                ),
+                                const SizedBox(height: 12),
+                                Center(
+                                  child: Text(
+                                    'Tidak ada notifikasi.',
+                                    style: TextStyle(color: context.mutedColor),
+                                  ),
+                                ),
+                              ],
+                            )
                           : ListView.separated(
                               padding: const EdgeInsets.all(20),
                               itemCount: visible.length,
@@ -144,12 +155,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
             color: selected ? AppColors.primary : context.surfaceColor,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-                color: selected ? AppColors.primary : context.dividerColor),
+              color: selected ? AppColors.primary : context.dividerColor,
+            ),
           ),
-          child: Text(label,
-              style: TextStyle(
-                  color: selected ? Colors.white : context.mutedColor,
-                  fontSize: 13)),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.white : context.mutedColor,
+              fontSize: 13,
+            ),
+          ),
         ),
       );
     }
@@ -159,10 +174,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
         children: [
-          chip('Semua', !_showUnreadOnly,
-              () => setState(() => _showUnreadOnly = false)),
-          chip('Belum dibaca ($unread)', _showUnreadOnly,
-              () => setState(() => _showUnreadOnly = true)),
+          chip(
+            'Semua',
+            !_showUnreadOnly,
+            () => setState(() => _showUnreadOnly = false),
+          ),
+          chip(
+            'Belum dibaca ($unread)',
+            _showUnreadOnly,
+            () => setState(() => _showUnreadOnly = true),
+          ),
         ],
       ),
     );
@@ -197,19 +218,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(n.title,
-                      style: TextStyle(
-                          color: context.textColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14)),
+                  Text(
+                    n.title,
+                    style: TextStyle(
+                      color: context.textColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(n.body,
-                      style:
-                          TextStyle(color: context.mutedColor, fontSize: 13)),
+                  Text(
+                    n.body,
+                    style: TextStyle(color: context.mutedColor, fontSize: 13),
+                  ),
                   const SizedBox(height: 4),
-                  Text(n.createdAt,
-                      style:
-                          TextStyle(color: context.mutedColor, fontSize: 11)),
+                  Text(
+                    n.createdAt,
+                    style: TextStyle(color: context.mutedColor, fontSize: 11),
+                  ),
                 ],
               ),
             ),

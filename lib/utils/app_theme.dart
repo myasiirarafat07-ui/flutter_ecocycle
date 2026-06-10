@@ -72,8 +72,14 @@ class AppTheme {
       textTheme: const TextTheme(
         bodyLarge: TextStyle(color: AppColors.lightText),
         bodyMedium: TextStyle(color: AppColors.lightText),
-        titleLarge: TextStyle(color: AppColors.lightText, fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600),
+        titleLarge: TextStyle(
+          color: AppColors.lightText,
+          fontWeight: FontWeight.bold,
+        ),
+        titleMedium: TextStyle(
+          color: AppColors.lightText,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       cardColor: AppColors.lightSurface,
       dividerColor: AppColors.lightDivider,
@@ -109,8 +115,14 @@ class AppTheme {
       textTheme: const TextTheme(
         bodyLarge: TextStyle(color: AppColors.darkText),
         bodyMedium: TextStyle(color: AppColors.darkText),
-        titleLarge: TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(color: AppColors.darkText, fontWeight: FontWeight.w600),
+        titleLarge: TextStyle(
+          color: AppColors.darkText,
+          fontWeight: FontWeight.bold,
+        ),
+        titleMedium: TextStyle(
+          color: AppColors.darkText,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       cardColor: AppColors.darkSurface,
       dividerColor: AppColors.darkDivider,

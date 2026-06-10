@@ -6,7 +6,7 @@ class AppColors {
   // Primary & Accent (Eco Green & Cyan)
   static const Color primary = Color(0xFF22C55E); // Green 500
   static const Color secondary = Color(0xFF0891B2); // Cyan 600
-  
+
   // Light Theme Colors
   static const Color lightBackground = Color(0xFFF8FAFC); // Slate 50
   static const Color lightSurface = Colors.white;

@@ -25,9 +25,9 @@ class OrderApiService {
   );
 
   Map<String, String> _headers(String token) => {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
 
   Never _fail(http.Response response) {
     String message = 'Request gagal';
@@ -62,7 +62,8 @@ class OrderApiService {
     );
     if (r.statusCode != 201) _fail(r);
     return Order.fromJson(
-        (jsonDecode(r.body) as Map)['order'] as Map<String, dynamic>);
+      (jsonDecode(r.body) as Map)['order'] as Map<String, dynamic>,
+    );
   }
 
   Future<OrderPage> myOrders(String token, {int page = 1, int limit = 12}) =>
@@ -72,10 +73,9 @@ class OrderApiService {
       _list('$baseUrl/api/orders/sales', token, page, limit);
 
   Future<OrderPage> _list(String url, String token, int page, int limit) async {
-    final uri = Uri.parse(url).replace(queryParameters: {
-      'page': '$page',
-      'limit': '$limit',
-    });
+    final uri = Uri.parse(
+      url,
+    ).replace(queryParameters: {'page': '$page', 'limit': '$limit'});
     final r = await http.get(uri, headers: _headers(token));
     if (r.statusCode != 200) _fail(r);
     final body = jsonDecode(r.body) as Map;
@@ -90,32 +90,40 @@ class OrderApiService {
   }
 
   Future<Order> getOrder(String token, int orderId) async {
-    final r = await http.get(Uri.parse('$baseUrl/api/orders/$orderId'),
-        headers: _headers(token));
+    final r = await http.get(
+      Uri.parse('$baseUrl/api/orders/$orderId'),
+      headers: _headers(token),
+    );
     if (r.statusCode != 200) _fail(r);
     return Order.fromJson(
-        (jsonDecode(r.body) as Map)['order'] as Map<String, dynamic>);
+      (jsonDecode(r.body) as Map)['order'] as Map<String, dynamic>,
+    );
   }
 
   /// Penjual mengirim/menyerahkan barang: DIPROSES -> DIKIRIM.
   Future<void> shipOrder(String token, int orderId) async {
-    final r = await http.put(Uri.parse('$baseUrl/api/orders/$orderId/ship'),
-        headers: _headers(token));
+    final r = await http.put(
+      Uri.parse('$baseUrl/api/orders/$orderId/ship'),
+      headers: _headers(token),
+    );
     if (r.statusCode != 200) _fail(r);
   }
 
   /// Penjual mengonfirmasi sudah menerima uang (COD): payment PENDING -> PAID.
   Future<void> confirmPayment(String token, int orderId) async {
     final r = await http.put(
-        Uri.parse('$baseUrl/api/orders/$orderId/confirm-payment'),
-        headers: _headers(token));
+      Uri.parse('$baseUrl/api/orders/$orderId/confirm-payment'),
+      headers: _headers(token),
+    );
     if (r.statusCode != 200) _fail(r);
   }
 
   /// Pembeli mengonfirmasi pesanan sudah diterima: DIKIRIM -> SELESAI.
   Future<void> completeOrder(String token, int orderId) async {
-    final r = await http.put(Uri.parse('$baseUrl/api/orders/$orderId/complete'),
-        headers: _headers(token));
+    final r = await http.put(
+      Uri.parse('$baseUrl/api/orders/$orderId/complete'),
+      headers: _headers(token),
+    );
     if (r.statusCode != 200) _fail(r);
   }
 }

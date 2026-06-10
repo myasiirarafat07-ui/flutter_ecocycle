@@ -38,7 +38,12 @@ class LegalDocumentScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.eco, color: AppColors.primary, size: 22),
+                  Image.asset(
+                    'assets/logo/ecocycle_logo.png',
+                    width: 26,
+                    height: 26,
+                    fit: BoxFit.contain,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'EcoCycle',

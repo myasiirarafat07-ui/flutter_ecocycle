@@ -280,11 +280,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: context.textColor,
-              size: 24,
-            ),
+            icon: Icon(Icons.arrow_back, color: context.textColor, size: 24),
             onPressed: () => Navigator.pop(context),
           ),
           Expanded(
@@ -436,7 +432,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         child: ElevatedButton.icon(
           onPressed: (_hasChanges && !_saving) ? _saveChanges : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _hasChanges ? AppColors.primary : context.surfaceColor,
+            backgroundColor: _hasChanges
+                ? AppColors.primary
+                : context.surfaceColor,
             foregroundColor: Colors.white,
             disabledBackgroundColor: context.surfaceColor,
             disabledForegroundColor: context.mutedColor,

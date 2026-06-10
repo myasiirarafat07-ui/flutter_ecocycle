@@ -42,9 +42,9 @@ class PaymentMethodApiService {
   );
 
   Map<String, String> _headers(String token) => {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
 
   Never _fail(http.Response response) {
     String message = 'Request gagal';
@@ -64,8 +64,10 @@ class PaymentMethodApiService {
   }
 
   Future<List<PaymentMethod>> getMethods(String token) async {
-    final r = await http.get(Uri.parse('$baseUrl/api/payment-methods'),
-        headers: _headers(token));
+    final r = await http.get(
+      Uri.parse('$baseUrl/api/payment-methods'),
+      headers: _headers(token),
+    );
     return _parse(r, 200);
   }
 

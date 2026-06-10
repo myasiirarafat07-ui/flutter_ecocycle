@@ -341,7 +341,9 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
                     Text(
                       tier.name,
                       style: TextStyle(
-                        color: achieved ? context.textColor : context.mutedColor,
+                        color: achieved
+                            ? context.textColor
+                            : context.mutedColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -388,20 +390,36 @@ class _EcoPointsScreenState extends State<EcoPointsScreen> {
   Widget _buildImpactRow(BuildContext context, PointsSummary s) {
     return Row(
       children: [
-        _impactCard(context, Icons.recycling,
-            '${s.totalWasteKg.toStringAsFixed(1)} kg', 'Limbah'),
-        const SizedBox(width: 12),
-        _impactCard(context, Icons.cloud_outlined,
-            '${s.co2OffsetKg.toStringAsFixed(1)} kg', 'CO₂e'),
+        _impactCard(
+          context,
+          Icons.recycling,
+          '${s.totalWasteKg.toStringAsFixed(1)} kg',
+          'Limbah',
+        ),
         const SizedBox(width: 12),
         _impactCard(
-            context, Icons.swap_horiz, '${s.greenTransactions}', 'Transaksi'),
+          context,
+          Icons.cloud_outlined,
+          '${s.co2OffsetKg.toStringAsFixed(1)} kg',
+          'CO₂e',
+        ),
+        const SizedBox(width: 12),
+        _impactCard(
+          context,
+          Icons.swap_horiz,
+          '${s.greenTransactions}',
+          'Transaksi',
+        ),
       ],
     );
   }
 
   Widget _impactCard(
-      BuildContext context, IconData icon, String value, String label) {
+    BuildContext context,
+    IconData icon,
+    String value,
+    String label,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),

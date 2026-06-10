@@ -68,7 +68,8 @@ class ProfileAvatar extends StatelessWidget {
     // Foto bisa berupa: URL terunggah (`/uploads/...` atau http/https) → dimuat
     // via network; atau base64 lama → didekode ke memory (kompatibilitas mundur).
     Widget photoWidget;
-    final isRemote = raw.startsWith('http://') ||
+    final isRemote =
+        raw.startsWith('http://') ||
         raw.startsWith('https://') ||
         raw.startsWith('/');
     if (raw.isEmpty) {
@@ -199,24 +200,37 @@ Future<void> pickAndUploadProfilePhoto(
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.photo_library_outlined,
-                color: AppColors.primary),
-            title: Text('Pilih dari Galeri',
-                style: TextStyle(color: ctx.textColor)),
+            leading: const Icon(
+              Icons.photo_library_outlined,
+              color: AppColors.primary,
+            ),
+            title: Text(
+              'Pilih dari Galeri',
+              style: TextStyle(color: ctx.textColor),
+            ),
             onTap: () => Navigator.pop(ctx, 'gallery'),
           ),
           ListTile(
-            leading:
-                const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
-            title:
-                Text('Ambil dari Kamera', style: TextStyle(color: ctx.textColor)),
+            leading: const Icon(
+              Icons.camera_alt_outlined,
+              color: AppColors.primary,
+            ),
+            title: Text(
+              'Ambil dari Kamera',
+              style: TextStyle(color: ctx.textColor),
+            ),
             onTap: () => Navigator.pop(ctx, 'camera'),
           ),
           if (hasPhoto)
             ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.danger),
-              title: const Text('Hapus Foto',
-                  style: TextStyle(color: AppColors.danger)),
+              leading: const Icon(
+                Icons.delete_outline,
+                color: AppColors.danger,
+              ),
+              title: const Text(
+                'Hapus Foto',
+                style: TextStyle(color: AppColors.danger),
+              ),
               onTap: () => Navigator.pop(ctx, 'remove'),
             ),
           const SizedBox(height: 8),
@@ -239,8 +253,9 @@ Future<void> pickAndUploadProfilePhoto(
       return;
     }
 
-    final source =
-        action == 'camera' ? ImageSource.camera : ImageSource.gallery;
+    final source = action == 'camera'
+        ? ImageSource.camera
+        : ImageSource.gallery;
     final picked = await ImagePicker().pickImage(
       source: source,
       maxWidth: 512,

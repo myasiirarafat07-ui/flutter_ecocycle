@@ -132,11 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           GestureDetector(
             onTap: _goToPrev,
-            child: Icon(
-              Icons.arrow_back,
-              color: context.textColor,
-              size: 24,
-            ),
+            child: Icon(Icons.arrow_back, color: context.textColor, size: 24),
           ),
           Expanded(
             child: Text(

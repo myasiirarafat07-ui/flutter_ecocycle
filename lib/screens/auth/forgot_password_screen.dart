@@ -217,7 +217,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         const SizedBox(height: 8),
         Text(
           subtitle,
-          style: TextStyle(color: context.mutedColor, fontSize: 14, height: 1.4),
+          style: TextStyle(
+            color: context.mutedColor,
+            fontSize: 14,
+            height: 1.4,
+          ),
         ),
       ],
     );

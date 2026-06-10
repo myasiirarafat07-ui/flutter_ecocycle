@@ -42,6 +42,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     });
   }
 
+  Future<void> _refresh() {
+    final future = _fetchOrder();
+    setState(() => _future = future);
+    return future;
+  }
+
   void _snack(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -270,37 +276,49 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       backgroundColor: context.bgColor,
       appBar: AppBar(title: const Text('Detail Pesanan')),
       body: SafeArea(
-        child: FutureBuilder<Order>(
-          future: _future,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: _refresh,
+          child: FutureBuilder<Order>(
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+              if (snapshot.hasError) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    const SizedBox(height: 140),
+                    Center(
+                      child: Text(
+                        '${snapshot.error}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: context.mutedColor),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              final order = snapshot.data!;
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _statusCard(context, order),
+                  const SizedBox(height: 16),
+                  _section(context, 'Alamat Pengiriman', order.shippingAddress),
+                  const SizedBox(height: 16),
+                  _itemsCard(context, order),
+                  const SizedBox(height: 16),
+                  _summaryCard(context, order),
+                  _actionCard(context, order),
+                ],
               );
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  '${snapshot.error}',
-                  style: TextStyle(color: context.mutedColor),
-                ),
-              );
-            }
-            final order = snapshot.data!;
-            return ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                _statusCard(context, order),
-                const SizedBox(height: 16),
-                _section(context, 'Alamat Pengiriman', order.shippingAddress),
-                const SizedBox(height: 16),
-                _itemsCard(context, order),
-                const SizedBox(height: 16),
-                _summaryCard(context, order),
-                _actionCard(context, order),
-              ],
-            );
-          },
+            },
+          ),
         ),
       ),
     );

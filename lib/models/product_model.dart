@@ -50,7 +50,10 @@ class Product {
       price: _toInt(json['price']),
       stock: _toInt(json['stock']),
       imageUrl: json['image_url']?.toString() ?? '',
-      images: _toStringList(json['images'], json['image_url']?.toString() ?? ''),
+      images: _toStringList(
+        json['images'],
+        json['image_url']?.toString() ?? '',
+      ),
       wasteKg: _toDouble(json['waste_kg']),
       weightKg: _toDouble(json['weight_kg']),
       sellerLat: _toNullableDouble(json['seller_lat']),

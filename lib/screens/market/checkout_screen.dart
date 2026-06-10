@@ -118,8 +118,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!mounted) return;
       setState(() {
         // Kartu sudah tidak dipakai — hanya E-Wallet yang ditawarkan.
-        _ewallets =
-            list.where((m) => m.methodType == 'EWALLET').toList(growable: false);
+        _ewallets = list
+            .where((m) => m.methodType == 'EWALLET')
+            .toList(growable: false);
       });
     } catch (_) {
       // Diam saja; COD tetap tersedia sebagai default.
@@ -186,11 +187,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: context.textColor,
-              size: 24,
-            ),
+            icon: Icon(Icons.arrow_back, color: context.textColor, size: 24),
             onPressed: () => Navigator.pop(context),
           ),
           Expanded(
@@ -231,9 +228,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const PersonalInfoScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const PersonalInfoScreen()),
                 );
               },
               child: Text(
@@ -438,7 +433,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Row(
                 children: [
                   Icon(
-                    hasBuyerLoc ? Icons.location_on : Icons.location_off_outlined,
+                    hasBuyerLoc
+                        ? Icons.location_on
+                        : Icons.location_off_outlined,
                     color: hasBuyerLoc ? AppColors.primary : context.mutedColor,
                     size: 22,
                   ),
@@ -448,10 +445,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       hasBuyerLoc
                           ? 'Lokasimu: ${_buyerLat!.toStringAsFixed(5)}, ${_buyerLng!.toStringAsFixed(5)}'
                           : 'Bagikan lokasimu untuk ongkir yang akurat.',
-                      style: TextStyle(
-                        color: context.textColor,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: context.textColor, fontSize: 13),
                     ),
                   ),
                 ],
@@ -471,7 +465,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                         )
                       : const Icon(Icons.my_location, size: 18),
-                  label: Text(hasBuyerLoc ? 'Perbarui Lokasi' : 'Gunakan Lokasi Saya'),
+                  label: Text(
+                    hasBuyerLoc ? 'Perbarui Lokasi' : 'Gunakan Lokasi Saya',
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary),
@@ -553,8 +549,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final p = item.product;
       if (p.sellerLat != null && p.sellerLng != null) {
         final point = LatLng(p.sellerLat!, p.sellerLng!);
-        if (!sellerPoints.any((s) => s.latitude == point.latitude &&
-            s.longitude == point.longitude)) {
+        if (!sellerPoints.any(
+          (s) => s.latitude == point.latitude && s.longitude == point.longitude,
+        )) {
           sellerPoints.add(point);
         }
       }
@@ -659,7 +656,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         _paymentValue == 'COD'
                             ? 'Bayar tunai saat barang diterima'
                             : 'E-Wallet',
-                        style: TextStyle(color: context.mutedColor, fontSize: 12),
+                        style: TextStyle(
+                          color: context.mutedColor,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -754,7 +754,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary.withValues(alpha: 0.15) : context.bgColor,
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : context.bgColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? AppColors.primary : context.dividerColor,
@@ -780,7 +782,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_circle, color: AppColors.primary, size: 22),
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.primary,
+                size: 22,
+              ),
           ],
         ),
       ),
@@ -835,10 +841,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(color: context.mutedColor, fontSize: 14),
-        ),
+        Text(label, style: TextStyle(color: context.mutedColor, fontSize: 14)),
         Text(
           value,
           style: TextStyle(
@@ -895,8 +898,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         items: widget.fromCart
             ? null
             : widget.items
-                .map((i) => {'product_id': i.product.id, 'quantity': i.quantity})
-                .toList(),
+                  .map(
+                    (i) => {'product_id': i.product.id, 'quantity': i.quantity},
+                  )
+                  .toList(),
       );
       if (!mounted) return;
       if (widget.fromCart) context.read<CartProvider>().reset();
@@ -906,8 +911,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             orderId: order.orderId,
             orderCode: order.orderCode,
             totalAmount: order.formattedTotal,
-            paymentMethod:
-                order.paymentMethod.isEmpty ? 'COD' : order.paymentMethod,
+            paymentMethod: order.paymentMethod.isEmpty
+                ? 'COD'
+                : order.paymentMethod,
           ),
         ),
       );

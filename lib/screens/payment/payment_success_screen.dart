@@ -360,7 +360,9 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
         decoration: BoxDecoration(
           color: context.bgColor,
-          border: Border(top: BorderSide(color: context.dividerColor, width: 1)),
+          border: Border(
+            top: BorderSide(color: context.dividerColor, width: 1),
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -372,9 +374,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => OrderDetailScreen(
-                        orderId: widget.orderId,
-                      ),
+                      builder: (_) =>
+                          OrderDetailScreen(orderId: widget.orderId),
                     ),
                   );
                 },

@@ -21,20 +21,25 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.bgColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildAppBar(context),
-              const SizedBox(height: 20),
-              _buildProfileHeader(context, user),
-              const SizedBox(height: 24),
-              _buildEcoPointsCard(context, user),
-              const SizedBox(height: 28),
-              _buildPengaturanAkun(context),
-              const SizedBox(height: 32),
-              _buildKeluar(context),
-              const SizedBox(height: 24),
-            ],
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () => user.refreshMe(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                _buildAppBar(context),
+                const SizedBox(height: 20),
+                _buildProfileHeader(context, user),
+                const SizedBox(height: 24),
+                _buildEcoPointsCard(context, user),
+                const SizedBox(height: 28),
+                _buildPengaturanAkun(context),
+                const SizedBox(height: 32),
+                _buildKeluar(context),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
@@ -94,9 +99,7 @@ class ProfileScreen extends StatelessWidget {
         ],
         const SizedBox(height: 4),
         Text(
-          user.memberSince.isEmpty
-              ? ''
-              : 'Member sejak ${user.memberSince}',
+          user.memberSince.isEmpty ? '' : 'Member sejak ${user.memberSince}',
           style: TextStyle(color: context.mutedColor, fontSize: 13),
         ),
       ],
@@ -156,8 +159,7 @@ class ProfileScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.white, fontSize: 13),
                   ),
                   SizedBox(width: 4),
-                  Icon(Icons.arrow_forward_ios,
-                      color: Colors.white, size: 14),
+                  Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
                 ],
               ),
             ],
@@ -252,10 +254,7 @@ class ProfileScreen extends StatelessWidget {
             Expanded(
               child: Text(
                 item.label,
-                style: TextStyle(
-                  color: context.textColor,
-                  fontSize: 15,
-                ),
+                style: TextStyle(color: context.textColor, fontSize: 15),
               ),
             ),
             Icon(Icons.chevron_right, color: context.mutedColor, size: 22),

@@ -55,7 +55,9 @@ class _SellProductScreenState extends State<SellProductScreen> {
       _weightController.text = p.weightKg > 0 ? p.weightKg.toString() : '';
       _images.addAll(p.images);
       _descController.text = p.description;
-      _category = _categories.contains(p.category) ? p.category : _categories.first;
+      _category = _categories.contains(p.category)
+          ? p.category
+          : _categories.first;
     }
   }
 
@@ -74,8 +76,10 @@ class _SellProductScreenState extends State<SellProductScreen> {
     }
     setState(() => _uploadingImages = true);
     try {
-      final urls =
-          await _api.uploadImages(token: token, files: files.take(remaining).toList());
+      final urls = await _api.uploadImages(
+        token: token,
+        files: files.take(remaining).toList(),
+      );
       if (!mounted) return;
       setState(() => _images.addAll(urls));
     } on ProductApiException catch (e) {
@@ -168,8 +172,11 @@ class _SellProductScreenState extends State<SellProductScreen> {
     final name = _nameController.text.trim();
     final price = int.tryParse(_priceController.text.trim()) ?? -1;
     final stock = int.tryParse(_stockController.text.trim()) ?? -1;
-    final wasteKg = double.tryParse(_wasteController.text.trim().replaceAll(',', '.')) ?? 0;
-    final weightKg = double.tryParse(_weightController.text.trim().replaceAll(',', '.')) ?? 0;
+    final wasteKg =
+        double.tryParse(_wasteController.text.trim().replaceAll(',', '.')) ?? 0;
+    final weightKg =
+        double.tryParse(_weightController.text.trim().replaceAll(',', '.')) ??
+        0;
 
     if (name.length < 3) {
       _snack('Nama produk minimal 3 karakter');
@@ -241,9 +248,9 @@ class _SellProductScreenState extends State<SellProductScreen> {
       final pos = await LocationService.getCurrentPosition();
       if (!mounted) return;
       await context.read<UserProvider>().updateLocation(
-            latitude: pos.latitude,
-            longitude: pos.longitude,
-          );
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+      );
       if (mounted) _snack('Lokasi penjualan tersimpan');
     } on LocationException catch (e) {
       if (mounted) _snack(e.message);
@@ -334,11 +341,15 @@ class _SellProductScreenState extends State<SellProductScreen> {
       children: [
         Row(
           children: [
-            Text('Gambar Produk',
-                style: TextStyle(color: context.textColor, fontSize: 14)),
+            Text(
+              'Gambar Produk',
+              style: TextStyle(color: context.textColor, fontSize: 14),
+            ),
             const SizedBox(width: 6),
-            Text('(${_images.length}/$_maxImages, foto pertama jadi utama)',
-                style: TextStyle(color: context.mutedColor, fontSize: 12)),
+            Text(
+              '(${_images.length}/$_maxImages, foto pertama jadi utama)',
+              style: TextStyle(color: context.mutedColor, fontSize: 12),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -376,8 +387,9 @@ class _SellProductScreenState extends State<SellProductScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: OutlinedButton.icon(
-                onPressed:
-                    (_uploadingImages || !canAddMore) ? null : _pickFromCamera,
+                onPressed: (_uploadingImages || !canAddMore)
+                    ? null
+                    : _pickFromCamera,
                 icon: const Icon(Icons.camera_alt_outlined, size: 18),
                 label: const Text('Kamera'),
                 style: OutlinedButton.styleFrom(
@@ -401,11 +413,15 @@ class _SellProductScreenState extends State<SellProductScreen> {
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: AppColors.primary),
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
                 ),
                 SizedBox(width: 8),
-                Text('Mengunggah gambar...',
-                    style: TextStyle(color: AppColors.primary, fontSize: 12)),
+                Text(
+                  'Mengunggah gambar...',
+                  style: TextStyle(color: AppColors.primary, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -423,8 +439,10 @@ class _SellProductScreenState extends State<SellProductScreen> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: canAddMore ? _addUrl : null,
-                icon: const Icon(Icons.add_circle_outline,
-                    color: AppColors.primary),
+                icon: const Icon(
+                  Icons.add_circle_outline,
+                  color: AppColors.primary,
+                ),
               ),
             ],
           ),
@@ -458,8 +476,10 @@ class _SellProductScreenState extends State<SellProductScreen> {
                   bottomLeft: Radius.circular(10),
                 ),
               ),
-              child: const Text('Utama',
-                  style: TextStyle(color: Colors.white, fontSize: 10)),
+              child: const Text(
+                'Utama',
+                style: TextStyle(color: Colors.white, fontSize: 10),
+              ),
             ),
           ),
         Positioned(
@@ -485,9 +505,7 @@ class _SellProductScreenState extends State<SellProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.bgColor,
-      appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Produk' : 'Jual Produk'),
-      ),
+      appBar: AppBar(title: Text(_isEdit ? 'Edit Produk' : 'Jual Produk')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),

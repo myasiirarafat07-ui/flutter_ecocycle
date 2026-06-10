@@ -36,14 +36,14 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> j) => OrderItem(
-        productId: _toInt(j['product_id']),
-        productName: j['product_name']?.toString() ?? '',
-        unitPrice: _toInt(j['unit_price']),
-        quantity: _toInt(j['quantity']),
-        subtotal: _toInt(j['subtotal']),
-        imageUrl: j['image_url']?.toString() ?? '',
-        reviewed: j['reviewed'] == true || j['reviewed'] == 1,
-      );
+    productId: _toInt(j['product_id']),
+    productName: j['product_name']?.toString() ?? '',
+    unitPrice: _toInt(j['unit_price']),
+    quantity: _toInt(j['quantity']),
+    subtotal: _toInt(j['subtotal']),
+    imageUrl: j['image_url']?.toString() ?? '',
+    reviewed: j['reviewed'] == true || j['reviewed'] == 1,
+  );
 }
 
 class Order {
@@ -88,27 +88,27 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
-        orderId: _toInt(j['order_id']),
-        orderCode: j['order_code']?.toString() ?? '',
-        orderStatus: j['order_status']?.toString() ?? '',
-        paymentStatus: j['payment_status']?.toString() ?? '',
-        paymentMethod: j['payment_method']?.toString() ?? '',
-        shippingMethod: j['shipping_method']?.toString() ?? '',
-        shippingAddress: j['shipping_address']?.toString() ?? '',
-        subtotal: _toInt(j['subtotal']),
-        shippingCost: _toInt(j['shipping_cost']),
-        totalAmount: _toInt(j['total_amount']),
-        itemCount: _toInt(j['item_count']),
-        firstItem: j['first_item']?.toString() ?? '',
-        buyerName: j['buyer_name']?.toString() ?? '',
-        createdAt: j['created_at']?.toString() ?? '',
-        isBuyer: j['is_buyer'] == true || j['is_buyer'] == 1,
-        isSeller: j['is_seller'] == true || j['is_seller'] == 1,
-        needsReview: j['needs_review'] == true || j['needs_review'] == 1,
-        items: (j['items'] as List<dynamic>? ?? [])
-            .map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    orderId: _toInt(j['order_id']),
+    orderCode: j['order_code']?.toString() ?? '',
+    orderStatus: j['order_status']?.toString() ?? '',
+    paymentStatus: j['payment_status']?.toString() ?? '',
+    paymentMethod: j['payment_method']?.toString() ?? '',
+    shippingMethod: j['shipping_method']?.toString() ?? '',
+    shippingAddress: j['shipping_address']?.toString() ?? '',
+    subtotal: _toInt(j['subtotal']),
+    shippingCost: _toInt(j['shipping_cost']),
+    totalAmount: _toInt(j['total_amount']),
+    itemCount: _toInt(j['item_count']),
+    firstItem: j['first_item']?.toString() ?? '',
+    buyerName: j['buyer_name']?.toString() ?? '',
+    createdAt: j['created_at']?.toString() ?? '',
+    isBuyer: j['is_buyer'] == true || j['is_buyer'] == 1,
+    isSeller: j['is_seller'] == true || j['is_seller'] == 1,
+    needsReview: j['needs_review'] == true || j['needs_review'] == 1,
+    items: (j['items'] as List<dynamic>? ?? [])
+        .map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 
   String get formattedTotal => rupiah(totalAmount);
 }

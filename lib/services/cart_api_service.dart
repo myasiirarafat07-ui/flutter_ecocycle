@@ -18,9 +18,9 @@ class CartApiService {
   );
 
   Map<String, String> _headers(String token) => {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
 
   Never _fail(http.Response response) {
     String message = 'Request gagal';
@@ -40,13 +40,18 @@ class CartApiService {
   }
 
   Future<List<CartItem>> getCart(String token) async {
-    final r = await http.get(Uri.parse('$baseUrl/api/cart'),
-        headers: _headers(token));
+    final r = await http.get(
+      Uri.parse('$baseUrl/api/cart'),
+      headers: _headers(token),
+    );
     return _parse(r, 200);
   }
 
-  Future<List<CartItem>> add(String token, int productId,
-      [int quantity = 1]) async {
+  Future<List<CartItem>> add(
+    String token,
+    int productId, [
+    int quantity = 1,
+  ]) async {
     final r = await http.post(
       Uri.parse('$baseUrl/api/cart'),
       headers: _headers(token),
@@ -55,7 +60,11 @@ class CartApiService {
     return _parse(r, 201);
   }
 
-  Future<List<CartItem>> update(String token, int productId, int quantity) async {
+  Future<List<CartItem>> update(
+    String token,
+    int productId,
+    int quantity,
+  ) async {
     final r = await http.put(
       Uri.parse('$baseUrl/api/cart/$productId'),
       headers: _headers(token),
@@ -73,8 +82,10 @@ class CartApiService {
   }
 
   Future<void> clear(String token) async {
-    final r = await http.delete(Uri.parse('$baseUrl/api/cart'),
-        headers: _headers(token));
+    final r = await http.delete(
+      Uri.parse('$baseUrl/api/cart'),
+      headers: _headers(token),
+    );
     if (r.statusCode != 200) _fail(r);
   }
 }

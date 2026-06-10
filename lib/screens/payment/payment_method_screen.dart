@@ -69,10 +69,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Hapus Metode',
-          style: TextStyle(color: context.textColor),
-        ),
+        title: Text('Hapus Metode', style: TextStyle(color: context.textColor)),
         content: Text(
           'Apakah kamu yakin ingin menghapus metode pembayaran ini?',
           style: TextStyle(color: context.mutedColor),
@@ -129,7 +126,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   }
 
   Future<void> _addMethod(
-      String methodType, String label, String detail) async {
+    String methodType,
+    String label,
+    String detail,
+  ) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
@@ -232,10 +232,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   const SizedBox(width: 4),
                   const Text(
                     'Tambah Baru',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: AppColors.primary, fontSize: 13),
                   ),
                 ],
               ),
@@ -259,7 +256,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
         border: method.isDefault
-            ? Border.all(color: AppColors.primary.withValues(alpha: 0.6), width: 1)
+            ? Border.all(
+                color: AppColors.primary.withValues(alpha: 0.6),
+                width: 1,
+              )
             : null,
       ),
       child: Row(
@@ -301,18 +301,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             ),
           ),
           if (method.isDefault)
-            const Icon(
-              Icons.check_circle,
-              color: AppColors.primary,
-              size: 24,
-            )
+            const Icon(Icons.check_circle, color: AppColors.primary, size: 24)
           else
             PopupMenuButton<String>(
-              icon: Icon(
-                Icons.more_vert,
-                color: context.mutedColor,
-                size: 22,
-              ),
+              icon: Icon(Icons.more_vert, color: context.mutedColor, size: 22),
               color: context.surfaceColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -326,11 +318,18 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   value: 'utama',
                   child: Row(
                     children: [
-                      Icon(Icons.star_outline, color: context.mutedColor, size: 18),
+                      Icon(
+                        Icons.star_outline,
+                        color: context.mutedColor,
+                        size: 18,
+                      ),
                       const SizedBox(width: 10),
                       Text(
                         'Jadikan Utama',
-                        style: TextStyle(color: context.textColor, fontSize: 14),
+                        style: TextStyle(
+                          color: context.textColor,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -501,7 +500,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 class _TambahMetodeSheet extends StatefulWidget {
   /// Callback: (methodType, label, detail).
   final Future<void> Function(String methodType, String label, String detail)
-      onTambah;
+  onTambah;
   const _TambahMetodeSheet({required this.onTambah});
 
   @override

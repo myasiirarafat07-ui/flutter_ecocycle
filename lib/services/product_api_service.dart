@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import '../models/product_model.dart';
+import '../utils/upload_media_type.dart';
 
 class ProductApiException implements Exception {
   final String message;
@@ -85,10 +86,7 @@ class ProductApiService {
     int page = 1,
     int limit = 12,
   }) async {
-    final query = <String, String>{
-      'page': '$page',
-      'limit': '$limit',
-    };
+    final query = <String, String>{'page': '$page', 'limit': '$limit'};
     if (category != null && category.isNotEmpty && category != 'Semua') {
       query['category'] = category;
     }
@@ -104,7 +102,9 @@ class ProductApiService {
       query['min_rating'] = minRating.toString();
     }
 
-    final uri = Uri.parse('$baseUrl/api/products').replace(queryParameters: query);
+    final uri = Uri.parse(
+      '$baseUrl/api/products',
+    ).replace(queryParameters: query);
 
     final response = await http.get(uri, headers: _headers(token));
     if (response.statusCode != 200) _fail(response);
@@ -157,7 +157,12 @@ class ProductApiService {
     for (final f in files) {
       final bytes = await f.readAsBytes();
       request.files.add(
-        http.MultipartFile.fromBytes('images', bytes, filename: f.name),
+        http.MultipartFile.fromBytes(
+          'images',
+          bytes,
+          filename: f.name,
+          contentType: imageMediaType(f),
+        ),
       );
     }
     final streamed = await request.send();

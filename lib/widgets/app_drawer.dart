@@ -21,7 +21,7 @@ class AppDrawer extends StatelessWidget {
     final user = context.watch<UserProvider>();
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
-    
+
     final displayName = user.name.isEmpty ? 'Pengguna' : user.name;
     final displayEmail = user.email.isEmpty ? 'email@contoh.com' : user.email;
     final tier = EcoTier.currentFor(user.ecoPoints);
@@ -111,8 +111,9 @@ class AppDrawer extends StatelessWidget {
                     activeIcon: Icons.notifications,
                     label: 'Notifikasi',
                     isDark: isDark,
-                    badgeCount:
-                        context.watch<NotificationProvider>().unreadCount,
+                    badgeCount: context
+                        .watch<NotificationProvider>()
+                        .unreadCount,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -122,9 +123,9 @@ class AppDrawer extends StatelessWidget {
                         ),
                       ).then((_) {
                         if (context.mounted) {
-                          context
-                              .read<NotificationProvider>()
-                              .refresh(context.read<UserProvider>().token);
+                          context.read<NotificationProvider>().refresh(
+                            context.read<UserProvider>().token,
+                          );
                         }
                       });
                     },
@@ -143,11 +144,14 @@ class AppDrawer extends StatelessWidget {
                       _showAboutDialog(context, isDark);
                     },
                   ),
-                  
+
                   _DrawerDivider(isDark: isDark),
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 4,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -155,14 +159,18 @@ class AppDrawer extends StatelessWidget {
                           children: [
                             Icon(
                               isDark ? Icons.dark_mode : Icons.light_mode,
-                              color: isDark ? Colors.white70 : AppColors.lightTextMuted,
+                              color: isDark
+                                  ? Colors.white70
+                                  : AppColors.lightTextMuted,
                               size: 22,
                             ),
                             const SizedBox(width: 16),
                             Text(
                               isDark ? 'Mode Gelap' : 'Mode Terang',
                               style: TextStyle(
-                                color: isDark ? Colors.white70 : AppColors.lightText,
+                                color: isDark
+                                    ? Colors.white70
+                                    : AppColors.lightText,
                                 fontSize: 15,
                               ),
                             ),
@@ -204,7 +212,9 @@ class AppDrawer extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.lightSurface,
         title: Row(
           children: [
             Image.asset(
@@ -216,7 +226,9 @@ class AppDrawer extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               'EcoCycle',
-              style: TextStyle(color: isDark ? Colors.white : AppColors.lightText),
+              style: TextStyle(
+                color: isDark ? Colors.white : AppColors.lightText,
+              ),
             ),
           ],
         ),
@@ -298,7 +310,9 @@ class _DrawerHeader extends StatelessWidget {
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : AppColors.lightBackground,
                         width: 2,
                       ),
                     ),
@@ -398,8 +412,7 @@ class _DrawerItem extends StatelessWidget {
             ),
             if (badgeCount > 0)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: AppColors.danger,
                   borderRadius: BorderRadius.circular(12),
@@ -433,7 +446,9 @@ class _DrawerSectionLabel extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
-          color: isDark ? Colors.white30 : AppColors.lightTextMuted.withValues(alpha: 0.5),
+          color: isDark
+              ? Colors.white30
+              : AppColors.lightTextMuted.withValues(alpha: 0.5),
           fontSize: 11,
           letterSpacing: 1.2,
           fontWeight: FontWeight.w600,

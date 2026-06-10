@@ -33,6 +33,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _reviewsFuture = _api.fetchReviews(product.id);
   }
 
+  Future<void> _refresh() {
+    final future = _api.fetchReviews(product.id);
+    setState(() => _reviewsFuture = future);
+    return future;
+  }
+
   void _snack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -49,27 +55,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       backgroundColor: context.bgColor,
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              _buildSliverAppBar(context),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTitleSection(context),
-                      const SizedBox(height: 20),
-                      _buildSellerCard(context),
-                      const SizedBox(height: 24),
-                      _buildDescription(context),
-                      const SizedBox(height: 24),
-                      _buildReviews(context),
-                    ],
+          RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: _refresh,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                _buildSliverAppBar(context),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitleSection(context),
+                        const SizedBox(height: 20),
+                        _buildSellerCard(context),
+                        const SizedBox(height: 24),
+                        _buildDescription(context),
+                        const SizedBox(height: 24),
+                        _buildReviews(context),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Positioned(
             bottom: 0,
@@ -128,14 +139,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
       ),
       centerTitle: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: _buildGallery(context),
-      ),
+      flexibleSpace: FlexibleSpaceBar(background: _buildGallery(context)),
     );
   }
 
   Widget _buildGallery(BuildContext context) {
-    final imgs = product.images.isNotEmpty ? product.images : [product.imageUrl];
+    final imgs = product.images.isNotEmpty
+        ? product.images
+        : [product.imageUrl];
     if (imgs.length <= 1) {
       return ProductImage(
         imageUrl: imgs.isNotEmpty ? imgs.first : '',
@@ -171,7 +182,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 width: i == _currentImage ? 10 : 6,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: i == _currentImage ? AppColors.primary : Colors.white70,
+                  color: i == _currentImage
+                      ? AppColors.primary
+                      : Colors.white70,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -366,7 +379,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               );
             }
             return Column(
-              children: reviews.map((r) => _buildReviewTile(context, r)).toList(),
+              children: reviews
+                  .map((r) => _buildReviewTile(context, r))
+                  .toList(),
             );
           },
         ),
@@ -430,72 +445,83 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: product.isMine
           ? _buildOwnerBar(context)
           : Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: outOfStock
-                  ? null
-                  : () async {
-                      final token = context.read<UserProvider>().token;
-                      if (token.isEmpty) {
-                        _snack('Login dulu untuk menambah ke keranjang');
-                        return;
-                      }
-                      try {
-                        await context.read<CartProvider>().add(token, product);
-                        _snack('Ditambahkan ke keranjang');
-                      } catch (e) {
-                        _snack('$e');
-                      }
-                    },
-              icon: const Icon(Icons.shopping_cart_outlined, size: 16),
-              label: const Text(
-                'Keranjang',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: outOfStock
+                        ? null
+                        : () async {
+                            final token = context.read<UserProvider>().token;
+                            if (token.isEmpty) {
+                              _snack('Login dulu untuk menambah ke keranjang');
+                              return;
+                            }
+                            try {
+                              await context.read<CartProvider>().add(
+                                token,
+                                product,
+                              );
+                              _snack('Ditambahkan ke keranjang');
+                            } catch (e) {
+                              _snack('$e');
+                            }
+                          },
+                    icon: const Icon(Icons.shopping_cart_outlined, size: 16),
+                    label: const Text(
+                      'Keranjang',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: outOfStock
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CheckoutScreen(
-                            items: [CartItem(product: product)],
-                          ),
-                        ),
-                      );
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: outOfStock
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CheckoutScreen(
+                                  items: [CartItem(product: product)],
+                                ),
+                              ),
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      outOfStock ? 'Stok Habis' : 'Beli Sekarang',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                elevation: 0,
-              ),
-              child: Text(
-                outOfStock ? 'Stok Habis' : 'Beli Sekarang',
-                style: const TextStyle(
-                    fontSize: 14, fontWeight: FontWeight.bold),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -528,8 +554,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               padding: const EdgeInsets.symmetric(vertical: 14),
               elevation: 0,
             ),
