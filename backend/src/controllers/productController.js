@@ -350,7 +350,10 @@ async function uploadProductImages(req, res, next) {
   try {
     const files = req.files || [];
     if (files.length === 0) throw new HttpError(400, 'Tidak ada gambar diunggah');
-    const urls = files.map((f) => `/uploads/products/${f.filename}`);
+    const urls = files.map((f) => {
+      const b64 = f.buffer.toString('base64');
+      return `data:${f.mimetype};base64,${b64}`;
+    });
     res.status(201).json({ urls });
   } catch (error) {
     next(error);

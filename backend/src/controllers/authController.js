@@ -296,8 +296,9 @@ async function updatePhoto(req, res, next) {
 
     let photo;
     if (req.file) {
-      // Unggahan file ke disk.
-      photo = `/uploads/avatars/${req.file.filename}`;
+      // Unggahan file ke memory.
+      const b64 = req.file.buffer.toString('base64');
+      photo = `data:${req.file.mimetype};base64,${b64}`;
     } else {
       const raw = req.body.profile_photo;
       if (raw === undefined || raw === null || raw === '') {

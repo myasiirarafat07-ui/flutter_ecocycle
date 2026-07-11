@@ -189,7 +189,7 @@ async function ensureProductImagesTable() {
     CREATE TABLE IF NOT EXISTS product_images (
       image_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
       product_id BIGINT UNSIGNED NOT NULL,
-      image_path VARCHAR(500) NOT NULL,
+      image_path MEDIUMTEXT NOT NULL,
       sort_order INT NOT NULL DEFAULT 0,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (image_id),
@@ -199,6 +199,11 @@ async function ensureProductImagesTable() {
         ON UPDATE CASCADE ON DELETE CASCADE
     )
   `);
+  await ensureColumnType('product_images', 'image_path', 'image_path MEDIUMTEXT NOT NULL', [
+    'mediumtext',
+    'longtext',
+    'text',
+  ]);
 }
 
 // Bersihkan kolom yang tak terpakai + perkuat integritas referensial. Idempotent & aman dijalankan ulang.

@@ -13,23 +13,8 @@ fs.mkdirSync(uploadDir, { recursive: true });
 const avatarDir = path.join(uploadBaseDir, 'avatars');
 fs.mkdirSync(avatarDir, { recursive: true });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = (path.extname(file.originalname) || '.jpg').toLowerCase();
-    const name = `p_${Date.now()}_${Math.round(Math.random() * 1e9)}${ext}`;
-    cb(null, name);
-  },
-});
-
-const avatarStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, avatarDir),
-  filename: (req, file, cb) => {
-    const ext = (path.extname(file.originalname) || '.jpg').toLowerCase();
-    const name = `a_${Date.now()}_${Math.round(Math.random() * 1e9)}${ext}`;
-    cb(null, name);
-  },
-});
+const storage = multer.memoryStorage();
+const avatarStorage = multer.memoryStorage();
 
 function imageFilter(req, file, cb) {
   if (/^image\//.test(file.mimetype)) return cb(null, true);

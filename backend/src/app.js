@@ -38,12 +38,22 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/testdb', async (req, res) => {
+  const { pool } = require('./config/db');
   try {
-    const { pool } = require('./config/db');
-    const [rows] = await pool.query('SELECT 1 as val');
-    res.json({ status: 'success', data: rows });
+    const [rows] = await pool.query('SELECT 1 + 1 AS solution');
+    res.json({ message: 'DB Connected', result: rows });
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message, stack: err.stack });
+    res.status(500).json({ error: err.message, code: err.code });
+  }
+});
+
+app.get('/api/seed', async (req, res) => {
+  const { seedRequiredData } = require('./config/seed');
+  try {
+    await seedRequiredData();
+    res.json({ message: 'Seeded successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
