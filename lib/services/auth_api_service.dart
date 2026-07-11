@@ -23,11 +23,11 @@ class AuthResult {
 
 class AuthApiService {
   // Ganti URL ini bergantung pada cara Anda menjalankan aplikasinya:
-  // - Android Emulator: 'http://10.0.2.2:3000'
+  // - Android Emulator: 'https://flutter-ecocycle.vercel.app'
   // - Web (Chrome) / Windows App: 'http://localhost:3000'
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3000',
+    defaultValue: 'https://flutter-ecocycle.vercel.app',
   );
 
   Future<AuthResult> register({

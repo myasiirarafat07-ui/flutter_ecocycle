@@ -21,7 +21,7 @@ class OrderPage {
 class OrderApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3000',
+    defaultValue: 'https://flutter-ecocycle.vercel.app',
   );
 
   Map<String, String> _headers(String token) => {

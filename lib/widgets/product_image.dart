@@ -12,7 +12,7 @@ import '../constants/app_colors.dart';
 class ProductImage extends StatelessWidget {
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3000',
+    defaultValue: 'https://flutter-ecocycle.vercel.app',
   );
 
   final String imageUrl;

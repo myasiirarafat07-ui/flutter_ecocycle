@@ -60,8 +60,8 @@ flutter pub get
 flutter run
 ```
 
-**Base URL API** (`API_BASE_URL`) di-inject saat build via `--dart-define` (default `http://10.0.2.2:3000`):
-- **Android emulator:** `http://10.0.2.2:3000`
+**Base URL API** (`API_BASE_URL`) di-inject saat build via `--dart-define` (default `https://flutter-ecocycle.vercel.app`):
+- **Android emulator:** `https://flutter-ecocycle.vercel.app`
 - **Web / Windows / desktop:** `http://localhost:3000`
 - **HP fisik:** IP host backend — lihat *Deployment* di bawah.
 

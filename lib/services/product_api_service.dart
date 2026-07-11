@@ -23,11 +23,11 @@ class ProductPage {
 
 class ProductApiService {
   // Samakan dengan AuthApiService:
-  // - Android Emulator: http://10.0.2.2:3000
+  // - Android Emulator: https://flutter-ecocycle.vercel.app
   // - Web/Windows: http://localhost:3000
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3000',
+    defaultValue: 'https://flutter-ecocycle.vercel.app',
   );
 
   Map<String, String> _headers([String? token]) {
