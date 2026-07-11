@@ -37,6 +37,16 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/api/testdb', async (req, res) => {
+  try {
+    const { pool } = require('./config/db');
+    const [rows] = await pool.query('SELECT 1 as val');
+    res.json({ status: 'success', data: rows });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message, stack: err.stack });
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
