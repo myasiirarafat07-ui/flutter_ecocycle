@@ -8,8 +8,8 @@ if (process.env.DB_HOST && process.env.DB_HOST.startsWith('mysql://')) {
   poolConfig = {
     host: uri.hostname,
     port: Number(uri.port) || 4000,
-    user: uri.username,
-    password: uri.password,
+    user: decodeURIComponent(uri.username || ''),
+    password: decodeURIComponent(uri.password || ''),
     database: uri.pathname.replace('/', '') || process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: 10,
@@ -37,6 +37,10 @@ if (process.env.DB_HOST && process.env.DB_HOST.startsWith('mysql://')) {
 }
 
 const pool = mysql.createPool(poolConfig);
+
+pool.on('error', (err) => {
+  console.error('Unexpected DB error:', err);
+});
 
 async function testConnection() {
   const connection = await pool.getConnection();
