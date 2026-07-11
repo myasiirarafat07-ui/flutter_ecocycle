@@ -121,8 +121,6 @@ async function getOrCreateSellerId(user) {
 
 async function listProducts(req, res, next) {
   try {
-    throw new Error('DELIBERATE_TEST_ERROR_REACHED');
-    
     const where = [];
     const params = [req.user?.user_id ?? 0]; // untuk is_mine
 
