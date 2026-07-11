@@ -25,17 +25,19 @@ function assertJwtSecret() {
 async function startServer() {
   try {
     assertJwtSecret();
-    await testConnection();
-    await seedRequiredData();
-
+    
     if (process.env.VERCEL !== '1') {
+      await testConnection();
+      await seedRequiredData();
       app.listen(port, () => {
         console.log(`EcoCycle API running on http://localhost:${port}`);
       });
     }
   } catch (error) {
     console.error('Failed to start EcoCycle API:', error.message);
-    process.exit(1);
+    if (process.env.VERCEL !== '1') {
+      process.exit(1);
+    }
   }
 }
 
