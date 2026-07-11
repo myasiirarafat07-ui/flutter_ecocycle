@@ -3,12 +3,14 @@ const path = require('path');
 const multer = require('multer');
 const HttpError = require('./httpError');
 
-// Folder penyimpanan gambar produk: backend/uploads/products.
-const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'products');
+const uploadBaseDir = process.env.VERCEL === '1'
+  ? path.join('/tmp', 'uploads')
+  : path.join(__dirname, '..', '..', 'uploads');
+
+const uploadDir = path.join(uploadBaseDir, 'products');
 fs.mkdirSync(uploadDir, { recursive: true });
 
-// Folder penyimpanan foto profil: backend/uploads/avatars.
-const avatarDir = path.join(__dirname, '..', '..', 'uploads', 'avatars');
+const avatarDir = path.join(uploadBaseDir, 'avatars');
 fs.mkdirSync(avatarDir, { recursive: true });
 
 const storage = multer.diskStorage({

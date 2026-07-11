@@ -17,8 +17,10 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '5mb' })); // ruang untuk foto profil base64
 
-// Sajikan gambar produk yang diunggah (backend/uploads → /uploads).
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+const uploadPath = process.env.VERCEL === '1' 
+  ? path.join('/tmp', 'uploads') 
+  : path.join(__dirname, '..', 'uploads');
+app.use('/uploads', express.static(uploadPath));
 
 app.get('/', (req, res) => {
   res.json({

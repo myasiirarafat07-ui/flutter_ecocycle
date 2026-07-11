@@ -28,9 +28,11 @@ async function startServer() {
     await testConnection();
     await seedRequiredData();
 
-    app.listen(port, () => {
-      console.log(`EcoCycle API running on http://localhost:${port}`);
-    });
+    if (process.env.VERCEL !== '1') {
+      app.listen(port, () => {
+        console.log(`EcoCycle API running on http://localhost:${port}`);
+      });
+    }
   } catch (error) {
     console.error('Failed to start EcoCycle API:', error.message);
     process.exit(1);
@@ -38,3 +40,5 @@ async function startServer() {
 }
 
 startServer();
+
+module.exports = app;
