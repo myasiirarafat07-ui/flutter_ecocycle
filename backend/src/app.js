@@ -57,6 +57,17 @@ app.get('/api/seed', async (req, res) => {
   }
 });
 
+app.get('/api/alter', async (req, res) => {
+  const { pool } = require('./config/db');
+  try {
+    await pool.query('ALTER TABLE product_images MODIFY COLUMN image_path MEDIUMTEXT NOT NULL');
+    await pool.query('ALTER TABLE products MODIFY COLUMN image_url MEDIUMTEXT NULL');
+    res.json({ message: 'Altered successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message, sqlMessage: error.sqlMessage });
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
